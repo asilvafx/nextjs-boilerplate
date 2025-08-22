@@ -6,7 +6,7 @@ import SupabaseService from './supabase.db.js';
 // import MySQLService from './mysql.db.js';
 
 // Configuration - Set your preferred database here
-const DATABASE_PROVIDER = process.env.DATABASE_PROVIDER || 'supabase';
+const DATABASE_PROVIDER = process.env.DATABASE_PROVIDER || 'firebase';
 
 class DBService {
     constructor() {
