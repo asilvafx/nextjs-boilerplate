@@ -30,24 +30,45 @@ class SupabaseService {
     // Get a single item by a specific key-value pair
     async readBy(key, value, table) {
         try {
+            console.log(`[DEBUG] readBy - Table: ${table}, Key: ${key}, Value: ${value}`);
+
             const { data, error } = await supabase
                 .from(table)
                 .select('*')
                 .eq(key, value)
-                .single();
+                .maybeSingle(); // Use maybeSingle() instead of single() to avoid errors when no rows found
 
             if (error) {
-                if (error.code === 'PGRST116') {
-                    // No rows returned
-                    return null;
+                console.error(`[ERROR] Supabase readBy error for table ${table}:`, {
+                    message: error.message,
+                    code: error.code,
+                    details: error.details,
+                    hint: error.hint,
+                    searchKey: key,
+                    searchValue: value
+                });
+
+                // Provide more specific error information
+                if (error.code === '42P01') {
+                    throw new Error(`Table "${table}" does not exist. Please create it in Supabase Dashboard first.`);
+                } else if (error.code === '42703') {
+                    throw new Error(`Column "${key}" doesn't exist in table "${table}". Check your table structure.`);
+                } else if (error.message.includes('row-level security')) {
+                    throw new Error(`Permission denied due to RLS policy. Please check your Row Level Security settings for table "${table}".`);
                 }
-                console.error('Error fetching item:', error);
+
                 return null;
+            }
+
+            if (data) {
+                console.log(`[DEBUG] Found record:`, data);
+            } else {
+                console.log(`[DEBUG] No record found for ${key}=${value} in table ${table}`);
             }
 
             return data;
         } catch (error) {
-            console.error('Error in readBy:', error);
+            console.error(`[ERROR] Error in readBy method for table ${table}:`, error);
             return null;
         }
     }
@@ -132,6 +153,9 @@ class SupabaseService {
     // Create a new item
     async create(data, table) {
         try {
+            console.log(`[DEBUG] Creating record in table: ${table}`);
+            console.log(`[DEBUG] Data to insert:`, JSON.stringify(data, null, 2));
+
             const { data: result, error } = await supabase
                 .from(table)
                 .insert([data])
@@ -139,13 +163,33 @@ class SupabaseService {
                 .single();
 
             if (error) {
-                console.error('Error creating item:', error);
+                console.error(`[ERROR] Supabase create error for table ${table}:`, {
+                    message: error.message,
+                    code: error.code,
+                    details: error.details,
+                    hint: error.hint,
+                    data: data
+                });
+
+                // Provide more specific error information
+                if (error.code === '42P01') {
+                    throw new Error(`Table "${table}" does not exist. Please create it in Supabase Dashboard first.`);
+                } else if (error.code === '42703') {
+                    throw new Error(`Column doesn't exist: ${error.message}. Check your table structure.`);
+                } else if (error.code === '23505') {
+                    throw new Error(`Duplicate key violation: ${error.message}`);
+                } else if (error.message.includes('row-level security')) {
+                    throw new Error(`Permission denied due to RLS policy. Please check your Row Level Security settings for table "${table}".`);
+                }
+
                 throw error;
             }
 
+            console.log(`[DEBUG] Successfully created record with ID: ${result.id}`);
             return { key: result.id, ref: result };
+
         } catch (error) {
-            console.error('Error in create:', error);
+            console.error(`[ERROR] Error in create method for table ${table}:`, error);
             throw error;
         }
     }
