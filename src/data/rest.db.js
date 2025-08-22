@@ -1,124 +1,211 @@
-import {equalTo, get, getDatabase, orderByChild, push, query, ref, remove, update} from "firebase/database";
-import {initializeApp} from "firebase/app";
-import {getDownloadURL, getStorage, ref as storageRef, uploadBytes} from "firebase/storage";
+// rest.db.js - Unified Database Service
+import FirebaseService from './firebase.db.js';
+import SupabaseService from './supabase.db.js';
 
-const firebaseConfig = {
-    apiKey: process.env.FIREBASE_API_KEY,
-    databaseURL: process.env.FIREBASE_DATABASE_URL,
-    authDomain: process.env.FIREBASE_AUTH_DOMAIN,
-    projectId: process.env.FIREBASE_PROJECT_ID,
-    storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
-    messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
-    appId: process.env.FIREBASE_APP_ID
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const storage = getStorage(app);
+// Configuration - Set your preferred database here
+const DATABASE_PROVIDER = process.env.DATABASE_PROVIDER || 'supabase'; // 'firebase' or 'supabase'
 
 class DBService {
+    constructor() {
+        this.provider = DATABASE_PROVIDER.toLowerCase();
+        this.service = this.provider === 'firebase' ? FirebaseService : SupabaseService;
 
-    // New method to get multiple items by a specific key-value pair
-    getItemsByKeyValue(key, value, table) {
-        const itemsRef = ref(db, `/${table}`);
-        const q = query(itemsRef, orderByChild(key), equalTo(value));
-
-        return get(q).then((snapshot) => {
-            if (snapshot.exists()) {
-                return snapshot.val(); // Return the data for the specific item(s)
-            } else {
-                return null; // Return null if no items match the query
-            }
-        });
+        console.log(`Database provider initialized: ${this.provider}`);
     }
 
-    // New method to get an item by a specific key-value pair
-    readBy(key, value, table) {
-        const itemsRef = ref(db, `/${table}`);
-        const q = query(itemsRef, orderByChild(key), equalTo(value));
-
-        return get(q).then((snapshot) => {
-            if (snapshot.exists()) {
-                const snapshotValue = snapshot.val();
-                const userObj = Object.keys(snapshotValue);
-                const getUserId = userObj[0];
-
-                return snapshotValue[getUserId]; // Return the data for the specific item(s)
-            } else {
-                return null; // Return null if no items match the query
-            }
-        });
+    // Get the current provider name
+    getProvider() {
+        return this.provider;
     }
 
-    // New method to get an item by a specific key-value pair
-    getItemKey(key, value, table) {
-        const itemsRef = ref(db, `/${table}`);
-        const q = query(itemsRef, orderByChild(key), equalTo(value));
+    // Switch provider at runtime (optional)
+    switchProvider(newProvider) {
+        if (newProvider !== 'firebase' && newProvider !== 'supabase') {
+            throw new Error('Invalid provider. Use "firebase" or "supabase"');
+        }
 
-        return get(q).then((snapshot) => {
-            if (snapshot.exists()) {
-                const snapshotValue = snapshot.val();
-                const userObj = Object.keys(snapshotValue);
-                const getUserId = userObj[0];
+        this.provider = newProvider.toLowerCase();
+        this.service = this.provider === 'firebase' ? FirebaseService : SupabaseService;
 
-                return getUserId; // Return the data for the specific item(s)
-            } else {
-                return null; // Return null if no items match the query
-            }
-        });
+        console.log(`Database provider switched to: ${this.provider}`);
+        return this.provider;
     }
 
-    // Get an item by a id pair
-    read(key, table) {
-        const itemsRef = ref(db, `/${table}/${key}`);
-        const q = query(itemsRef);
-
-        return get(q).then((snapshot) => {
-            if (snapshot.exists()) {
-                const snapshotValue = snapshot.val();
-                return snapshotValue; // Return the data for the specific item(s)
-            } else {
-                return null; // Return null if no items match the query
-            }
-        });
+    // Unified methods - these will call the appropriate service
+    async getItemsByKeyValue(key, value, table) {
+        try {
+            return await this.service.getItemsByKeyValue(key, value, table);
+        } catch (error) {
+            console.error(`Error in getItemsByKeyValue (${this.provider}):`, error);
+            throw error;
+        }
     }
 
-    readAll(table) {
-        const requestRef = ref(db, `/${table}`);
-        return get(requestRef).then((snapshot) => {
-            if (snapshot.exists()) {
-                return snapshot.val(); // Return the data
-            } else {
-                return {}; // Return an empty object if no data
-            }
-        });
+    async readBy(key, value, table) {
+        try {
+            return await this.service.readBy(key, value, table);
+        } catch (error) {
+            console.error(`Error in readBy (${this.provider}):`, error);
+            throw error;
+        }
     }
 
-    create(data, table) {
-        const requestRef = ref(db, `/${table}`);
-        return push(requestRef, data);
+    async getItemKey(key, value, table) {
+        try {
+            return await this.service.getItemKey(key, value, table);
+        } catch (error) {
+            console.error(`Error in getItemKey (${this.provider}):`, error);
+            throw error;
+        }
     }
 
-    update(key, value, table) {
-        const requestRef = ref(db, `/${table}/${key}`);
-        return update(requestRef, value);
+    async read(id, table) {
+        try {
+            return await this.service.read(id, table);
+        } catch (error) {
+            console.error(`Error in read (${this.provider}):`, error);
+            throw error;
+        }
     }
 
-    delete(key, table) {
-        const requestRef = ref(db, `/${table}/${key}`);
-        return remove(requestRef);
+    async readAll(table) {
+        try {
+            return await this.service.readAll(table);
+        } catch (error) {
+            console.error(`Error in readAll (${this.provider}):`, error);
+            throw error;
+        }
     }
 
-    deleteAll(table) {
-        const requestRef = ref(db, `/${table}`);
-        return remove(requestRef);
+    async create(data, table) {
+        try {
+            return await this.service.create(data, table);
+        } catch (error) {
+            console.error(`Error in create (${this.provider}):`, error);
+            throw error;
+        }
     }
 
-    // Method to upload an image and return the download URL
+    async update(id, updateData, table) {
+        try {
+            return await this.service.update(id, updateData, table);
+        } catch (error) {
+            console.error(`Error in update (${this.provider}):`, error);
+            throw error;
+        }
+    }
+
+    async delete(id, table) {
+        try {
+            return await this.service.delete(id, table);
+        } catch (error) {
+            console.error(`Error in delete (${this.provider}):`, error);
+            throw error;
+        }
+    }
+
+    async deleteAll(table) {
+        try {
+            return await this.service.deleteAll(table);
+        } catch (error) {
+            console.error(`Error in deleteAll (${this.provider}):`, error);
+            throw error;
+        }
+    }
+
     async upload(file, path) {
-        const fileRef = storageRef(storage, path); // Renamed variable to avoid conflict
-        const snapshot = await uploadBytes(fileRef, file);
-        return await getDownloadURL(snapshot.ref);
+        try {
+            return await this.service.upload(file, path);
+        } catch (error) {
+            console.error(`Error in upload (${this.provider}):`, error);
+            throw error;
+        }
+    }
+
+    // Provider-specific methods (if needed)
+    async executeSupabaseQuery(query, params = []) {
+        if (this.provider !== 'supabase') {
+            throw new Error('executeSupabaseQuery is only available with Supabase provider');
+        }
+        return await this.service.executeQuery(query, params);
+    }
+
+    // Health check method
+    async healthCheck() {
+        try {
+            // Simple test to verify connection
+            const testResult = await this.readAll('test_table');
+            return {
+                provider: this.provider,
+                status: 'connected',
+                timestamp: new Date().toISOString()
+            };
+        } catch (error) {
+            return {
+                provider: this.provider,
+                status: 'error',
+                error: error.message,
+                timestamp: new Date().toISOString()
+            };
+        }
+    }
+
+    // Migration helper (optional)
+    async migrateData(fromProvider, toProvider, tables = []) {
+        if (fromProvider === toProvider) {
+            throw new Error('Source and destination providers cannot be the same');
+        }
+
+        console.log(`Starting migration from ${fromProvider} to ${toProvider}...`);
+
+        // Switch to source provider
+        const originalProvider = this.provider;
+        this.switchProvider(fromProvider);
+
+        const migrationResults = {};
+
+        for (const table of tables) {
+            try {
+                console.log(`Migrating table: ${table}`);
+
+                // Read all data from source
+                const sourceData = await this.readAll(table);
+
+                // Switch to destination provider
+                this.switchProvider(toProvider);
+
+                // Insert data into destination
+                const results = [];
+                for (const [key, item] of Object.entries(sourceData)) {
+                    try {
+                        const result = await this.create(item, table);
+                        results.push(result);
+                    } catch (error) {
+                        console.error(`Error migrating item ${key}:`, error);
+                        results.push({ error: error.message, originalKey: key });
+                    }
+                }
+
+                migrationResults[table] = {
+                    totalItems: Object.keys(sourceData).length,
+                    migratedItems: results.length,
+                    results: results
+                };
+
+                // Switch back to source for next table
+                this.switchProvider(fromProvider);
+
+            } catch (error) {
+                console.error(`Error migrating table ${table}:`, error);
+                migrationResults[table] = { error: error.message };
+            }
+        }
+
+        // Restore original provider
+        this.switchProvider(originalProvider);
+
+        console.log('Migration completed:', migrationResults);
+        return migrationResults;
     }
 }
 
