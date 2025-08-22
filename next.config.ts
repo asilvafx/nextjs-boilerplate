@@ -14,7 +14,7 @@ const withNextIntl = createNextIntlPlugin(
 
 // Base config
 const nextConfig: NextConfig = {
-    output: 'export',
+    output: 'standalone'
 };
 
 // Compose plugins (order matters: rightmost runs first)
