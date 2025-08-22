@@ -1,16 +1,38 @@
 // rest.db.js - Unified Database Service
 import FirebaseService from './firebase.db.js';
 import SupabaseService from './supabase.db.js';
+// Import future providers here
+// import MongoService from './mongo.db.js';
+// import MySQLService from './mysql.db.js';
 
 // Configuration - Set your preferred database here
-const DATABASE_PROVIDER = process.env.DATABASE_PROVIDER || 'supabase'; // 'firebase' or 'supabase'
+const DATABASE_PROVIDER = process.env.DATABASE_PROVIDER || 'supabase';
 
 class DBService {
     constructor() {
+        // Database providers registry
+        this.providers = {
+            firebase: FirebaseService,
+            supabase: SupabaseService,
+            // Add future providers here
+            // mongodb: MongoService,
+            // mysql: MySQLService,
+        };
+
         this.provider = DATABASE_PROVIDER.toLowerCase();
-        this.service = this.provider === 'firebase' ? FirebaseService : SupabaseService;
+        this.service = this.getProviderService(this.provider);
 
         console.log(`Database provider initialized: ${this.provider}`);
+        console.log(`Available providers: ${Object.keys(this.providers).join(', ')}`);
+    }
+
+    // Get service instance for a specific provider
+    getProviderService(providerName) {
+        const service = this.providers[providerName.toLowerCase()];
+        if (!service) {
+            throw new Error(`Unknown database provider: ${providerName}. Available: ${Object.keys(this.providers).join(', ')}`);
+        }
+        return service;
     }
 
     // Get the current provider name
@@ -18,14 +40,20 @@ class DBService {
         return this.provider;
     }
 
+    // Get list of available providers
+    getAvailableProviders() {
+        return Object.keys(this.providers);
+    }
+
     // Switch provider at runtime (optional)
     switchProvider(newProvider) {
-        if (newProvider !== 'firebase' && newProvider !== 'supabase') {
-            throw new Error('Invalid provider. Use "firebase" or "supabase"');
+        const availableProviders = Object.keys(this.providers);
+        if (!availableProviders.includes(newProvider.toLowerCase())) {
+            throw new Error(`Invalid provider: ${newProvider}. Available providers: ${availableProviders.join(', ')}`);
         }
 
         this.provider = newProvider.toLowerCase();
-        this.service = this.provider === 'firebase' ? FirebaseService : SupabaseService;
+        this.service = this.getProviderService(this.provider);
 
         console.log(`Database provider switched to: ${this.provider}`);
         return this.provider;
@@ -127,6 +155,9 @@ class DBService {
         if (this.provider !== 'supabase') {
             throw new Error('executeSupabaseQuery is only available with Supabase provider');
         }
+        if (!this.service.executeQuery) {
+            throw new Error('executeQuery method not available in current Supabase service');
+        }
         return await this.service.executeQuery(query, params);
     }
 
@@ -150,62 +181,307 @@ class DBService {
         }
     }
 
-    // Migration helper (optional)
-    async migrateData(fromProvider, toProvider, tables = []) {
-        if (fromProvider === toProvider) {
+    // Enhanced Migration System
+    async migrateData(fromProvider, toProvider, options = {}) {
+        const {
+            tables = [],
+            batchSize = 100,
+            dryRun = false,
+            transformData = null,
+            onProgress = null,
+            continueOnError = true,
+            backupBeforeMigration = false
+        } = options;
+
+        // Validation
+        const availableProviders = Object.keys(this.providers);
+        if (!availableProviders.includes(fromProvider.toLowerCase())) {
+            throw new Error(`Invalid source provider: ${fromProvider}. Available: ${availableProviders.join(', ')}`);
+        }
+        if (!availableProviders.includes(toProvider.toLowerCase())) {
+            throw new Error(`Invalid destination provider: ${toProvider}. Available: ${availableProviders.join(', ')}`);
+        }
+        if (fromProvider.toLowerCase() === toProvider.toLowerCase()) {
             throw new Error('Source and destination providers cannot be the same');
+        }
+        if (!tables.length) {
+            throw new Error('No tables specified for migration');
         }
 
         console.log(`Starting migration from ${fromProvider} to ${toProvider}...`);
+        console.log(`Migration options:`, { tables, batchSize, dryRun, continueOnError, backupBeforeMigration });
 
-        // Switch to source provider
+        // Store original provider to restore later
         const originalProvider = this.provider;
-        this.switchProvider(fromProvider);
 
-        const migrationResults = {};
+        // Get services for both providers
+        const sourceService = this.getProviderService(fromProvider);
+        const destinationService = this.getProviderService(toProvider);
 
-        for (const table of tables) {
+        const migrationResults = {
+            startTime: new Date().toISOString(),
+            fromProvider: fromProvider.toLowerCase(),
+            toProvider: toProvider.toLowerCase(),
+            tables: {},
+            summary: {
+                totalTables: tables.length,
+                successfulTables: 0,
+                failedTables: 0,
+                totalRecords: 0,
+                migratedRecords: 0,
+                errors: []
+            }
+        };
+
+        // Backup phase (if requested)
+        if (backupBeforeMigration && !dryRun) {
+            console.log('Creating backup before migration...');
             try {
-                console.log(`Migrating table: ${table}`);
+                migrationResults.backup = await this.createBackup(toProvider, tables);
+            } catch (error) {
+                console.error('Backup failed:', error);
+                migrationResults.summary.errors.push(`Backup failed: ${error.message}`);
+                if (!continueOnError) {
+                    throw error;
+                }
+            }
+        }
 
-                // Read all data from source
-                const sourceData = await this.readAll(table);
+        // Migration phase
+        for (let i = 0; i < tables.length; i++) {
+            const table = tables[i];
+            const tableResult = {
+                tableName: table,
+                startTime: new Date().toISOString(),
+                status: 'in-progress',
+                totalRecords: 0,
+                migratedRecords: 0,
+                errors: [],
+                records: []
+            };
+
+            try {
+                console.log(`[${i + 1}/${tables.length}] Migrating table: ${table}`);
+
+                // Progress callback
+                if (onProgress) {
+                    onProgress({
+                        phase: 'migration',
+                        currentTable: table,
+                        tableIndex: i + 1,
+                        totalTables: tables.length,
+                        overallProgress: ((i / tables.length) * 100).toFixed(2)
+                    });
+                }
+
+                // Switch to source provider and read data
+                this.switchProvider(fromProvider);
+                const sourceData = await sourceService.readAll(table);
+
+                if (!sourceData || Object.keys(sourceData).length === 0) {
+                    console.log(`Table ${table} is empty, skipping...`);
+                    tableResult.status = 'skipped';
+                    tableResult.totalRecords = 0;
+                    migrationResults.tables[table] = tableResult;
+                    continue;
+                }
+
+                const recordEntries = Object.entries(sourceData);
+                tableResult.totalRecords = recordEntries.length;
+                migrationResults.summary.totalRecords += recordEntries.length;
+
+                console.log(`Found ${recordEntries.length} records in ${table}`);
+
+                if (dryRun) {
+                    console.log(`[DRY RUN] Would migrate ${recordEntries.length} records from ${table}`);
+                    tableResult.status = 'dry-run-success';
+                    tableResult.migratedRecords = recordEntries.length;
+                    migrationResults.summary.migratedRecords += recordEntries.length;
+                    migrationResults.tables[table] = tableResult;
+                    continue;
+                }
 
                 // Switch to destination provider
                 this.switchProvider(toProvider);
 
-                // Insert data into destination
-                const results = [];
-                for (const [key, item] of Object.entries(sourceData)) {
-                    try {
-                        const result = await this.create(item, table);
-                        results.push(result);
-                    } catch (error) {
-                        console.error(`Error migrating item ${key}:`, error);
-                        results.push({ error: error.message, originalKey: key });
+                // Process records in batches
+                for (let batchStart = 0; batchStart < recordEntries.length; batchStart += batchSize) {
+                    const batch = recordEntries.slice(batchStart, Math.min(batchStart + batchSize, recordEntries.length));
+
+                    console.log(`Processing batch ${Math.floor(batchStart / batchSize) + 1}/${Math.ceil(recordEntries.length / batchSize)} (${batch.length} records)`);
+
+                    for (const [originalKey, recordData] of batch) {
+                        try {
+                            // Apply data transformation if provided
+                            let transformedData = recordData;
+                            if (transformData && typeof transformData === 'function') {
+                                transformedData = await transformData(recordData, originalKey, table, fromProvider, toProvider);
+                            }
+
+                            // Create record in destination
+                            const result = await destinationService.create(transformedData, table);
+
+                            tableResult.records.push({
+                                originalKey,
+                                newKey: result.key || result.id,
+                                status: 'success',
+                                data: transformedData
+                            });
+
+                            tableResult.migratedRecords++;
+                            migrationResults.summary.migratedRecords++;
+
+                        } catch (error) {
+                            const errorInfo = {
+                                originalKey,
+                                error: error.message,
+                                data: recordData
+                            };
+
+                            tableResult.errors.push(errorInfo);
+                            tableResult.records.push({
+                                originalKey,
+                                status: 'error',
+                                error: error.message
+                            });
+
+                            console.error(`Error migrating record ${originalKey} in ${table}:`, error.message);
+
+                            if (!continueOnError) {
+                                throw error;
+                            }
+                        }
+                    }
+
+                    // Progress update for batch completion
+                    if (onProgress) {
+                        onProgress({
+                            phase: 'migration',
+                            currentTable: table,
+                            tableProgress: ((batchStart + batch.length) / recordEntries.length * 100).toFixed(2),
+                            recordsProcessed: batchStart + batch.length,
+                            totalRecordsInTable: recordEntries.length
+                        });
                     }
                 }
 
-                migrationResults[table] = {
-                    totalItems: Object.keys(sourceData).length,
-                    migratedItems: results.length,
-                    results: results
-                };
+                tableResult.status = tableResult.errors.length === 0 ? 'success' : 'partial-success';
+                tableResult.endTime = new Date().toISOString();
 
-                // Switch back to source for next table
-                this.switchProvider(fromProvider);
+                if (tableResult.errors.length === 0) {
+                    migrationResults.summary.successfulTables++;
+                } else {
+                    migrationResults.summary.failedTables++;
+                }
+
+                console.log(`Table ${table} migration completed: ${tableResult.migratedRecords}/${tableResult.totalRecords} records migrated`);
 
             } catch (error) {
-                console.error(`Error migrating table ${table}:`, error);
-                migrationResults[table] = { error: error.message };
+                tableResult.status = 'failed';
+                tableResult.endTime = new Date().toISOString();
+                tableResult.errors.push({
+                    type: 'table-level',
+                    error: error.message
+                });
+
+                migrationResults.summary.failedTables++;
+                migrationResults.summary.errors.push(`Table ${table}: ${error.message}`);
+
+                console.error(`Table ${table} migration failed:`, error);
+
+                if (!continueOnError) {
+                    migrationResults.endTime = new Date().toISOString();
+                    this.switchProvider(originalProvider);
+                    throw error;
+                }
             }
+
+            migrationResults.tables[table] = tableResult;
         }
 
         // Restore original provider
         this.switchProvider(originalProvider);
 
-        console.log('Migration completed:', migrationResults);
+        migrationResults.endTime = new Date().toISOString();
+        migrationResults.duration = new Date(migrationResults.endTime).getTime() - new Date(migrationResults.startTime).getTime();
+
+        console.log('\n=== MIGRATION SUMMARY ===');
+        console.log(`Duration: ${migrationResults.duration}ms`);
+        console.log(`Tables: ${migrationResults.summary.successfulTables}/${migrationResults.summary.totalTables} successful`);
+        console.log(`Records: ${migrationResults.summary.migratedRecords}/${migrationResults.summary.totalRecords} migrated`);
+        if (migrationResults.summary.errors.length > 0) {
+            console.log(`Errors: ${migrationResults.summary.errors.length}`);
+        }
+        console.log('========================\n');
+
         return migrationResults;
+    }
+
+    // Create backup of specific tables
+    async createBackup(provider, tables) {
+        const originalProvider = this.provider;
+        this.switchProvider(provider);
+
+        const backup = {
+            timestamp: new Date().toISOString(),
+            provider: provider,
+            tables: {}
+        };
+
+        try {
+            for (const table of tables) {
+                console.log(`Backing up table: ${table}`);
+                backup.tables[table] = await this.readAll(table);
+            }
+        } finally {
+            this.switchProvider(originalProvider);
+        }
+
+        return backup;
+    }
+
+    // Restore from backup
+    async restoreFromBackup(backup, options = {}) {
+        const { overwrite = false, tables = null } = options;
+
+        const tablesToRestore = tables || Object.keys(backup.tables);
+        const results = {};
+
+        for (const table of tablesToRestore) {
+            if (!backup.tables[table]) {
+                results[table] = { error: 'Table not found in backup' };
+                continue;
+            }
+
+            try {
+                if (overwrite) {
+                    await this.deleteAll(table);
+                }
+
+                const records = backup.tables[table];
+                let restoredCount = 0;
+
+                for (const [key, data] of Object.entries(records)) {
+                    try {
+                        await this.create(data, table);
+                        restoredCount++;
+                    } catch (error) {
+                        console.error(`Error restoring record ${key}:`, error);
+                    }
+                }
+
+                results[table] = {
+                    totalRecords: Object.keys(records).length,
+                    restoredRecords: restoredCount,
+                    status: 'success'
+                };
+
+            } catch (error) {
+                results[table] = { error: error.message, status: 'failed' };
+            }
+        }
+
+        return results;
     }
 }
 
