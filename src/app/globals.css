@@ -1,0 +1,616 @@
+@import 'tailwindcss';
+
+:root {
+    /* Base colors */
+    --bg-primary: #171717;        /* neutral-900 */
+    --bg-secondary: #1e293b;      /* slate-800 */
+    --text-primary: #ffffff;      /* white */
+    --text-secondary: #94a3b8;    /* slate-400 */
+    --text-muted: #64748b;        /* slate-500 */
+    --text-accent: #cbd5e1;       /* slate-300 */
+
+    /* Brand colors */
+    --primary: #a855f7;           /* purple-400 */
+    --primary-dark: #9333ea;      /* purple-500 */
+    --secondary: #22d3ee;         /* cyan-400 */
+    --secondary-dark: #06b6d4;    /* cyan-500 */
+    --accent: #10b981;            /* emerald-500 */
+    --accent-light: #34d399;      /* emerald-400 */
+    --accent-dark: #059669;       /* emerald-600 */
+
+    /* Surface colors */
+    --surface: rgba(255, 255, 255, 0.05);     /* white/5 */
+    --surface-hover: rgba(255, 255, 255, 0.1); /* white/10 */
+    --border: rgba(255, 255, 255, 0.1);       /* white/10 */
+    --border-focus: var(--primary);
+    --overlay: rgba(255, 255, 255, 0.05);
+
+    /* Status colors */
+    --success: #22c55e;           /* green-500 */
+    --warning: #f59e0b;           /* amber-500 */
+    --error: #ef4444;             /* red-500 */
+    --info: var(--secondary);
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(to right, var(--primary), var(--secondary));
+    --gradient-surface: linear-gradient(to bottom right, var(--primary-dark), var(--secondary-dark));
+    --gradient-cta: linear-gradient(to bottom right,
+    color-mix(in srgb, var(--primary) 20%, transparent),
+    color-mix(in srgb, var(--secondary) 10%, transparent),
+    color-mix(in srgb, var(--primary) 20%, transparent));
+    --gradient-cta-auth: linear-gradient(to bottom right,
+    color-mix(in srgb, var(--accent) 20%, transparent),
+    color-mix(in srgb, var(--accent-light) 10%, transparent),
+    color-mix(in srgb, var(--accent) 20%, transparent));
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.05);
+}
+
+@layer base {
+    html, body {
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+    }
+
+    /* Typography */
+    h1 {
+        @apply text-2xl font-bold mb-1;
+        color: var(--text-primary);
+    }
+
+    h2 {
+        @apply text-2xl font-bold mb-3;
+        color: var(--text-primary);
+    }
+
+    h3 {
+        @apply font-bold mb-2;
+        color: var(--text-primary);
+    }
+
+    h4 {
+        @apply font-semibold text-sm mb-2;
+        color: var(--text-primary);
+    }
+
+    h5 {
+        @apply font-medium text-sm mb-1;
+        color: var(--text-primary);
+    }
+
+    p {
+        color: var(--text-secondary);
+    }
+
+    p.subtitle {
+        color: var(--text-secondary);
+        @apply mb-6;
+    }
+
+    p.small {
+        @apply text-xs mt-3;
+        color: var(--text-secondary);
+    }
+
+    span.badge {
+        background-color: var(--surface);
+        color: var(--text-primary);
+        @apply px-3 py-1.5 rounded-full text-sm font-semibold;
+    }
+
+    span.price {
+        color: var(--primary);
+        @apply font-bold;
+    }
+
+    /* Form elements */
+    .border {
+        border-color: var(--border);
+    }
+
+    label {
+        color: var(--text-secondary);
+        @apply text-sm block mb-1;
+    }
+
+    textarea, input {
+        background-color: transparent;
+        color: var(--text-primary);
+        border-color: var(--border);
+        @apply w-full border p-3 rounded-lg text-sm transition-colors;
+    }
+
+    textarea:focus, input:focus {
+        border-color: var(--border-focus);
+        @apply outline-none;
+    }
+
+    select {
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
+        border-color: var(--border);
+        @apply w-full border p-3 rounded-lg text-sm transition-colors;
+    }
+
+    select:focus {
+        border-color: var(--border-focus);
+        @apply outline-none;
+    }
+
+    textarea {
+        @apply min-h-20 resize-y;
+        resize: vertical;
+    }
+
+    /* Buttons */
+    button svg {
+        color: var(--text-primary);
+    }
+
+    button, .button {
+        background-color: transparent;
+        border-color: var(--border);
+        color: var(--primary);
+        @apply inline-flex items-center justify-center gap-2 text-center rounded-xl font-semibold border py-3 px-4 disabled:opacity-50 disabled:cursor-not-allowed transition-colors;
+    }
+
+    button.primary, .button.primary {
+        background: var(--gradient-primary);
+        color: var(--bg-secondary);
+        border-color: transparent;
+    }
+
+    button.full-width {
+        @apply w-full;
+    }
+
+    /* Layout components */
+    .card {
+        background-color: var(--surface);
+        border-color: var(--border);
+        box-shadow: var(--shadow-sm);
+        @apply backdrop-blur border rounded-2xl p-6 mb-6 space-y-4;
+    }
+
+    .card.sticky {
+        @apply sticky top-6;
+    }
+
+    .container {
+        @apply min-h-screen p-4 md:p-6 lg:p-8 mx-auto;
+    }
+
+    .screen {
+        @apply max-w-6xl mx-auto;
+    }
+
+    .screen.xl {
+        @apply max-w-2xl lg:max-w-4xl;
+    }
+
+    .screen.lg {
+        @apply max-w-xl lg:max-w-2xl;
+    }
+
+    .screen.md {
+        @apply max-w-lg lg:max-w-xl;
+    }
+
+    .screen.sm {
+        @apply max-w-md lg:max-w-lg;
+    }
+
+    /* Header */
+    .header {
+        @apply flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 mb-8;
+    }
+
+    .logo-container {
+        @apply flex items-center gap-3;
+    }
+
+    .logo {
+        background: var(--gradient-primary);
+        color: var(--bg-secondary);
+        box-shadow: var(--shadow-lg);
+        @apply w-14 h-14 rounded-xl flex items-center justify-center font-bold text-lg;
+    }
+
+    .header-actions {
+        @apply flex items-center gap-3;
+    }
+
+    /* Grid layouts */
+    .main-grid {
+        @apply grid lg:grid-cols-3 gap-6;
+    }
+
+    .main-content {
+        @apply lg:col-span-2;
+    }
+
+    .sidebar {
+        @apply lg:col-span-1;
+    }
+
+    .products-grid {
+        @apply grid md:grid-cols-2 gap-3;
+    }
+
+    .button-group {
+        @apply flex flex-col md:flex-row flex-wrap gap-3 mb-6;
+    }
+
+    .button-group .button {
+        @apply flex-1 md:flex-[initial];
+    }
+
+    /* Product cards */
+
+    .product-card {
+        background-color: var(--surface);
+        border-color: var(--border);
+        @apply p-3 rounded-lg border;
+    }
+
+    /* Feature cards */
+    .features-section {
+        background-color: var(--surface);
+        @apply rounded-xl p-4 mb-6;
+    }
+
+    .features-grid {
+        @apply grid md:grid-cols-2 gap-3;
+    }
+
+    .feature-card {
+        background-color: var(--surface);
+        border-color: var(--border);
+        @apply p-4 rounded-lg border flex gap-3 items-start;
+    }
+
+    .feature-icon {
+        @apply text-2xl flex-shrink-0;
+    }
+
+    .feature-content {
+        @apply flex-1;
+    }
+
+    .feature-content h4 {
+        @apply mb-2;
+    }
+
+    /* Auth section */
+    .auth-section {
+        border-color: var(--border);
+        @apply mt-8 pt-6 border-t;
+    }
+
+    .auth-container {
+        @apply flex flex-wrap gap-4 items-center justify-center;
+    }
+
+    .auth-welcome {
+        color: var(--text-accent);
+    }
+
+    .auth-links {
+        @apply flex gap-2;
+    }
+
+    .auth-link {
+        color: var(--primary);
+        @apply transition-colors;
+    }
+
+    .auth-link:hover {
+        color: var(--primary-dark);
+    }
+
+    .auth-link.secondary {
+        color: var(--text-secondary);
+        @apply transition-colors;
+    }
+
+    .auth-link.secondary:hover {
+        color: var(--text-accent);
+    }
+
+    .auth-register-btn {
+        background-color: color-mix(in srgb, var(--primary) 20%, transparent);
+        color: var(--primary);
+        @apply px-4 py-2 rounded-lg transition-colors;
+    }
+
+    .auth-register-btn:hover {
+        background-color: color-mix(in srgb, var(--primary) 30%, transparent);
+    }
+
+    /* Booking form */
+    .booking-form {
+        @apply space-y-4;
+    }
+
+    .booking-header p {
+        @apply text-sm;
+        color: var(--text-secondary);
+    }
+
+    .form-row {
+        @apply flex gap-3;
+    }
+
+    .form-field {
+        @apply flex-1 flex flex-col;
+    }
+
+    .form-field label {
+        @apply mb-2;
+    }
+
+    /* Form validation */
+    input.error,
+    textarea.error,
+    .datepicker-input.error {
+        border-color: var(--error) !important;
+    }
+
+    .react-select-error .react-select__control {
+        border-color: var(--error) !important;
+    }
+
+    .error-text {
+        color: var(--error);
+        @apply text-xs mt-1;
+    }
+
+    /* React DatePicker Styles */
+    .datepicker-input {
+        background-color: transparent !important;
+        color: var(--text-primary) !important;
+        border-color: var(--border) !important;
+        @apply w-full border p-3 rounded-lg text-sm transition-colors;
+    }
+
+    .datepicker-input:focus {
+        border-color: var(--border-focus) !important;
+        @apply outline-none;
+    }
+
+    .react-datepicker-wrapper {
+        @apply w-full;
+    }
+
+    .react-datepicker {
+        background-color: var(--bg-secondary) !important;
+        border-color: var(--border) !important;
+        color: var(--text-primary) !important;
+    }
+    .react-datepicker__time {
+        background-color: var(--bg-secondary) !important;
+    }
+
+    .react-datepicker__header {
+        background-color: var(--surface) !important;
+        border-bottom-color: var(--border) !important;
+    }
+    .react-datepicker-time__header {
+        color: var(--text-primary) !important;
+    }
+
+    .react-datepicker__current-month,
+    .react-datepicker__day-name,
+    .react-datepicker__day {
+        color: var(--text-primary) !important;
+    }
+
+    .react-datepicker__day:hover {
+        background-color: var(--surface) !important;
+    }
+
+    .react-datepicker__day--selected {
+        background-color: var(--primary) !important;
+        color: var(--bg-primary) !important;
+    }
+
+    .react-datepicker__time-container {
+        border-left-color: var(--border) !important;
+    }
+
+    .react-datepicker__time-list-item:hover {
+        background-color: var(--surface) !important;
+    }
+
+    .react-datepicker__time-list-item--selected {
+        background-color: var(--primary) !important;
+        color: var(--bg-primary) !important;
+    }
+
+    /* React Phone Input Styles */
+    .phone-input-container {
+        @apply w-full;
+    }
+
+    .phone-input-container input {
+        background-color: transparent !important;
+        color: var(--text-primary) !important;
+        border-color: var(--border) !important;
+        @apply w-full border p-3 rounded-lg text-sm transition-colors;
+        padding-left: 58px !important;
+    }
+
+    .phone-input-container input:focus {
+        border-color: var(--border-focus) !important;
+        @apply outline-none;
+    }
+
+    .phone-input-container input.error {
+        border-color: var(--error) !important;
+    }
+
+    .phone-input-button {
+        background-color: transparent !important;
+        border-color: var(--border) !important;
+        border-right: none !important;
+    }
+
+    .phone-input-container .flag-dropdown {
+        border-color: var(--border) !important;
+        background-color: transparent !important;
+    }
+
+    .phone-input-container .selected-flag {
+        background-color: transparent !important;
+    }
+
+    .phone-input-container .country-list {
+        background-color: var(--bg-secondary) !important;
+        border-color: var(--border) !important;
+        color: var(--text-primary) !important;
+    }
+
+    .phone-input-container .country-list .country:hover {
+        background-color: var(--surface) !important;
+    }
+
+    /* Google Places Autocomplete Styles */
+    .google-places-input {
+        background-color: transparent !important;
+        color: var(--text-primary) !important;
+        border-color: var(--border) !important;
+        @apply w-full border p-3 rounded-lg text-sm transition-colors;
+    }
+
+    .google-places-input:focus {
+        border-color: var(--border-focus) !important;
+        @apply outline-none;
+    }
+
+    .google-places-input.error {
+        border-color: var(--error) !important;
+    }
+
+    /* Style the Google Places dropdown */
+    .pac-container {
+        background-color: var(--bg-secondary) !important;
+        border-color: var(--border) !important;
+        border-radius: 0.5rem !important;
+        border: 1px solid var(--border) !important;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+        margin-top: 2px !important;
+    }
+
+    .pac-item {
+        background-color: transparent !important;
+        color: var(--text-primary) !important;
+        border-color: var(--border) !important;
+        padding: 12px 16px !important;
+        font-size: 0.875rem !important;
+    }
+
+    .pac-item:hover {
+        background-color: var(--surface) !important;
+    }
+
+    .pac-item-selected {
+        background-color: var(--surface-hover) !important;
+    }
+
+    .pac-matched {
+        color: var(--primary) !important;
+        font-weight: 600 !important;
+    }
+
+    .pac-item-query {
+        color: var(--text-primary) !important;
+        font-size: 0.875rem !important;
+    }
+
+    .pac-icon {
+        display: none !important;
+    }
+
+    /* Hide the Google logo and powered by */
+    .pac-logo:after {
+        display: none !important;
+    }
+
+    .hdpi.pac-logo:after {
+        display: none !important;
+    }
+    
+    /* Footer */
+    .footer {
+        color: var(--text-secondary);
+        @apply text-center text-sm mt-12;
+    }
+
+    /* Links */
+    a.underline-link {
+        @apply underline;
+    }
+
+    /* CTA Banner */
+    .cta-banner {
+        background: var(--gradient-cta);
+        border-color: color-mix(in srgb, var(--primary) 20%, transparent);
+        @apply relative backdrop-blur border rounded-2xl p-6 mb-6 overflow-hidden;
+    }
+
+    .cta-banner::before {
+        content: '';
+        background: linear-gradient(to right,
+        color-mix(in srgb, var(--primary) 5%, transparent),
+        color-mix(in srgb, var(--secondary) 5%, transparent));
+        @apply absolute inset-0 rounded-2xl;
+    }
+
+    .cta-banner.authenticated {
+        background: var(--gradient-cta-auth);
+        border-color: color-mix(in srgb, var(--accent) 20%, transparent);
+    }
+
+    .cta-banner.authenticated::before {
+        background: linear-gradient(to right,
+        color-mix(in srgb, var(--accent) 5%, transparent),
+        color-mix(in srgb, var(--accent-light) 5%, transparent));
+    }
+
+    .cta-content {
+        @apply relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6;
+    }
+
+    .cta-text {
+        @apply flex-1;
+    }
+
+    .cta-text h3 {
+        color: var(--text-primary);
+        @apply text-xl font-bold mb-2;
+    }
+
+    .cta-text p {
+        color: var(--text-accent);
+        @apply mb-4;
+    }
+
+    .cta-benefits {
+        @apply flex flex-col gap-2;
+    }
+
+    .benefit {
+        color: var(--text-accent);
+        @apply text-sm flex items-center gap-2;
+    }
+
+    .cta-actions {
+        @apply flex flex-col sm:flex-row gap-3 min-w-fit;
+    }
+
+    .cta-actions .button {
+        @apply min-w-[140px] justify-center;
+    }
+}

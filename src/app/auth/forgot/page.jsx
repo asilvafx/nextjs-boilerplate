@@ -1,0 +1,221 @@
+"use client";
+
+import { useState } from "react";
+import { toast } from "react-hot-toast";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import Turnstile from "react-turnstile";
+import { motion, AnimatePresence } from "framer-motion";
+
+const TurnstileKey = process.env.NEXT_PUBLIC_CF_TURNSTILE_API || null;
+
+const ForgotPasswordPage = () => {
+    const router = useRouter();
+    const [email, setEmail] = useState("");
+    const [step, setStep] = useState("email"); // 'email' | 'code'
+    const [code, setCode] = useState("");
+    const [encryptedCode, setEncryptedCode] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [isTurnstileVerified, setIsTurnstileVerified] = useState(false);
+
+    const handleSendCode = async (e) => {
+        e.preventDefault();
+        if (TurnstileKey && !isTurnstileVerified) {
+            toast.error('Please complete the verification.');
+            return;
+        }
+        setLoading(true);
+
+        try {
+            const response = await fetch('/api/auth/forgot', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    "x-internal-secret": process.env.NEXT_PUBLIC_API_KEY,
+                },
+                body: JSON.stringify({ email }),
+            });
+
+            const data = await response.json();
+
+            if (!data.success) {
+                toast.error(data.error);
+                setLoading(false);
+                return;
+            }
+
+            setEncryptedCode(data.encryptedCode);
+            toast.success(`${data.message} ${data.demoCode ? `(Demo code: ${data.demoCode})` : ''}`);
+            setStep("code");
+
+        } catch (error) {
+            console.error('Send code error:', error);
+            toast.error("Error sending code.");
+        }
+
+        setLoading(false);
+    };
+
+    const handleVerifyCode = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+
+        try {
+            const response = await fetch('/api/auth/verify', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    "x-internal-secret": process.env.NEXT_PUBLIC_API_KEY,
+                },
+                body: JSON.stringify({
+                    code: code,
+                    encryptedCode: encryptedCode
+                }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                toast.error(data.error);
+                setLoading(false);
+                return;
+            }
+
+            toast.success(data.message);
+            // Navigate to reset password page with email as query parameter
+            router.push(`/auth/reset?email=${encodeURIComponent(email)}&token=${encodeURIComponent(encryptedCode)}`);
+
+        } catch (error) {
+            console.error('Verify code error:', error);
+            toast.error("Error verifying code.");
+        }
+
+        setLoading(false);
+    };
+
+    return (
+        <div className="min-h-screen flex items-center justify-center px-4 py-8">
+            <div className="w-full max-w-md">
+                <div className="text-center mb-8">
+                    <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Forgot Password</h1>
+                    <p className="mt-2 text-sm text-gray-600 dark:text-gray-100">
+                        {step === "email"
+                            ? "Enter your email to receive a reset code"
+                            : "Enter the 6-digit code sent to your email"
+                        }
+                    </p>
+                </div>
+
+                <AnimatePresence mode="wait">
+                    {step === "email" && (
+                        <motion.form
+                            key="email"
+                            onSubmit={handleSendCode}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                            transition={{ duration: 0.4 }}
+                            className="card"
+                        >
+                            <div>
+                                <label className="block font-semibold text-slate-10 mb-2">Email Address</label>
+                                <div className="flex items-center border rounded-xl px-3 h-12 focus-within:border-blue-500">
+                                    <input
+                                        type="email"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        placeholder="Enter your email"
+                                        className="w-full border-none outline-none"
+                                        disabled={loading}
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            {TurnstileKey && (
+                                <div className="flex justify-center">
+                                    <Turnstile
+                                        sitekey={TurnstileKey}
+                                        theme="light"
+                                        size="flexible"
+                                        onVerify={() => setIsTurnstileVerified(true)}
+                                    />
+                                </div>
+                            )}
+
+                            <motion.button
+                                type="submit"
+                                whileTap={{ scale: 0.98 }}
+                                whileHover={{ scale: 1.02 }}
+                                disabled={loading || (TurnstileKey && !isTurnstileVerified)}
+                                className="w-full primary"
+                            >
+                                {loading ? "Sending..." : "Send Reset Code"}
+                            </motion.button>
+                        </motion.form>
+                    )}
+
+                    {step === "code" && (
+                        <motion.form
+                            key="code"
+                            onSubmit={handleVerifyCode}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                            transition={{ duration: 0.4 }}
+                            className="card"
+                        >
+                            <div>
+                                <label className="block font-semibold text-slate-10 mb-2">Verification Code</label>
+                                <div className="flex items-center border rounded-xl px-3 h-12 focus-within:border-blue-500">
+                                    <input
+                                        type="text"
+                                        value={code}
+                                        onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                                        placeholder="••••••"
+                                        className="w-full border-none outline-none text-center tracking-widest text-xl font-mono"
+                                        disabled={loading}
+                                        maxLength={6}
+                                        required
+                                    />
+                                </div>
+                                <p className="text-xs text-gray-500 mt-1">
+                                    Code sent to: {email}
+                                </p>
+                            </div>
+
+                            <div className="flex gap-3">
+                                <motion.button
+                                    type="button"
+                                    whileTap={{ scale: 0.98 }}
+                                    onClick={() => setStep("email")}
+                                    className="flex-1"
+                                >
+                                    Back
+                                </motion.button>
+
+                                <motion.button
+                                    type="submit"
+                                    whileTap={{ scale: 0.98 }}
+                                    whileHover={{ scale: 1.02 }}
+                                    disabled={loading || code.length !== 6}
+                                    className="flex-1 primary"
+                                >
+                                    {loading ? "Verifying..." : "Verify Code"}
+                                </motion.button>
+                            </div>
+                        </motion.form>
+                    )}
+                </AnimatePresence>
+
+                <div className="mt-6 text-center">
+                    <Link href="/auth/login" className="text-blue-500 hover:underline">
+                        ← Back to Login
+                    </Link>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default ForgotPasswordPage;
