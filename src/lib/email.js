@@ -207,12 +207,12 @@ class EmailService {
 
         return this.sendEmail(
             to,
-            'Welcome to Your App!',
+            `Welcome to ${this.fromName}!`,
             WelcomeTemplate,
             {
                 userDisplayName,
                 companyName: this.fromName, // Use configured company name
-                loginUrl: `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/auth/login`,
+                loginUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/auth/login`,
             }
         );
     }
@@ -266,7 +266,7 @@ class EmailService {
 
         return this.sendEmail(
             to,
-            `Confirmation de votre commande ${orderId}`,
+            `Order Confirmation #${orderId}`,
             OrderConfirmationTemplate,
             {
                 customerName,
@@ -278,7 +278,7 @@ class EmailService {
                 total: parseFloat(total).toFixed(2),
                 shippingAddress: shippingAddress || {},
                 companyName: this.fromName,
-                companyUrl: process.env.NEXTAUTH_URL || 'http://localhost:3000',
+                companyUrl: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
             }
         );
     }
