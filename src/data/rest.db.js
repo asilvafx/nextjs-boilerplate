@@ -1,6 +1,7 @@
 // rest.db.js - Unified Database Service
 import FirebaseService from './firebase.db.js';
 import SupabaseService from './supabase.db.js';
+import RedisService from './redis.db.js';
 // Import future providers here
 // import MongoService from './mongo.db.js';
 // import MySQLService from './mysql.db.js';
@@ -14,6 +15,7 @@ class DBService {
         this.providers = {
             firebase: FirebaseService,
             supabase: SupabaseService,
+            redis: RedisService,
             // Add future providers here
             // mongodb: MongoService,
             // mysql: MySQLService,
@@ -150,7 +152,7 @@ class DBService {
         }
     }
 
-    // Provider-specific methods (if needed)
+    // Provider-specific methods
     async executeSupabaseQuery(query, params = []) {
         if (this.provider !== 'supabase') {
             throw new Error('executeSupabaseQuery is only available with Supabase provider');
@@ -159,6 +161,67 @@ class DBService {
             throw new Error('executeQuery method not available in current Supabase service');
         }
         return await this.service.executeQuery(query, params);
+    }
+
+    // Redis-specific methods
+    async setExpiration(id, table, ttlSeconds) {
+        if (this.provider !== 'redis') {
+            throw new Error('setExpiration is only available with Redis provider');
+        }
+        if (!this.service.setExpiration) {
+            throw new Error('setExpiration method not available in current Redis service');
+        }
+        return await this.service.setExpiration(id, table, ttlSeconds);
+    }
+
+    async getTTL(id, table) {
+        if (this.provider !== 'redis') {
+            throw new Error('getTTL is only available with Redis provider');
+        }
+        if (!this.service.getTTL) {
+            throw new Error('getTTL method not available in current Redis service');
+        }
+        return await this.service.getTTL(id, table);
+    }
+
+    async executeRedisCommand(command, ...args) {
+        if (this.provider !== 'redis') {
+            throw new Error('executeRedisCommand is only available with Redis provider');
+        }
+        if (!this.service.executeCommand) {
+            throw new Error('executeCommand method not available in current Redis service');
+        }
+        return await this.service.executeCommand(command, ...args);
+    }
+
+    async getFileMetadata(path) {
+        if (this.provider !== 'redis') {
+            throw new Error('getFileMetadata is only available with Redis provider');
+        }
+        if (!this.service.getFileMetadata) {
+            throw new Error('getFileMetadata method not available in current Redis service');
+        }
+        return await this.service.getFileMetadata(path);
+    }
+
+    async listUploadedFiles() {
+        if (this.provider !== 'redis') {
+            throw new Error('listUploadedFiles is only available with Redis provider');
+        }
+        if (!this.service.listUploadedFiles) {
+            throw new Error('listUploadedFiles method not available in current Redis service');
+        }
+        return await this.service.listUploadedFiles();
+    }
+
+    async deleteFileMetadata(path) {
+        if (this.provider !== 'redis') {
+            throw new Error('deleteFileMetadata is only available with Redis provider');
+        }
+        if (!this.service.deleteFileMetadata) {
+            throw new Error('deleteFileMetadata method not available in current Redis service');
+        }
+        return await this.service.deleteFileMetadata(path);
     }
 
     // Health check method
@@ -482,6 +545,13 @@ class DBService {
         }
 
         return results;
+    }
+
+    // Close all connections (useful for Redis)
+    async disconnect() {
+        if (this.service && typeof this.service.disconnect === 'function') {
+            await this.service.disconnect();
+        }
     }
 }
 
