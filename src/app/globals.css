@@ -457,8 +457,14 @@
         border-right: none !important;
     }
 
-    .phone-input-container .flag-dropdown {
-        border-color: var(--border) !important;
+    .react-tel-input .form-control {
+        width: 100% !important;
+        height: auto !important;
+        font-size: var(--text-sm) !important;
+    }
+
+    .react-tel-input .flag-dropdown {
+        border: none !important;
         background-color: transparent !important;
     }
 
@@ -477,6 +483,10 @@
     }
 
     /* Google Places Autocomplete Styles */
+    gmp-place-autocomplete {
+        color-scheme: dark;
+    } 
+
     .google-places-input {
         background-color: transparent !important;
         color: var(--text-primary) !important;

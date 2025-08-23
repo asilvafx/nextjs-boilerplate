@@ -60,7 +60,7 @@ const BookingForm = () => {
             addressContainerRef.current.innerHTML = ''; // 👈 clear existing
             addressContainerRef.current.appendChild(placeAutocomplete);
         }
-
+        
         // Add the place selection listener
         placeAutocomplete.addEventListener('gmp-select', async ({ placePrediction }) => {
             try {
@@ -162,7 +162,7 @@ const BookingForm = () => {
         loader.load()
             .then(() => initMap())
             .catch(err => {
-                console.error('Failed to load Google Maps:', err);
+                console.warn('Failed to load Google Maps:', err);
 
                 // fallback input
                 const fallbackInput = document.createElement('input');
@@ -335,7 +335,7 @@ const BookingForm = () => {
                 'First Name': formData.firstName,
                 'Last Name': formData.lastName,
                 'Email': formData.email,
-                'Phone': formData.phone,
+                'Phone': '+'+formData.phone,
                 'Address': formData.address,
                 'Service': formData.service.value,
                 'Preferred Date/Time': formData.when ? formData.when.toLocaleString() : 'Not selected',
