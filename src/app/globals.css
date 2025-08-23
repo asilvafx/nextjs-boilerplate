@@ -1,5 +1,5 @@
 @import 'tailwindcss';
- 
+
 :root {
     /* Base colors */
     --bg-primary: #171717;        /* neutral-900 */
@@ -534,6 +534,9 @@
     }
 
     /* Hide the Google logo and powered by */
+    .google-places-container gmp-place-autocomplete {
+        padding: 0.3rem !important;
+    }
     .pac-logo:after {
         display: none !important;
     }

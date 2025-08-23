@@ -5,6 +5,10 @@ import PhoneInput from 'react-phone-input-2';
 import 'react-datepicker/dist/react-datepicker.css';
 import 'react-phone-input-2/lib/style.css';
 
+// Global variable to track if Google Maps is being loaded
+let isGoogleMapsLoading = false;
+let googleMapsLoadPromise = null;
+
 const BookingForm = () => {
     const [formData, setFormData] = useState({
         firstName: '',
@@ -18,8 +22,8 @@ const BookingForm = () => {
     });
 
     const [errors, setErrors] = useState({});
-    const addressInputRef = useRef(null);
-    const autocompleteRef = useRef(null);
+    const addressContainerRef = useRef(null);
+    const placeAutocompleteRef = useRef(null);
 
     const serviceOptions = [
         { value: '30‑min intro — Free', label: '30‑min intro — Free' },
@@ -28,58 +32,181 @@ const BookingForm = () => {
         { value: 'Recorded Audio Read — €30', label: 'Recorded Audio Read — €30' }
     ];
 
-    // Initialize Google Places Autocomplete
-    useEffect(() => {
-        const initializeAutocomplete = () => {
-            if (window.google && window.google.maps && addressInputRef.current) {
-                autocompleteRef.current = new window.google.maps.places.Autocomplete(
-                    addressInputRef.current,
-                    {
-                        types: ['address'], // Only street addresses
-                        fields: ['formatted_address', 'address_components', 'geometry'],
-                        componentRestrictions: { country: ['fr', 'be', 'ch', 'lu'] } // Restrict to France and neighboring countries
-                    }
-                );
+    async function initMap(){
+        // Request the places library
+        await window.google.maps.importLibrary("places");
 
-                // Listen for place selection
-                autocompleteRef.current.addListener('place_changed', () => {
-                    const place = autocompleteRef.current.getPlace();
+        // Create the new PlaceAutocompleteElement
+        const placeAutocomplete = new window.google.maps.places.PlaceAutocompleteElement({
+            includedRegionCodes: ['fr'],
+        });
 
-                    if (place.formatted_address) {
-                        setFormData(prev => ({
-                            ...prev,
-                            address: place.formatted_address
-                        }));
+        // Store reference for cleanup
+        placeAutocompleteRef.current = placeAutocomplete;
 
-                        // Clear address error if exists
-                        if (errors.address) {
-                            setErrors(prev => ({ ...prev, address: '' }));
-                        }
-                    }
-                });
+        // Style the element to match your form
+        placeAutocomplete.style.width = '100%';
+        placeAutocomplete.style.height = '2.75rem';
+        placeAutocomplete.style.padding = '0.75rem';
+        placeAutocomplete.style.border = '1px solid var(--border)';
+        placeAutocomplete.style.borderRadius = '0.5rem';
+        placeAutocomplete.style.fontSize = '0.875rem';
+        placeAutocomplete.style.backgroundColor = 'transparent';
+        placeAutocomplete.style.color = 'var(--text-primary)';
+
+        // Append the new element safely
+        if (addressContainerRef.current) {
+            addressContainerRef.current.innerHTML = ''; // 👈 clear existing
+            addressContainerRef.current.appendChild(placeAutocomplete);
+        }
+
+        // Add the place selection listener
+        placeAutocomplete.addEventListener('gmp-select', async ({ placePrediction }) => {
+            try {
+                const place = placePrediction.toPlace();
+                await place.fetchFields({ fields: ['formattedAddress'] });
+
+                const placeData = place.toJSON();
+                const formattedAddress = placeData.formattedAddress;
+
+                if (formattedAddress) {
+                    // Update the visual value in the Google element
+                    placeAutocomplete.value = formattedAddress;
+
+                    // Update React state
+                    setFormData(prev => ({
+                        ...prev,
+                        address: formattedAddress
+                    }));
+
+                    // Clear address error if exists
+                    setErrors(prev => ({ ...prev, address: '' }));
+                }
+            } catch (error) {
+                console.error('Error fetching place details:', error);
             }
-        };
+        });
 
-        // Check if Google Maps is already loaded
+        // Handle focus and blur events for styling
+        placeAutocomplete.addEventListener('focus', () => {
+            placeAutocomplete.style.borderColor = 'var(--border-focus)';
+            placeAutocomplete.style.outline = 'none';
+        });
+
+        placeAutocomplete.addEventListener('blur', () => {
+            placeAutocomplete.style.borderColor = 'var(--border)';
+        });
+
+        // Apply error styling if needed
+        if (errors.address) {
+            placeAutocomplete.style.borderColor = '#ef4444';
+        }
+    }
+
+    const loadGoogleMapsScript = () => {
+        // If already loaded, return resolved promise
         if (window.google && window.google.maps) {
-            initializeAutocomplete();
-        } else {
-            // Load Google Maps script if not already loaded
+            return Promise.resolve();
+        }
+
+        // If already loading, return existing promise
+        if (isGoogleMapsLoading && googleMapsLoadPromise) {
+            return googleMapsLoadPromise;
+        }
+
+        // Check if script already exists in DOM
+        const existingScript = document.querySelector('script[src*="maps.googleapis.com"]');
+        if (existingScript) {
+            return new Promise((resolve) => {
+                if (window.google && window.google.maps) {
+                    resolve();
+                } else {
+                    existingScript.onload = () => resolve();
+                }
+            });
+        }
+
+        // Create new script
+        isGoogleMapsLoading = true;
+        googleMapsLoadPromise = new Promise((resolve, reject) => {
             const script = document.createElement('script');
             script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_API_KEY}&libraries=places`;
             script.async = true;
             script.defer = true;
-            script.onload = initializeAutocomplete;
+
+            script.onload = () => {
+                isGoogleMapsLoading = false;
+                resolve();
+            };
+
+            script.onerror = () => {
+                isGoogleMapsLoading = false;
+                reject(new Error('Failed to load Google Maps script'));
+            };
+
             document.head.appendChild(script);
-        }
+        });
+
+        return googleMapsLoadPromise;
+    };
+
+    // Initialize Google Places Autocomplete with the new PlaceAutocompleteElement
+    useEffect(() => {
+        const initializePlaceAutocomplete = async () => {
+            if (!addressContainerRef.current) return;
+
+            try {
+                await loadGoogleMapsScript();
+                await initMap();
+
+            } catch (error) {
+                console.error('Failed to initialize Google Places Autocomplete:', error);
+
+                // Fallback to regular text input if autocomplete fails
+                const fallbackInput = document.createElement('input');
+                fallbackInput.type = 'text';
+                fallbackInput.placeholder = 'Start typing your address...';
+                fallbackInput.value = formData.address;
+                fallbackInput.style.width = '100%';
+                fallbackInput.style.height = '2.75rem';
+                fallbackInput.style.padding = '0.75rem';
+                fallbackInput.style.border = '1px solid var(--border)';
+                fallbackInput.style.borderRadius = '0.5rem';
+                fallbackInput.style.fontSize = '0.875rem';
+                fallbackInput.style.backgroundColor = 'transparent';
+                fallbackInput.style.color = 'var(--text-primary)';
+
+                fallbackInput.addEventListener('input', (e) => {
+                    setFormData(prev => ({
+                        ...prev,
+                        address: e.target.value
+                    }));
+                    if (errors.address) {
+                        setErrors(prev => ({ ...prev, address: '' }));
+                    }
+                });
+
+                if (addressContainerRef.current) {
+                    addressContainerRef.current.innerHTML = '';
+                    addressContainerRef.current.appendChild(fallbackInput);
+                }
+            }
+        };
+
+        initializePlaceAutocomplete();
 
         return () => {
             // Cleanup
-            if (autocompleteRef.current) {
-                window.google?.maps?.event?.clearInstanceListeners(autocompleteRef.current);
+            if (placeAutocompleteRef.current) {
+                try {
+                    placeAutocompleteRef.current.remove();
+                } catch (error) {
+                    // Ignore cleanup errors
+                    console.warn('Error during place autocomplete cleanup:', error);
+                }
             }
         };
-    }, [errors.address]);
+    }, []);
 
     const customSelectStyles = {
         control: (provided, state) => ({
@@ -295,16 +422,12 @@ const BookingForm = () => {
 
                 <div className="form-field">
                     <label>Address</label>
-                    <input
-                        ref={addressInputRef}
-                        type="text"
-                        name="address"
-                        value={formData.address}
-                        onChange={handleInputChange}
-                        placeholder="Start typing your address..."
-                        className={`google-places-input ${errors.address ? 'error' : ''}`}
-                        autoComplete="off"
-                    />
+                    <div
+                        ref={addressContainerRef}
+                        className={`google-places-container ${errors.address ? 'error' : ''}`}
+                    >
+                        {/* PlaceAutocompleteElement will be inserted here */}
+                    </div>
                     {errors.address && <span className="error-text">{errors.address}</span>}
                 </div>
 
