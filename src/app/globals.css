@@ -121,6 +121,9 @@
         border-color: var(--border);
         @apply w-full border p-3 rounded-lg text-sm transition-colors;
     }
+    input {
+        height: 45px;
+    }
 
     textarea:focus, input:focus {
         border-color: var(--border-focus);
@@ -459,7 +462,7 @@
 
     .react-tel-input .form-control {
         width: 100% !important;
-        height: auto !important;
+        height: 45px !important;
         font-size: var(--text-sm) !important;
     }
 
@@ -485,7 +488,9 @@
     /* Google Places Autocomplete Styles */
     gmp-place-autocomplete {
         color-scheme: dark;
-    } 
+        font-size: var(--text-sm);
+        height: 45px;
+    }
 
     .google-places-input {
         background-color: transparent !important;
