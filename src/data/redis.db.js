@@ -9,9 +9,11 @@ class RedisDBService {
     }
 
     async initializeClient() {
+        const redisUrl = process.env.REDIS_URL;
+        if(!redisUrl || redisUrl.trim() === '') return null;
         try {
             this.client = createClient({
-                url: process.env.REDIS_URL,
+                url:redisUrl,
                 socket: {
                     reconnectStrategy: (retries) => {
                         console.log(`Redis reconnection attempt ${retries}`);

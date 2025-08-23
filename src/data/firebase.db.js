@@ -12,6 +12,9 @@ const firebaseConfig = {
     appId: process.env.FIREBASE_APP_ID
 };
 
+const firebaseUrl = firebaseConfig.databaseURL;
+if(!firebaseUrl || firebaseUrl.trim() === '') return null;
+
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const storage = getStorage(app);

@@ -65,7 +65,7 @@ class DBService {
             return await this.service.getItemsByKeyValue(key, value, table);
         } catch (error) {
             console.error(`Error in getItemsByKeyValue (${this.provider}):`, error);
-            throw error;
+            return null;
         }
     }
 
@@ -74,7 +74,7 @@ class DBService {
             return await this.service.readBy(key, value, table);
         } catch (error) {
             console.error(`Error in readBy (${this.provider}):`, error);
-            throw error;
+            return null;
         }
     }
 
@@ -83,7 +83,7 @@ class DBService {
             return await this.service.getItemKey(key, value, table);
         } catch (error) {
             console.error(`Error in getItemKey (${this.provider}):`, error);
-            throw error;
+            return null;
         }
     }
 
@@ -92,7 +92,7 @@ class DBService {
             return await this.service.read(id, table);
         } catch (error) {
             console.error(`Error in read (${this.provider}):`, error);
-            throw error;
+            return null;
         }
     }
 
@@ -101,7 +101,7 @@ class DBService {
             return await this.service.readAll(table);
         } catch (error) {
             console.error(`Error in readAll (${this.provider}):`, error);
-            throw error;
+            return null;
         }
     }
 
@@ -110,7 +110,7 @@ class DBService {
             return await this.service.create(data, table);
         } catch (error) {
             console.error(`Error in create (${this.provider}):`, error);
-            throw error;
+            return null;
         }
     }
 
@@ -119,7 +119,7 @@ class DBService {
             return await this.service.update(id, updateData, table);
         } catch (error) {
             console.error(`Error in update (${this.provider}):`, error);
-            throw error;
+            return null;
         }
     }
 
@@ -128,7 +128,7 @@ class DBService {
             return await this.service.delete(id, table);
         } catch (error) {
             console.error(`Error in delete (${this.provider}):`, error);
-            throw error;
+            return null;
         }
     }
 
@@ -137,7 +137,6 @@ class DBService {
             return await this.service.deleteAll(table);
         } catch (error) {
             console.error(`Error in deleteAll (${this.provider}):`, error);
-            throw error;
         }
     }
 
@@ -146,7 +145,7 @@ class DBService {
             return await this.service.upload(file, path);
         } catch (error) {
             console.error(`Error in upload (${this.provider}):`, error);
-            throw error;
+            return null;
         }
     }
 
