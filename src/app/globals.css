@@ -1,5 +1,5 @@
 @import 'tailwindcss';
-
+ 
 :root {
     /* Base colors */
     --bg-primary: #171717;        /* neutral-900 */
@@ -541,7 +541,7 @@
     .hdpi.pac-logo:after {
         display: none !important;
     }
-    
+
     /* Footer */
     .footer {
         color: var(--text-secondary);
