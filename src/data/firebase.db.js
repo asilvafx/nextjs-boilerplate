@@ -12,12 +12,16 @@ const firebaseConfig = {
     appId: process.env.FIREBASE_APP_ID
 };
 
-const firebaseUrl = firebaseConfig.databaseURL;
-if(!firebaseUrl || firebaseUrl.trim() === '') return null;
+let app;
+let db;
+let storage;
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const storage = getStorage(app);
+const firebaseUrl = firebaseConfig.databaseURL;
+if(firebaseUrl && firebaseUrl.trim() !== ''){
+    app = initializeApp(firebaseConfig);
+    db = getDatabase(app);
+    storage = getStorage(app);
+}
 
 class FirebaseDBService {
 
