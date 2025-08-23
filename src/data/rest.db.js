@@ -1,6 +1,5 @@
 // rest.db.js - Unified Database Service
 import FirebaseService from './firebase.db.js';
-import SupabaseService from './supabase.db.js';
 import RedisService from './redis.db.js';
 // Import future providers here
 // import MongoService from './mongo.db.js';
@@ -14,7 +13,6 @@ class DBService {
         // Database providers registry
         this.providers = {
             firebase: FirebaseService,
-            supabase: SupabaseService,
             redis: RedisService,
             // Add future providers here
             // mongodb: MongoService,
@@ -153,16 +151,6 @@ class DBService {
     }
 
     // Provider-specific methods
-    async executeSupabaseQuery(query, params = []) {
-        if (this.provider !== 'supabase') {
-            throw new Error('executeSupabaseQuery is only available with Supabase provider');
-        }
-        if (!this.service.executeQuery) {
-            throw new Error('executeQuery method not available in current Supabase service');
-        }
-        return await this.service.executeQuery(query, params);
-    }
-
     // Redis-specific methods
     async setExpiration(id, table, ttlSeconds) {
         if (this.provider !== 'redis') {
@@ -182,16 +170,6 @@ class DBService {
             throw new Error('getTTL method not available in current Redis service');
         }
         return await this.service.getTTL(id, table);
-    }
-
-    async executeRedisCommand(command, ...args) {
-        if (this.provider !== 'redis') {
-            throw new Error('executeRedisCommand is only available with Redis provider');
-        }
-        if (!this.service.executeCommand) {
-            throw new Error('executeCommand method not available in current Redis service');
-        }
-        return await this.service.executeCommand(command, ...args);
     }
 
     async getFileMetadata(path) {
