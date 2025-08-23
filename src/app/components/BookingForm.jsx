@@ -4,6 +4,7 @@ import DatePicker from 'react-datepicker';
 import PhoneInput from 'react-phone-input-2';
 import 'react-datepicker/dist/react-datepicker.css';
 import 'react-phone-input-2/lib/style.css';
+import { Loader } from '@googlemaps/js-api-loader';
 
 // Global variable to track if Google Maps is being loaded
 let isGoogleMapsLoading = false;
@@ -150,63 +151,57 @@ const BookingForm = () => {
         return googleMapsLoadPromise;
     };
 
-    // Initialize Google Places Autocomplete with the new PlaceAutocompleteElement
+    // load Google Maps API with Loader
     useEffect(() => {
-        const initializePlaceAutocomplete = async () => {
-            if (!addressContainerRef.current) return;
+        const loader = new Loader({
+            apiKey: process.env.NEXT_PUBLIC_GOOGLE_API_KEY,
+            version: 'weekly',
+            libraries: ['places'],
+        });
 
-            try {
-                await loadGoogleMapsScript();
-                await initMap();
+        loader.load()
+            .then(() => initMap())
+            .catch(err => {
+                console.error('Failed to load Google Maps:', err);
 
-            } catch (error) {
-                console.error('Failed to initialize Google Places Autocomplete:', error);
-
-                // Fallback to regular text input if autocomplete fails
+                // fallback input
                 const fallbackInput = document.createElement('input');
                 fallbackInput.type = 'text';
                 fallbackInput.placeholder = 'Start typing your address...';
                 fallbackInput.value = formData.address;
-                fallbackInput.style.width = '100%';
-                fallbackInput.style.height = '2.75rem';
-                fallbackInput.style.padding = '0.75rem';
-                fallbackInput.style.border = '1px solid var(--border)';
-                fallbackInput.style.borderRadius = '0.5rem';
-                fallbackInput.style.fontSize = '0.875rem';
-                fallbackInput.style.backgroundColor = 'transparent';
-                fallbackInput.style.color = 'var(--text-primary)';
+
+                Object.assign(fallbackInput.style, {
+                    width: '100%',
+                    height: '2.75rem',
+                    padding: '0.75rem',
+                    border: '1px solid var(--border)',
+                    borderRadius: '0.5rem',
+                    fontSize: '0.875rem',
+                    backgroundColor: 'transparent',
+                    color: 'var(--text-primary)',
+                });
 
                 fallbackInput.addEventListener('input', (e) => {
-                    setFormData(prev => ({
-                        ...prev,
-                        address: e.target.value
-                    }));
-                    if (errors.address) {
-                        setErrors(prev => ({ ...prev, address: '' }));
-                    }
+                    setFormData(prev => ({ ...prev, address: e.target.value }));
+                    setErrors(prev => ({ ...prev, address: '' }));
                 });
 
                 if (addressContainerRef.current) {
                     addressContainerRef.current.innerHTML = '';
                     addressContainerRef.current.appendChild(fallbackInput);
                 }
-            }
-        };
-
-        initializePlaceAutocomplete();
+            });
 
         return () => {
-            // Cleanup
             if (placeAutocompleteRef.current) {
                 try {
                     placeAutocompleteRef.current.remove();
-                } catch (error) {
-                    // Ignore cleanup errors
-                    console.warn('Error during place autocomplete cleanup:', error);
+                } catch (err) {
+                    console.warn('Cleanup error:', err);
                 }
             }
         };
-    }, []);
+    }, []); // run once
 
     const customSelectStyles = {
         control: (provided, state) => ({
