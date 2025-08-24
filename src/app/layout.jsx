@@ -14,6 +14,7 @@ export const metadata = {
 
 export const viewport = {
     viewport: "user-scalable=0, initial-scale=1, maximum-scale=1, width=device-width",
+    appleMobileWebAppCapable: "yes",
 }
 
 export default async function RootLayout({ children }) {
