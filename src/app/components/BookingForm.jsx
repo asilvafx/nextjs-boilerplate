@@ -60,7 +60,7 @@ const BookingForm = () => {
             addressContainerRef.current.innerHTML = ''; // 👈 clear existing
             addressContainerRef.current.appendChild(placeAutocomplete);
         }
-        
+
         // Add the place selection listener
         placeAutocomplete.addEventListener('gmp-select', async ({ placePrediction }) => {
             try {
@@ -209,8 +209,10 @@ const BookingForm = () => {
             backgroundColor: 'transparent',
             borderColor: state.isFocused ? 'var(--border-focus)' : 'var(--border)',
             borderRadius: '0.5rem',
-            padding: '0.25rem',
-            fontSize: '0.875rem',
+            padding: '0.05rem',
+            margin: 'auto',
+            height: '45px',
+            fontSize: '0.9rem',
             boxShadow: 'none',
             '&:hover': {
                 borderColor: 'var(--border-focus)'
@@ -436,6 +438,7 @@ const BookingForm = () => {
                         placeholder="Select a service..."
                         isSearchable={false}
                         className={errors.service ? 'react-select-error' : ''}
+                        components={{ IndicatorSeparator:() => null }}
                     />
                     {errors.service && <span className="error-text">{errors.service}</span>}
                 </div>

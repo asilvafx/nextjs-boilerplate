@@ -496,8 +496,9 @@
     /* Google Places Autocomplete Styles */
     gmp-place-autocomplete {
         color-scheme: dark;
-        font-size: 16px;
-        height: 45px;
+        font-size: 16px !important;
+        height: 45px !important;
+        @apply !rounded-lg;
     }
 
     .google-places-input {
