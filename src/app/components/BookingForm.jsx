@@ -1,14 +1,10 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import Select from 'react-select';
 import DatePicker from 'react-datepicker';
 import PhoneInput from 'react-phone-input-2';
+import GooglePlacesAutoComplete from '@/app/ui/GooglePlacesAutoComplete';
 import 'react-datepicker/dist/react-datepicker.css';
 import 'react-phone-input-2/lib/style.css';
-import { Loader } from '@googlemaps/js-api-loader';
-
-// Global variable to track if Google Maps is being loaded
-let isGoogleMapsLoading = false;
-let googleMapsLoadPromise = null;
 
 const BookingForm = () => {
     const [formData, setFormData] = useState({
@@ -23,8 +19,6 @@ const BookingForm = () => {
     });
 
     const [errors, setErrors] = useState({});
-    const addressContainerRef = useRef(null);
-    const placeAutocompleteRef = useRef(null);
 
     const serviceOptions = [
         { value: '30‑min intro — Free', label: '30‑min intro — Free' },
@@ -32,129 +26,6 @@ const BookingForm = () => {
         { value: '90‑min Coaching + Tarot — €75', label: '90‑min Coaching + Tarot — €75' },
         { value: 'Recorded Audio Read — €30', label: 'Recorded Audio Read — €30' }
     ];
-
-    async function initMap(){
-        // Request the places library
-        await window.google.maps.importLibrary("places");
-
-        // Create the new PlaceAutocompleteElement
-        const placeAutocomplete = new window.google.maps.places.PlaceAutocompleteElement({
-            includedRegionCodes: ['fr'],
-        });
-
-        // Store reference for cleanup
-        placeAutocompleteRef.current = placeAutocomplete;
-
-        // Style the element to match your form
-        placeAutocomplete.style.width = '100%';
-        placeAutocomplete.style.height = '2.75rem';
-        placeAutocomplete.style.padding = '0.75rem';
-        placeAutocomplete.style.border = '1px solid var(--border)';
-        placeAutocomplete.style.borderRadius = '0.5rem';
-        placeAutocomplete.style.fontSize = '0.875rem';
-        placeAutocomplete.style.backgroundColor = 'transparent';
-        placeAutocomplete.style.color = 'var(--text-primary)';
-
-        // Append the new element safely
-        if (addressContainerRef.current) {
-            addressContainerRef.current.innerHTML = ''; // 👈 clear existing
-            addressContainerRef.current.appendChild(placeAutocomplete);
-        }
-
-        // Add the place selection listener
-        placeAutocomplete.addEventListener('gmp-select', async ({ placePrediction }) => {
-            try {
-                const place = placePrediction.toPlace();
-                await place.fetchFields({ fields: ['formattedAddress'] });
-
-                const placeData = place.toJSON();
-                const formattedAddress = placeData.formattedAddress;
-
-                if (formattedAddress) {
-                    // Update the visual value in the Google element
-                    placeAutocomplete.value = formattedAddress;
-
-                    // Update React state
-                    setFormData(prev => ({
-                        ...prev,
-                        address: formattedAddress
-                    }));
-
-                    // Clear address error if exists
-                    setErrors(prev => ({ ...prev, address: '' }));
-                }
-            } catch (error) {
-                console.error('Error fetching place details:', error);
-            }
-        });
-
-        // Handle focus and blur events for styling
-        placeAutocomplete.addEventListener('focus', () => {
-            placeAutocomplete.style.borderColor = 'var(--border-focus)';
-            placeAutocomplete.style.outline = 'none';
-        });
-
-        placeAutocomplete.addEventListener('blur', () => {
-            placeAutocomplete.style.borderColor = 'var(--border)';
-        });
-
-        // Apply error styling if needed
-        if (errors.address) {
-            placeAutocomplete.style.borderColor = '#ef4444';
-        }
-    }
-
-    // load Google Maps API with Loader
-    useEffect(() => {
-        const loader = new Loader({
-            apiKey: process.env.NEXT_PUBLIC_GOOGLE_API_KEY,
-            version: 'weekly',
-            libraries: ['places'],
-        });
-
-        loader.load()
-            .then(() => initMap())
-            .catch(err => {
-                console.warn('Failed to load Google Maps:', err);
-
-                // fallback input
-                const fallbackInput = document.createElement('input');
-                fallbackInput.type = 'text';
-                fallbackInput.placeholder = 'Start typing your address...';
-                fallbackInput.value = formData.address;
-
-                Object.assign(fallbackInput.style, {
-                    width: '100%',
-                    height: '2.75rem',
-                    padding: '0.75rem',
-                    border: '1px solid var(--border)',
-                    borderRadius: '0.5rem',
-                    fontSize: '0.875rem',
-                    backgroundColor: 'transparent',
-                    color: 'var(--text-primary)',
-                });
-
-                fallbackInput.addEventListener('input', (e) => {
-                    setFormData(prev => ({ ...prev, address: e.target.value }));
-                    setErrors(prev => ({ ...prev, address: '' }));
-                });
-
-                if (addressContainerRef.current) {
-                    addressContainerRef.current.innerHTML = '';
-                    addressContainerRef.current.appendChild(fallbackInput);
-                }
-            });
-
-        return () => {
-            if (placeAutocompleteRef.current) {
-                try {
-                    placeAutocompleteRef.current.remove();
-                } catch (err) {
-                    console.warn('Cleanup error:', err);
-                }
-            }
-        };
-    }, []); // run once
 
     const customSelectStyles = {
         control: (provided, state) => ({
@@ -212,6 +83,22 @@ const BookingForm = () => {
         if (errors[name]) {
             setErrors(prev => ({ ...prev, [name]: '' }));
         }
+    };
+
+    const handleAddressChange = (address) => {
+        setFormData((prev) => ({
+            ...prev,
+            address: address
+        }));
+        // Clear address error when user inputs address
+        if (errors.address) {
+            setErrors(prev => ({ ...prev, address: '' }));
+        }
+    };
+
+    const handleAddressError = (error) => {
+        console.warn('Address input error:', error);
+        // You can set a specific error state here if needed
     };
 
     const handleServiceChange = (selectedOption) => {
@@ -372,11 +259,16 @@ const BookingForm = () => {
 
                 <div className="form-field">
                     <label>Address</label>
-                    <div
-                        ref={addressContainerRef}
-                        className={`google-places-container ${errors.address ? 'error' : ''}`}
-                    >
-                        {/* PlaceAutocompleteElement will be inserted here */}
+                    <div className={`google-places-container ${errors.address ? 'error' : ''}`}>
+                        <GooglePlacesAutoComplete
+                            value={formData.address}
+                            onChange={handleAddressChange}
+                            onError={handleAddressError}
+                            hasError={!!errors.address}
+                            placeholder="Start typing your address..."
+                            styles={{ width: '100%' }}
+                            apiKey={process.env.NEXT_PUBLIC_GOOGLE_API_KEY}
+                        />
                     </div>
                     {errors.address && <span className="error-text">{errors.address}</span>}
                 </div>

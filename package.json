@@ -35,6 +35,7 @@
         "react-datepicker": "^8.7.0",
         "react-dom": "^19.1.1",
         "react-email": "^4.2.8",
+        "react-google-places-autocomplete": "^4.1.0",
         "react-hot-toast": "^2.6.0",
         "react-icons": "^5.5.0",
         "react-phone-input-2": "^2.15.1",
