@@ -104,53 +104,6 @@ const BookingForm = () => {
         }
     }
 
-    const loadGoogleMapsScript = () => {
-        // If already loaded, return resolved promise
-        if (window.google && window.google.maps) {
-            return Promise.resolve();
-        }
-
-        // If already loading, return existing promise
-        if (isGoogleMapsLoading && googleMapsLoadPromise) {
-            return googleMapsLoadPromise;
-        }
-
-        // Check if script already exists in DOM
-        const existingScript = document.querySelector('script[src*="maps.googleapis.com"]');
-        if (existingScript) {
-            return new Promise((resolve) => {
-                if (window.google && window.google.maps) {
-                    resolve();
-                } else {
-                    existingScript.onload = () => resolve();
-                }
-            });
-        }
-
-        // Create new script
-        isGoogleMapsLoading = true;
-        googleMapsLoadPromise = new Promise((resolve, reject) => {
-            const script = document.createElement('script');
-            script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_API_KEY}&libraries=places`;
-            script.async = true;
-            script.defer = true;
-
-            script.onload = () => {
-                isGoogleMapsLoading = false;
-                resolve();
-            };
-
-            script.onerror = () => {
-                isGoogleMapsLoading = false;
-                reject(new Error('Failed to load Google Maps script'));
-            };
-
-            document.head.appendChild(script);
-        });
-
-        return googleMapsLoadPromise;
-    };
-
     // load Google Maps API with Loader
     useEffect(() => {
         const loader = new Loader({
