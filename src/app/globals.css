@@ -48,11 +48,6 @@
     --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.05);
 }
 
-:root {
-    touch-action: pan-x pan-y;
-    height: 100%
-}
-
 @layer base {
     html, body {
         background-color: var(--bg-primary);
@@ -508,6 +503,9 @@
         font-size: 16px !important;
         height: 45px !important;
         @apply !rounded-lg;
+    }
+    gmp-place-autocomplete:focus, gmp-place-autocomplete:active { 
+        font-size: 16px !important;
     }
 
     .google-places-input {
