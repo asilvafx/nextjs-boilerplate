@@ -125,6 +125,10 @@
     input {
         height: 45px;
     }
+    input[type="checkbox"]{
+        width: 20px;
+        height: 20px;
+    }
 
     textarea:focus, input:focus {
         border-color: var(--border-focus);
