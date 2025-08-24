@@ -502,7 +502,7 @@
         color-scheme: dark;
         font-size: 16px !important;
         height: 45px !important;
-        height: 45px !important;
+        max-height: 45px !important;
         @apply !rounded-lg relative;
     }
     gmp-place-autocomplete:focus, gmp-place-autocomplete:active {
