@@ -21,10 +21,25 @@ const GooglePlacesAutoComplete = ({
         padding: '0.75rem',
         border: '1px solid var(--border)',
         borderRadius: '0.5rem',
-        fontSize: '0.875rem',
+        fontSize: '16px', // Important: 16px or larger prevents zoom on iOS
         backgroundColor: 'transparent',
         color: 'var(--text-primary)',
         ...styles // Override defaults with provided styles
+    };
+
+    // Prevent mobile zoom by managing viewport meta tag
+    const preventMobileZoom = () => {
+        const viewport = document.querySelector('meta[name="viewport"]');
+        if (viewport) {
+            viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+        }
+    };
+
+    const restoreMobileZoom = () => {
+        const viewport = document.querySelector('meta[name="viewport"]');
+        if (viewport) {
+            viewport.setAttribute('content', 'width=device-width, initial-scale=1.0');
+        }
     };
 
     const initGooglePlaces = async () => {
@@ -45,6 +60,11 @@ const GooglePlacesAutoComplete = ({
                 ...defaultStyles,
                 borderColor: hasError ? '#ef4444' : (defaultStyles.borderColor || 'var(--border)')
             });
+
+            // Add mobile-specific attributes to prevent zoom
+            placeAutocomplete.setAttribute('autocomplete', 'address-line1');
+            placeAutocomplete.setAttribute('autocapitalize', 'words');
+            placeAutocomplete.setAttribute('autocorrect', 'on');
 
             // Append the new element safely
             if (containerRef.current) {
@@ -83,14 +103,18 @@ const GooglePlacesAutoComplete = ({
                 }
             });
 
-            // Handle focus and blur events for styling
+            // Handle focus and blur events for styling and zoom prevention
             placeAutocomplete.addEventListener('focus', () => {
                 placeAutocomplete.style.borderColor = 'var(--border-focus)';
                 placeAutocomplete.style.outline = 'none';
+                // Prevent zoom on mobile devices
+                preventMobileZoom();
             });
 
             placeAutocomplete.addEventListener('blur', () => {
                 placeAutocomplete.style.borderColor = hasError ? '#ef4444' : (defaultStyles.borderColor || 'var(--border)');
+                // Restore zoom capability after input loses focus
+                setTimeout(restoreMobileZoom, 100);
             });
 
             // Handle manual input changes (when user types directly)
@@ -119,6 +143,11 @@ const GooglePlacesAutoComplete = ({
             borderColor: hasError ? '#ef4444' : (defaultStyles.borderColor || 'var(--border)')
         });
 
+        // Add mobile-specific attributes to prevent zoom
+        fallbackInput.setAttribute('autocomplete', 'address-line1');
+        fallbackInput.setAttribute('autocapitalize', 'words');
+        fallbackInput.setAttribute('autocorrect', 'on');
+
         fallbackInput.addEventListener('input', (e) => {
             if (onChange) {
                 onChange(e.target.value);
@@ -127,10 +156,14 @@ const GooglePlacesAutoComplete = ({
 
         fallbackInput.addEventListener('focus', () => {
             fallbackInput.style.borderColor = 'var(--border-focus)';
+            // Prevent zoom on mobile devices
+            preventMobileZoom();
         });
 
         fallbackInput.addEventListener('blur', () => {
             fallbackInput.style.borderColor = hasError ? '#ef4444' : (defaultStyles.borderColor || 'var(--border)');
+            // Restore zoom capability after input loses focus
+            setTimeout(restoreMobileZoom, 100);
         });
 
         if (containerRef.current) {
