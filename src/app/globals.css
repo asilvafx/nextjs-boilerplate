@@ -85,6 +85,10 @@
         color: var(--text-secondary);
     }
 
+    span {
+        font-size: initial;
+    }
+
     p.subtitle {
         color: var(--text-secondary);
         @apply mb-6;
