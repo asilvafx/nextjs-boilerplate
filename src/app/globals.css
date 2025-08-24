@@ -120,7 +120,7 @@
         background-color: transparent;
         color: var(--text-primary);
         border-color: var(--border);
-        @apply w-full border p-3 rounded-lg text-sm transition-colors;
+        @apply w-full border p-3 rounded-lg transition-colors;
     }
     input {
         height: 45px;
