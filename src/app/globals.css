@@ -566,6 +566,12 @@
     }
 
     /* Hide the Google logo and powered by */
+    .google-places-container {
+        position: relative;
+        touch-action: manipulation;
+        max-height: 400px;
+        font-size: 16px;
+    }
     .google-places-container gmp-place-autocomplete {
         padding: 0.3rem !important;
     }

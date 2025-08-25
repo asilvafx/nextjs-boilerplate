@@ -65,7 +65,6 @@ export default function GDPRCookies() {
             }
         });
 
-        console.log("Google Analytics removed");
     }, []);
 
     const handleAcceptAll = useCallback(() => {
