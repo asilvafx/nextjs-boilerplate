@@ -120,14 +120,14 @@
         @apply text-sm block mb-1;
     }
 
-    textarea, input {
+    textarea, input, .select {
         font-size: 16px;
         background-color: transparent;
         color: var(--text-primary);
         border-color: var(--border);
         @apply w-full border p-3 rounded-lg transition-colors;
     }
-    input {
+    input, .select {
         height: 45px;
     }
     input[type="checkbox"]{
@@ -190,7 +190,6 @@
     .card.sticky {
         @apply sticky top-6;
     }
-
     .container {
         @apply min-h-screen p-4 md:p-6 lg:p-8 mx-auto pt-42 sm:pt-38 md:pt-42 lg:pt-32;
     }
@@ -225,12 +224,13 @@
     }
 
     .header-navbar {
-        @apply relative flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 w-full px-2 pt-6 pb-4 rounded-bl-xl rounded-br-xl backdrop-blur-lg opacity-80 border-b border-white/20 border-b-[1px] drop-shadow-sm;
+        @apply relative flex flex-row items-start lg:items-center justify-between gap-4 w-full px-2 pt-6 pb-4 rounded-bl-xl rounded-br-xl backdrop-blur-lg opacity-90 border-b border-white/20 border-b-[1px] drop-shadow-sm;
+        flex-wrap: nowrap;
         background: var(--bg-primary);
     }
 
     .logo-container {
-        @apply flex items-center gap-3;
+        @apply flex items-center gap-3 max-w-[350px];
     }
 
     .logo {
@@ -263,6 +263,7 @@
 
     .button-group {
         @apply flex flex-col md:flex-row flex-wrap gap-3 mb-6;
+        text-wrap: nowrap;
     }
 
     .button-group .button {
@@ -656,11 +657,11 @@
     }
 
     .cta-actions {
-        @apply flex flex-col sm:flex-row gap-3 min-w-fit;
+        @apply flex flex-col w-full sm:flex-row gap-3 min-w-fit;
     }
 
     .cta-actions .button {
-        @apply min-w-[140px] justify-center;
+        @apply min-w-[140px] justify-center w-full md:w-auto;
     }
 
     /* GDPR Cookie Banner Styles */

@@ -48,17 +48,18 @@ const Cart = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5 }}
                 >
+                    {totalItems > 0 && (
                     <div className="flex items-center justify-between mb-8">
                         <h1 className="text-4xl font-bold">{t('title')}</h1>
-                        {totalItems > 0 && (
+
                             <button
                                 onClick={handleEmptyCart}
                                 className="bg-transparent text-red-500 hover:text-red-700 transition-colors duration-200 text-lg font-medium"
                             >
                                 {t('emptyCart')}
                             </button>
-                        )}
                     </div>
+                    )}
 
                     {totalItems === 0 ? (
                         // Empty Cart State
@@ -90,7 +91,7 @@ const Cart = () => {
                         <div className="grid lg:grid-cols-3 gap-8">
                             {/* Cart Items */}
                             <div className="lg:col-span-2">
-                                <div className="bg-white dark:bg-neutral-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+                                <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
                                     <div className="p-6 border-b border-gray-200 dark:border-gray-700">
                                         <h2 className="text-xl font-semibold">
                                             {t('items', { count: totalItems })}

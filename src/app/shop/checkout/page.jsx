@@ -32,8 +32,8 @@ const Checkout = () => {
                     theme: 'stripe',
                     variables: {
                         colorPrimary: '#6772e5',
-                        colorBackground: '#ffffff',
-                        colorText: '#30313d',
+                        colorBackground: '#1c1c1c',
+                        colorText: '#fff',
                         colorDanger: '#df1b41',
                         fontFamily: 'Roboto, Open Sans, Segoe UI, sans-serif',
                         borderRadius: '0.6rem',
@@ -114,7 +114,7 @@ const Checkout = () => {
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ duration: 0.3 }}
                             >
-                                <div className="bg-white dark:bg-neutral-900 rounded-lg p-4 lg:sticky lg:top-24">
+                                <div className="bg-white dark:bg-neutral-900 rounded-lg lg:sticky lg:top-24">
                                     <h2 className="text-xl font-semibold mb-6">{t('orderSummary')}</h2>
 
                                     {/* Items */}

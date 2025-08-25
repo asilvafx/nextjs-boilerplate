@@ -35,15 +35,14 @@ export default function CountrySelector({
                 <button
                     type="button"
                     className={`${
-                        disabled ? "bg-neutral-100" : "bg-white"
-                    } h-full relative w-full border border-gray-300 rounded-lg pl-3 pr-10 py-2 text-left cursor-default focus:outline-none`}
+                        disabled && "bg-neutral-100"} select`}
                     aria-haspopup="listbox"
                     aria-expanded="true"
                     aria-labelledby="listbox-label"
                     onClick={onToggle}
                     disabled={disabled}
                 >
-          <span className="truncate flex items-center text-black font-normal">
+          <span className="truncate flex items-center font-normal">
             <img
                 alt={selectedValue.value}
                 src={`https://purecatamphetamine.github.io/country-flag-icons/3x2/${selectedValue.value}.svg`}

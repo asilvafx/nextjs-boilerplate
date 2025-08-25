@@ -28,14 +28,12 @@ const Header = () => {
                 </div>
             </Link>
                 <div className="header-actions">
-                        {totalItems > 0 && (
-                            <Link
-                                href="/shop/cart"
-                                className="button"
-                            >
-                                Cart ({totalItems})
-                            </Link>
-                        )}
+                    <Link
+                        href="/shop/cart"
+                        className="button"
+                    >
+                        Cart ({totalItems})
+                    </Link>
                     <a href="#booking" className="button primary">
                         Book now
                     </a>

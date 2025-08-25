@@ -11,7 +11,7 @@ import { fetchProducts } from '../lib/products';
 
 function Shop() {
     const t = useTranslations('Shop');
-    const { addItem, totalItems } = useCart();
+    const { addItem, cartTotal, totalItems } = useCart();
 
     // State management
     const [items, setItems] = useState([]);
@@ -109,7 +109,7 @@ function Shop() {
                     <Link href="/shop/cart">
                         <button className="button flex items-center gap-2">
                             <FaShoppingBag />
-                            {t('cart')} (<strong>{totalItems}</strong>)
+                            Checkout - {parseFloat(cartTotal).toFixed(2)} $
                         </button>
                     </Link>
                 </div>

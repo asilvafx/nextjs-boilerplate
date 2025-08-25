@@ -204,8 +204,8 @@ const PaymentForm = ({ cartTotal, subTotal, shippingCost }) => {
                         value={phone}
                         onChange={setPhone}
                         inputStyle={{ width: "100%" }}
-                        inputClass="!rounded-xl !border !w-full"
-                        buttonClass="!rounded-xl"
+                        containerClass="phone-input-container"
+                        buttonClass="phone-input-button"
                     />
                 </div>
             </div>
@@ -296,12 +296,14 @@ const PaymentForm = ({ cartTotal, subTotal, shippingCost }) => {
             {/* Payment Element Section */}
             <div>
                 <h2 className="text-lg font-semibold mb-2">{t('cardInformation')}</h2>
-                <PaymentElement />
+                <PaymentElement
+                theme="dark"
+                />
             </div>
 
             {/* Submit Button */}
             <button
-                className="w-full"
+                className="w-full primary"
                 type="submit"
                 disabled={!stripe || !elements || isProcessing}
             >
