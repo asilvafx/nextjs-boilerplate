@@ -1,3 +1,4 @@
+// ui/GooglePlacesAutoComplete.jsx
 import { useEffect, useRef } from 'react';
 import { Loader } from '@googlemaps/js-api-loader';
 
