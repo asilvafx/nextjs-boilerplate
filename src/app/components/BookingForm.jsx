@@ -261,6 +261,7 @@ const BookingForm = () => {
                     <label>Address</label>
                     <div className={`google-places-container ${errors.address ? 'error' : ''}`}>
                         <GooglePlacesAutoComplete
+                            legacy="mobile"
                             value={formData.address}
                             onChange={handleAddressChange}
                             onError={handleAddressError}

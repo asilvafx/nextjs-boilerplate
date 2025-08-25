@@ -270,8 +270,7 @@
 
     /* Feature cards */
     .features-section {
-        background-color: var(--surface);
-        @apply rounded-xl p-4 mb-6;
+        @apply my-4;
     }
 
     .features-grid {

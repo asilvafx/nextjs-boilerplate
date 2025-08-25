@@ -42,7 +42,6 @@ const HeroSection = () => {
 
             {/* Features */}
             <div id="features" className="features-section">
-                <h3>Why Choose Starlit Tarot</h3>
                 <div className="features-grid">
                     {features.map((feature, index) => (
                         <div key={index} className="feature-card">
