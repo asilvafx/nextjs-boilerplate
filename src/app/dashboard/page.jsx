@@ -5,9 +5,9 @@ const DashboardPage = () => {
 
     const t = useTranslations('HomePage');
     return (
-        <div className="flex flex-col gap-8 items-center justify-center h-screen">
+        <div className="section">
 
-            <h1 className="text-3xl font-bold">
+            <h1>
                 Dashboard
             </h1>
 

@@ -165,7 +165,7 @@
     button, .button {
         background-color: transparent;
         border-color: var(--border);
-        color: var(--primary);
+        color: var(--text-primary);
         @apply inline-flex items-center justify-center gap-2 text-center rounded-xl font-semibold border py-3 px-4 disabled:opacity-50 disabled:cursor-not-allowed transition-colors;
     }
 
@@ -192,11 +192,15 @@
     }
 
     .container {
-        @apply min-h-screen p-4 md:p-6 lg:p-8 mx-auto;
+        @apply min-h-screen p-4 md:p-6 lg:p-8 mx-auto pt-42 sm:pt-38 md:pt-42 lg:pt-32;
     }
 
     .screen {
-        @apply max-w-6xl mx-auto;
+        @apply max-w-full mx-auto h-screen flex flex-col;
+    }
+
+    .section {
+        @apply w-full;
     }
 
     .screen.xl {
@@ -217,7 +221,12 @@
 
     /* Header */
     .header {
-        @apply flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 mb-8;
+        @apply fixed left-0 right-0 top-0 container mx-auto z-50 px-4 md:px-6 lg:px-8;
+    }
+
+    .header-navbar {
+        @apply relative flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 w-full px-2 pt-6 pb-4 rounded-bl-xl rounded-br-xl backdrop-blur-lg opacity-80 border-b border-white/20 border-b-[1px] drop-shadow-sm;
+        background: var(--bg-primary);
     }
 
     .logo-container {
@@ -583,9 +592,9 @@
     }
 
     /* Footer */
-    .footer {
+    footer, .footer {
         color: var(--text-secondary);
-        @apply text-center text-sm mt-12;
+        @apply text-center text-sm mt-auto !pb-10;
     }
 
     /* Links */

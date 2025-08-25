@@ -1,9 +1,24 @@
+"use client"
+
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { useCart } from 'react-use-cart';
 
 const Header = () => {
+    const t = useTranslations('Cart');
+    const {
+        cartTotal,
+        items,
+        totalItems,
+        updateItemQuantity,
+        removeItem,
+        emptyCart
+    } = useCart();
+
     return (
         <header className="header">
-            <div className="logo-container">
+            <div className="header-navbar">
+            <Link href="/" className="logo-container">
                 <div className="logo">
                     ST
                 </div>
@@ -11,14 +26,20 @@ const Header = () => {
                     <h1>Starlit Tarot</h1>
                     <p>Clear readings — gentle guidance — real results</p>
                 </div>
-            </div>
-            <div className="header-actions">
-                <span className="badge">
-                    30‑min intro: Free
-                </span>
-                <a href="#booking" className="button primary">
-                    Book now
-                </a>
+            </Link>
+                <div className="header-actions">
+                        {totalItems > 0 && (
+                            <Link
+                                href="/shop/cart"
+                                className="button"
+                            >
+                                Cart ({totalItems})
+                            </Link>
+                        )}
+                    <a href="#booking" className="button primary">
+                        Book now
+                    </a>
+                </div>
             </div>
         </header>
     );

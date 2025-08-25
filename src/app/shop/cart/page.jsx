@@ -42,7 +42,7 @@ const Cart = () => {
 
     return (
         <>
-            <div className="w-full max-w-4xl mx-auto p-4 mb-10 mt-36">
+            <div className="section">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -205,13 +205,13 @@ const Cart = () => {
                                     <div className="space-y-3">
                                         <Link
                                             href="/shop/checkout"
-                                            className="button w-full"
+                                            className="button primary w-full"
                                         >
                                             {t('proceedToCheckout')}
                                         </Link>
                                         <Link
                                             href="/shop"
-                                            className="button w-full border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 bg-neutral-100 dark:bg-neutral-900"
+                                            className="button w-full"
                                         >
                                             {t('continueShopping')}
                                         </Link>

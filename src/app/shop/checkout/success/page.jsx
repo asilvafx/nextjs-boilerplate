@@ -214,7 +214,7 @@ const PaymentSuccess = () => {
     }
 
     return (
-        <div className="w-full max-w-4xl mx-auto mt-36 p-8 mb-10">
+        <div className="section">
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}

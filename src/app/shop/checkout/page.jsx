@@ -49,13 +49,13 @@ const Checkout = () => {
 
     return (
         <>
-            <div className="w-full max-w-4xl mx-auto p-4 mb-10 mt-36">
+            <div className="section">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5 }}
                 >
-                    <h1 className="text-4xl font-bold mb-8 text-center">{t('checkoutTitle')}</h1>
+                    <h1 className="text-4xl font-bold mb-8 text-start">{t('checkoutTitle')}</h1>
 
                     {totalItems === 0 ? (
                         <motion.div

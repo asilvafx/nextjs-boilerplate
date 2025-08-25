@@ -26,10 +26,14 @@ const HeroSection = () => {
 
     return (
         <div className="card">
-            <h2>Find clarity with a tarot reading that listens.</h2>
+            <h2 className="max-w-sm">Find clarity with a tarot reading that listens.</h2>
             <p className="subtitle">
-                I blend practical insight with compassionate intuition to help you make confident choices about love, career, and life transitions.
+                I blend practical insight with compassionate intuition to help you make confident choices about love,
+                career, and life transitions.
             </p>
+            <span className="badge absolute top-0 right-0 m-3">
+                    30‑min intro: Free
+            </span>
 
             <div className="button-group">
                 <Link href="/shop" className="button primary">

@@ -4,6 +4,8 @@ import { Toaster } from "react-hot-toast";
 import Providers from "./providers";
 import { Inter } from "next/font/google";
 import "@/app/globals.css";
+import Header from './components/Header';
+import Footer from './components/Footer';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -25,12 +27,19 @@ export default async function RootLayout({ children }) {
         <html lang={locale}>
         <body className={inter.className}>
         <NextIntlClientProvider>
-        <Providers>
-            <Toaster position="top-right" />
-            {children}
-        </Providers>
+            <Providers>
+
+                <div className="container">
+                    <div className="screen">
+                        <Header />
+                        <Toaster position="top-right" />
+                        {children}
+                        <Footer />
+                    </div>
+                </div>
+            </Providers>
         </NextIntlClientProvider>
         </body>
         </html>
-    );
+);
 }
