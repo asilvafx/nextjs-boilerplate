@@ -102,7 +102,7 @@
     span.badge {
         background-color: var(--surface);
         color: var(--text-primary);
-        @apply px-3 py-1.5 rounded-full text-sm font-semibold;
+        @apply px-3 py-1.5 rounded-full font-semibold;
     }
 
     span.price {
@@ -191,7 +191,7 @@
         @apply sticky top-6;
     }
     .container {
-        @apply min-h-screen p-4 md:p-6 lg:p-8 mx-auto pt-42 sm:pt-38 md:pt-42 lg:pt-32;
+        @apply min-h-screen p-4 md:p-6 lg:p-8 mx-auto pt-28 md:pt-32 lg:pt-32;
     }
 
     .screen {
@@ -224,24 +224,164 @@
     }
 
     .header-navbar {
-        @apply relative flex flex-row items-start lg:items-center justify-between gap-4 w-full px-2 pt-6 pb-4 rounded-bl-xl rounded-br-xl backdrop-blur-lg opacity-90 border-b border-white/20 border-b-[1px] drop-shadow-sm;
+        @apply relative flex flex-row flex-nowrap items-center justify-between gap-2 sm:gap-4 w-full px-2 sm:px-4 py-3 sm:py-4 rounded-bl-sm rounded-br-sm border-b border-neutral-300/10 backdrop-blur-lg opacity-90 drop-shadow-sm;
+        box-shadow: 0 3px 6px rgba(0,0,0, .1);
         flex-wrap: nowrap;
         background: var(--bg-primary);
+        height: 70px;
+        max-height: 70px;
+        overflow: visible;
+        transition: max-height 0.3s ease;
+    }
+
+    @media (min-width: 640px) {
+        .header-navbar {
+            height: 80px;
+            max-height: 80px;
+        }
+    }
+
+    .header-navbar.mobile-menu-open {
+        max-height: 180px;
     }
 
     .logo-container {
-        @apply flex items-center gap-3 max-w-[350px];
+        @apply flex items-center gap-2 sm:gap-3 max-w-[250px] sm:max-w-[300px] lg:max-w-[350px] flex-shrink min-w-0;
+    }
+
+    .logo-container h1 {
+        @apply text-sm sm:text-base lg:text-lg font-bold truncate;
+        line-height: 1.2;
+    }
+
+    .logo-container p {
+        @apply text-xs sm:text-sm lg:text-base text-gray-400 truncate;
+        line-height: 1.2;
     }
 
     .logo {
         background: var(--gradient-primary);
         color: var(--bg-secondary);
         box-shadow: var(--shadow-lg);
-        @apply w-14 h-14 rounded-xl flex items-center justify-center font-bold text-lg;
+        @apply w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 rounded-lg sm:rounded-xl flex items-center justify-center font-bold text-sm sm:text-base lg:text-lg flex-shrink-0;
     }
 
-    .header-actions {
-        @apply flex items-center gap-3;
+    /* Desktop actions - hidden on mobile */
+    .desktop-actions {
+        @apply hidden lg:flex items-center gap-2 lg:gap-3 flex-shrink-0;
+    }
+
+    .desktop-actions .button {
+        @apply text-sm lg:text-base px-3 py-2 lg:px-4 lg:py-2 whitespace-nowrap;
+    }
+
+    /* Mobile menu toggle button */
+    .mobile-menu-toggle {
+        @apply flex flex-col justify-center items-center w-8 h-8 sm:w-10 sm:h-10 bg-transparent border-none cursor-pointer p-0 flex-shrink-0;
+        position: relative;
+    }
+
+    .hamburger-line {
+        @apply block w-4 sm:w-6 h-0.5 bg-white rounded-sm transition-all duration-300 ease-in-out;
+        margin: 0;
+        transform-origin: center;
+    }
+
+    .hamburger-line:first-child.open {
+        transform: rotate(45deg) translate(3px, 3px);
+    }
+
+    .hamburger-line:nth-child(2).open {
+        opacity: 0;
+    }
+
+    .hamburger-line:last-child.open {
+        transform: rotate(-45deg) translate(3px, -3px);
+    }
+
+    /* Mobile dropdown menu */
+    .mobile-menu {
+        @apply absolute top-full left-0 right-0 bg-black/90 backdrop-blur-lg border-t border-neutral-300/10 opacity-0 invisible transition-all duration-300 ease-in-out transform translate-y-[-10px] lg:hidden;
+        background: var(--bg-primary);
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .mobile-menu.open {
+        @apply opacity-100 visible translate-y-0;
+    }
+
+    .mobile-menu-content {
+        @apply flex flex-col gap-3 p-3 sm:p-4;
+    }
+
+    .mobile-menu-item {
+        @apply w-full text-center justify-center text-sm sm:text-base px-3 py-2;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 1023px) {
+        .header-actions {
+            display: none;
+        }
+    }
+
+    @media (min-width: 1024px) {
+        .mobile-menu-toggle {
+            display: none;
+        }
+
+        .mobile-menu {
+            display: none;
+        }
+
+        .desktop-actions {
+            display: flex;
+        }
+    }
+
+    /* Content scaling for better fit */
+    @media (max-width: 380px) {
+        .logo-container p {
+            display: none;
+        }
+    }
+    @media (max-width: 480px) {
+        .header-navbar {
+            height: 65px;
+            max-height: 65px;
+            gap: 1rem;
+            padding: 0.5rem 0.75rem;
+        }
+
+        .header-navbar.mobile-menu-open {
+            max-height: 170px;
+        }
+
+        .logo-container {
+            max-width: 200px;
+            gap: 0.5rem;
+        }
+
+        .logo-container h1 {
+            font-size: 0.875rem;
+        }
+
+        .logo-container p {
+            font-size: 0.75rem;
+            max-width: 250px;
+            text-overflow: ellipsis;
+         }
+
+        .logo {
+            width: 2.25rem;
+            height: 2.25rem;
+            font-size: 0.875rem;
+        }
+    }
+
+    /* Ensure smooth transitions */
+    * {
+        transition: all 0.3s ease;
     }
 
     /* Grid layouts */
