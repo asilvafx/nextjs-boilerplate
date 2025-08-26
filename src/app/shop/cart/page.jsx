@@ -52,12 +52,12 @@ const Cart = () => {
                     <div className="flex items-center justify-between mb-8">
                         <h1 className="text-4xl font-bold">{t('title')}</h1>
 
-                            <button
+                            <span
                                 onClick={handleEmptyCart}
-                                className="bg-transparent text-red-500 hover:text-red-700 transition-colors duration-200 text-lg font-medium"
+                                className="bg-transparent text-sm text-red-500 hover:text-red-700 transition-colors duration-200 font-medium"
                             >
                                 {t('emptyCart')}
-                            </button>
+                            </span>
                     </div>
                     )}
 
@@ -91,7 +91,7 @@ const Cart = () => {
                         <div className="grid lg:grid-cols-3 gap-8">
                             {/* Cart Items */}
                             <div className="lg:col-span-2">
-                                <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+                                <div className="card">
                                     <div className="p-6 border-b border-gray-200 dark:border-gray-700">
                                         <h2 className="text-xl font-semibold">
                                             {t('items', { count: totalItems })}

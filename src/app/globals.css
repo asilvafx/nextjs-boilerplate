@@ -199,7 +199,7 @@
     }
 
     .section {
-        @apply w-full;
+        @apply w-full mb-20;
     }
 
     .screen.xl {
@@ -386,7 +386,7 @@
 
     /* Grid layouts */
     .main-grid {
-        @apply grid lg:grid-cols-3 gap-6;
+        @apply grid lg:grid-cols-3 gap-6 mb-20;
     }
 
     .main-content {

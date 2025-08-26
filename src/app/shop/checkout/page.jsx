@@ -95,7 +95,7 @@ const Checkout = () => {
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ duration: 0.3 }}
                             >
-                                <div className="bg-white dark:bg-neutral-900 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+                                <div className="card">
                                     <h2 className="text-xl font-semibold mb-6">{t('paymentInformation')}</h2>
                                     {stripeOptions && (
                                         <Elements stripe={stripePromise} options={stripeOptions}>
@@ -114,7 +114,7 @@ const Checkout = () => {
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ duration: 0.3 }}
                             >
-                                <div className="bg-white dark:bg-neutral-900 rounded-lg lg:sticky lg:top-24">
+                                <div className="card lg:sticky lg:top-24">
                                     <h2 className="text-xl font-semibold mb-6">{t('orderSummary')}</h2>
 
                                     {/* Items */}

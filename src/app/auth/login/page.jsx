@@ -90,110 +90,108 @@ const LoginPage = () => {
     }
 
     return (
-        <div className="container">
-            <div className="screen sm">
-                <div className="text-center mb-8">
-                    <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Sign In</h1>
-                    <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                        Welcome back! Please sign in to your account.
-                    </p>
+        <div className="section screen sm">
+            <div className="text-center mb-8">
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Sign In</h1>
+                <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                    Welcome back! Please sign in to your account.
+                </p>
+            </div>
+
+            <motion.form
+                className="card"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+                onSubmit={handleLogin}
+            >
+                <div>
+                    <label className="block font-semibold text-slate-10 mb-2">Email</label>
+                    <div className="flex items-center border rounded-xl px-3 h-12 focus-within:border-blue-500">
+                        <input
+                            disabled={loading}
+                            type="email"
+                            placeholder="Enter your Email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            className="w-full border-none outline-none"
+                            required
+                        />
+                    </div>
                 </div>
 
-                <motion.form
-                    className="card"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4 }}
-                    onSubmit={handleLogin}
-                >
-                    <div>
-                        <label className="block font-semibold text-slate-10 mb-2">Email</label>
-                        <div className="flex items-center border rounded-xl px-3 h-12 focus-within:border-blue-500">
-                            <input
-                                disabled={loading}
-                                type="email"
-                                placeholder="Enter your Email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                className="w-full border-none outline-none"
-                                required
-                            />
-                        </div>
+                <div>
+                    <label className="block font-semibold text-slate-10 mb-2">Password</label>
+                    <div className="flex items-center border rounded-xl px-3 h-12 focus-within:border-blue-500">
+                        <input
+                            disabled={loading}
+                            type={showPwd ? "text" : "password"}
+                            placeholder="Enter your Password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            className="w-full border-none outline-none"
+                            required
+                        />
+                        <button
+                            type="button"
+                            onClick={showPassword}
+                            className="text-sm bg-transparent border-none text-black ml-2 hover:text-gray-600"
+                        >
+                            {showPwd ? <IoMdEyeOff size={22} /> : <IoMdEye size={22} />}
+                        </button>
                     </div>
+                </div>
 
-                    <div>
-                        <label className="block font-semibold text-slate-10 mb-2">Password</label>
-                        <div className="flex items-center border rounded-xl px-3 h-12 focus-within:border-blue-500">
-                            <input
-                                disabled={loading}
-                                type={showPwd ? "text" : "password"}
-                                placeholder="Enter your Password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="w-full border-none outline-none"
-                                required
-                            />
-                            <button
-                                type="button"
-                                onClick={showPassword}
-                                className="text-sm bg-transparent border-none text-black ml-2 hover:text-gray-600"
-                            >
-                                {showPwd ? <IoMdEyeOff size={22} /> : <IoMdEye size={22} />}
-                            </button>
-                        </div>
-                    </div>
+                <div className="flex justify-between items-center text-sm text-gray-600">
+                    <label className="flex items-center space-x-2 cursor-pointer">
+                        <input
+                            type="checkbox"
+                            checked={rememberMe}
+                            onChange={() => setRememberMe(!rememberMe)}
+                            className="rounded"
+                        />
+                        <span>Remember me</span>
+                    </label>
 
-                    <div className="flex justify-between items-center text-sm text-gray-600">
-                        <label className="flex items-center space-x-2 cursor-pointer">
-                            <input
-                                type="checkbox"
-                                checked={rememberMe}
-                                onChange={() => setRememberMe(!rememberMe)}
-                                className="rounded"
-                            />
-                            <span>Remember me</span>
-                        </label>
-
-                        <Link href="/auth/forgot" className="text-blue-500 hover:underline">
-                            Forgot password?
-                        </Link>
-                    </div>
-
-                    {TurnstileKey && (
-                        <div className="flex justify-center">
-                            <Turnstile
-                                sitekey={TurnstileKey}
-                                theme="light"
-                                size="flexible"
-                                onVerify={() => setIsTurnstileVerified(true)}
-                            />
-                        </div>
-                    )}
-
-                    <motion.button
-                        type="submit"
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        disabled={loading || (TurnstileKey && !isTurnstileVerified)}
-                        className="w-full primary"
-                    >
-                        {loading ? "Please wait..." : "Sign In"}
-                    </motion.button>
-
-                    <p className="text-center text-sm text-gray-500">
-                        Don't have an account?{" "}
-                        <Link href="/auth/register" className="text-blue-500 font-medium hover:underline">
-                            Sign Up
-                        </Link>
-                    </p>
-
-                </motion.form>
-
-                <div className="mt-6 text-center">
-                    <Link href="/" className="text-blue-500 hover:underline">
-                        ← Back to Home
+                    <Link href="/auth/forgot" className="text-blue-500 hover:underline">
+                        Forgot password?
                     </Link>
                 </div>
+
+                {TurnstileKey && (
+                    <div className="flex justify-center">
+                        <Turnstile
+                            sitekey={TurnstileKey}
+                            theme="light"
+                            size="flexible"
+                            onVerify={() => setIsTurnstileVerified(true)}
+                        />
+                    </div>
+                )}
+
+                <motion.button
+                    type="submit"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    disabled={loading || (TurnstileKey && !isTurnstileVerified)}
+                    className="w-full primary"
+                >
+                    {loading ? "Please wait..." : "Sign In"}
+                </motion.button>
+
+                <p className="text-center text-sm text-gray-500">
+                    Don't have an account?{" "}
+                    <Link href="/auth/register" className="text-blue-500 font-medium hover:underline">
+                        Sign Up
+                    </Link>
+                </p>
+
+            </motion.form>
+
+            <div className="mt-6 text-center">
+                <Link href="/" className="text-blue-500 hover:underline">
+                    ← Back to Home
+                </Link>
             </div>
         </div>
     );
