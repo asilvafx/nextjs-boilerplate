@@ -5,7 +5,7 @@ html, body {
 /* Dashboard-specific variables extending the root variables */
 :root {
     /* Dashboard specific colors */
-    --dashboard-sidebar-bg: rgba(30, 41, 59, 0.95);     /* slate-800 with opacity */
+    --dashboard-sidebar-bg: var(--border);     /* slate-800 with opacity */
     --dashboard-sidebar-active: var(--primary);
     --dashboard-card-bg: var(--surface);
     --dashboard-stat-bg: linear-gradient(135deg, var(--primary), var(--secondary));
@@ -32,7 +32,7 @@ html, body {
     background: var(--dashboard-sidebar-bg);
     backdrop-filter: blur(10px);
     border-right: 1px solid var(--border);
-    width: 16rem; /* w-64 */
+    width: 24rem; /* w-64 */
     min-height: 100vh;
     position: fixed;
     left: 0;
@@ -40,6 +40,13 @@ html, body {
     z-index: 40;
     transform: translateX(0);
     transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (min-width: 1024px) {
+    .dashboard-sidebar {
+        width: 16rem; /* w-64 */
+        border-right: none;
+    }
 }
 
 .dashboard-sidebar.mobile-hidden {
@@ -59,6 +66,8 @@ html, body {
 
 @media (min-width: 1024px) {
     .dashboard-main {
+        background: var(--dashboard-sidebar-bg);
+        padding: 1rem;
         margin-left: 16rem; /* lg:ml-64 */
     }
 }
@@ -76,16 +85,19 @@ html, body {
 }
 
 @media (min-width: 1024px) {
+
     .dashboard-content {
         padding: 2rem; /* lg:p-8 */
         padding-top: 2rem; /* lg:pt-8 */
+        border-radius: 25px;
+        height: 100%;
+        background-color: var(--bg-primary);
     }
 }
 
 /* Sidebar Components */
 .sidebar-header {
     padding: 1.5rem; /* p-6 */
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .sidebar-brand {
