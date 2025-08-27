@@ -4,6 +4,7 @@ import { Toaster } from "react-hot-toast";
 import Providers from "./providers";
 import { Inter } from "next/font/google";
 import {Analytics} from '@vercel/analytics/next';
+import {SpeedInsights} from '@vercel/speed-insights/next';
 
 import "@/app/globals.css";
 
@@ -29,6 +30,7 @@ export default async function RootLayout({ children }) {
                 <Toaster position="top-right" />
                 {children}
                 <Analytics />
+                <SpeedInsights />
             </Providers>
         </NextIntlClientProvider>
         </body>
