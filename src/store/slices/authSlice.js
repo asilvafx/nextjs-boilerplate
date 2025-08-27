@@ -5,17 +5,17 @@ import { decryptHash } from "../../lib/crypto";
 
 let storedUser = null;
 try {
-    const encrypted = Cookies.get("authUser");
+    const encrypted = Cookies.get("access_data");
     if (encrypted) {
         storedUser = decryptHash(encrypted);
         if(!storedUser){
             storedUser = null;
-            Cookies.remove("authUser");
+            Cookies.remove("access_data");
         }
     }
 } catch (e) {
     storedUser = null;
-    Cookies.remove("authUser");
+    Cookies.remove("access_data");
 }
 
 const initialState = {
@@ -34,7 +34,7 @@ const authSlice = createSlice({
         logout: (state) => {
             state.user = null;
             state.isAuthenticated = false;
-            Cookies.remove("authUser");
+            Cookies.remove("access_data");
         },
     },
 });

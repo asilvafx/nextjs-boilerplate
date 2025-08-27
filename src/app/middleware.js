@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 
 export function middleware(request) {
     // Define protected routes
-    const protectedRoutes = ['/dashboard', '/profile', '/admin'];
+    const protectedRoutes = ['/dashboard', '/profile'];
     const authRoutes = ['/auth/login', '/auth/register'];
 
     const { pathname } = request.nextUrl;

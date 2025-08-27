@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import Cookies from "js-cookie";
 import { motion } from "framer-motion";
-import { logout } from "../../../store/slices/authSlice.js";
+import { logout } from "@/store/slices/authSlice.js";
 
 const LogoutPage = () => {
     const dispatch = useDispatch();
@@ -20,16 +20,8 @@ const LogoutPage = () => {
                 dispatch(logout());
 
                 // Clear authentication cookie
-                Cookies.remove("authUser", { path: '/' });
-
-                // Clear any other auth-related cookies if you have them
-                // Cookies.remove("refreshToken", { path: '/' });
-
-                // Optional: Clear localStorage/sessionStorage if you store auth data there
-                if (typeof window !== 'undefined') {
-                    localStorage.removeItem('authUser');
-                    sessionStorage.removeItem('authUser');
-                }
+                Cookies.remove("access_data", { path: '/' });
+                Cookies.remove("access_token", { path: '/' }); 
 
                 // Show success message
                 toast.success("Logged out successfully!");

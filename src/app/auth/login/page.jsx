@@ -71,7 +71,7 @@ const LoginPage = () => {
 
             // Update Redux state with user data
             login(data.user);
-            Cookies.set("authUser", data.userData, {
+            Cookies.set("access_data", data.userData, {
                 secure: true,
                 sameSite: 'lax',
                 path: '/',
