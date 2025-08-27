@@ -6,11 +6,9 @@ import { useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
 import Turnstile from "react-turnstile";
 import { motion } from "framer-motion";
-import Cookies from "js-cookie";
 import Link from "next/link";
 import { IoMdEye, IoMdEyeOff } from "react-icons/io";
 import { useAuth } from "@/hooks/useAuth.js";
-import { encryptHash } from "@/lib/crypto.js";
 
 const TurnstileKey = process.env.NEXT_PUBLIC_CF_TURNSTILE_API || null;
 
@@ -59,6 +57,7 @@ const LoginPage = () => {
                     email,
                     password: passwordHash
                 }),
+                credentials: 'include' // Important: Include cookies in the request
             });
 
             const data = await response.json();
@@ -69,13 +68,11 @@ const LoginPage = () => {
                 return;
             }
 
+            // Update Redux state with user data
             login(data.user);
-            Cookies.set("authUser", encryptHash(data.user), {
-                secure: true,
-                sameSite: 'lax',
-                path: '/',
-                expires: rememberMe ? 30 : 7 // 30 days if checked, 7 otherwise
-            });
+
+            // Note: No need to manually set cookies - JWT token is set as HTTP-only cookie by the server
+
             toast.success(data.message);
             router.push("/");
         } catch (error) {
