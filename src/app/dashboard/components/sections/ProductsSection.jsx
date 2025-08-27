@@ -1,5 +1,6 @@
 // app/dashboard/components/sections/ProductsSection.jsx
 "use client"
+import {useState} from 'react';
 import ProductModal from '../modals/ProductModal';
 import { DataTable, StatusBadge, ActionButtons, EmptyState } from '../common/Common';
 

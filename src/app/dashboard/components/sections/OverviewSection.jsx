@@ -56,19 +56,19 @@ const OverviewSection = ({ statsCards, currentData }) => {
                         <h3 className="dashboard-card-title">Recent Orders</h3>
                         <span className="dashboard-card-action">View All</span>
                     </div>
-                   {/* <DataTable headers={['Order ID', 'Customer', 'Product', 'Amount', 'Status']}>
+                     <DataTable headers={['Order ID', 'Customer', 'Product', 'Amount', 'Status']}>
                         {currentData.recentOrders.map((order) => (
                             <tr key={order.id}>
-                                <td>#{order.id}</td>
-                                <td>{order.customer}</td>
-                                <td>{order.product}</td>
-                                <td>{order.amount}</td>
-                                <td>
+                                <td data-label="Order ID">#{order.id}</td>
+                                <td data-label="Customer">{order.customer}</td>
+                                <td data-label="Product">{order.product}</td>
+                                <td data-label="Amount">{order.amount}</td>
+                                <td data-label="Status">
                                     <StatusBadge status={order.status} />
                                 </td>
                             </tr>
                         ))}
-                    </DataTable>*/}
+                    </DataTable>
                 </div>
 
                 <div className="dashboard-card">
@@ -76,7 +76,7 @@ const OverviewSection = ({ statsCards, currentData }) => {
                         <h3 className="dashboard-card-title">Recent Users</h3>
                         <span className="dashboard-card-action">View All</span>
                     </div>
-                   {/* <DataTable headers={['Name', 'Email', 'Role', 'Status']}>
+                   <DataTable headers={['Name', 'Email', 'Role', 'Status']}>
                         {currentData.recentUsers.map((user) => (
                             <tr key={user.id}>
                                 <td>{user.name}</td>
@@ -87,7 +87,7 @@ const OverviewSection = ({ statsCards, currentData }) => {
                                 </td>
                             </tr>
                         ))}
-                    </DataTable>*/}
+                    </DataTable>
                 </div>
             </div>
         </div>
