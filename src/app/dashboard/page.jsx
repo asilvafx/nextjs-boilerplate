@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import '@/app/styles/Dashboard.css';
-import AdminDashboard from '../components/AdminDashboard';
 
 // Mock data - replace with actual API calls
 const mockData = {
@@ -871,7 +870,6 @@ const DashboardPage = () => {
                     {renderContent()}
                 </div>
             </div>
-            <AdminDashboard />
         </div>
     );
 };

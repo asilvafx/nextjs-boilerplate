@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { fetchFeaturedProducts } from '../lib/products';
+import { fetchFeaturedProducts } from '../data/products';
 
 const ProductsSection = () => {
     const [products, setProducts] = useState([]);

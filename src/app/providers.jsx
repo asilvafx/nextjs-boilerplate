@@ -3,9 +3,7 @@
 import { Provider } from "react-redux";
 import { ThemeProvider } from "next-themes";
 import store from "../store/store";
-import SafeCartProvider from "./SafeCartProvider";
-import GDPRCookies from "./ui/GDPRCookies";
-
+import SafeCartProvider from "./SafeCartProvider"; 
 
 export default function Providers({ children }) {
     return (
@@ -13,7 +11,6 @@ export default function Providers({ children }) {
             <SafeCartProvider>
                 <ThemeProvider attribute="class" enableSystem={true} defaultTheme="system">
                     {children}
-                    <GDPRCookies />
                 </ThemeProvider>
             </SafeCartProvider>
         </Provider>

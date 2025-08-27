@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 import { FaShoppingBag, FaSpinner } from 'react-icons/fa';
 import { useTranslations } from 'next-intl';
 import { useState, useEffect } from 'react';
-import { fetchProducts } from '../lib/products';
+import { fetchProducts } from '../data/products';
 
 function Shop() {
     const t = useTranslations('Shop');

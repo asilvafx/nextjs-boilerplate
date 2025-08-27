@@ -1,7 +1,10 @@
+// app/layout.jsx
 import {NextIntlClientProvider} from 'next-intl';
 import {getLocale} from 'next-intl/server';
 import { Toaster } from "react-hot-toast";
 import Providers from "./providers";
+import LayoutWrapper from "./layoutWrapper";
+import CookieConsentComponent from "./ui/CookieConsent";
 import { Inter } from "next/font/google";
 import {Analytics} from '@vercel/analytics/next';
 import {SpeedInsights} from '@vercel/speed-insights/next';
@@ -28,7 +31,10 @@ export default async function RootLayout({ children }) {
         <NextIntlClientProvider>
             <Providers>
                 <Toaster position="top-right" />
-                {children}
+                <LayoutWrapper>
+                    {children}
+                </LayoutWrapper>
+                <CookieConsentComponent />
                 <Analytics />
                 <SpeedInsights />
             </Providers>
