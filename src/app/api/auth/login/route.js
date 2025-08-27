@@ -1,7 +1,7 @@
 // app/api/auth/login/route.js
 import { NextResponse } from 'next/server';
 import DBService from '@/data/rest.db.js';
-import { decryptHash } from '@/lib/crypto.js';
+import { encryptHash, decryptHash } from '@/lib/crypto.js';
 import jwt from 'jsonwebtoken';
 
 export async function POST(request) {
@@ -43,7 +43,6 @@ export async function POST(request) {
         // Create JWT token
         const token = jwt.sign(
             {
-                id: user.id,
                 email: user.email,
                 role: user.role || 'user' // Include role if available
             },
@@ -55,6 +54,7 @@ export async function POST(request) {
         const response = NextResponse.json({
             success: true,
             user: userWithoutPassword,
+            userData: encryptHash(userWithoutPassword),
             message: 'Login successful!'
         });
 

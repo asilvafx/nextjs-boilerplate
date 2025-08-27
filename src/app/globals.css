@@ -770,7 +770,7 @@
     }
 
     .cta-content {
-        @apply relative z-10 flex flex-col xl:flex-row items-start xl:items-center justify-between gap-6;
+        @apply relative z-10 flex flex-col items-start justify-between gap-6;
     }
 
     .cta-text {

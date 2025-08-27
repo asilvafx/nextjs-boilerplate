@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
+import Cookies from "js-cookie";
 import Turnstile from "react-turnstile";
 import { motion } from "framer-motion";
 import Link from "next/link";
@@ -70,6 +71,12 @@ const LoginPage = () => {
 
             // Update Redux state with user data
             login(data.user);
+            Cookies.set("authUser", data.userData, {
+                secure: true,
+                sameSite: 'lax',
+                path: '/',
+                expires: rememberMe ? 30 : 7 // 30 days if checked, 7 otherwise
+            });
 
             // Note: No need to manually set cookies - JWT token is set as HTTP-only cookie by the server
 

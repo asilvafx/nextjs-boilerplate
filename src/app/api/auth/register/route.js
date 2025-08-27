@@ -62,6 +62,7 @@ export async function POST(request) {
             displayName: name,
             email: inpEmail,
             password: encryptedPassword,
+            role: 'user',
             created_at: timeNow
         }, "users");
 
