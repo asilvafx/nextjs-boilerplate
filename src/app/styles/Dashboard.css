@@ -74,13 +74,14 @@ table th {
     }
 
     table tr {
-        border-bottom: 3px solid #ddd;
+        border-radius: 20px;
+        border-bottom: 3px solid rgba(255, 255, 255, .1);
         display: block;
         margin-bottom: .625em;
     }
 
     table td {
-        border-bottom: 1px solid #ddd;
+        border-bottom: 1px solid rgba(255, 255, 255, .1);
         display: block;
         font-size: .8em;
         text-align: right;
@@ -114,7 +115,7 @@ table th {
     background: var(--dashboard-sidebar-bg);
     backdrop-filter: blur(10px);
     border-right: 1px solid var(--border);
-    width: 24rem; /* w-64 */
+    width: 20rem; /* w-64 */
     min-height: 100vh;
     position: fixed;
     left: 0;
@@ -231,6 +232,8 @@ table th {
 }
 
 .sidebar-link {
+    pointer-events: auto;
+    cursor: pointer;
     display: flex;
     width: 100%;
     text-align: start;
@@ -474,9 +477,6 @@ table th {
 
 /* Tables */
 .dashboard-table-container {
-    background: var(--dashboard-card-bg);
-    border: 1px solid var(--border);
-    border-radius: 1rem; /* rounded-2xl */
     overflow: auto;
 }
 

@@ -41,9 +41,8 @@ const DashboardPage = () => {
     const sectionComponents = {
         overview: () => <OverviewSection statsCards={statsCards} currentData={currentData} />,
         analytics: () => <AnalyticsSection />,
-        users: () => <UsersSection users={currentData.recentUsers} />,
-        products: () => <ProductsSection products={currentData.products} />,
-        services: () => <ServicesSection />,
+        access: () => <UsersSection users={currentData.recentUsers} />,
+        shop: () => <ProductsSection products={currentData.products} />,
         orders: () => <OrdersSection orders={currentData.recentOrders} />,
         customers: () => <CustomersSection />,
         gallery: () => <GallerySection />,

@@ -19,9 +19,8 @@ const Sidebar = ({
         {
             title: 'Management',
             items: [
-                { id: 'users', label: 'Users', icon: '👥', badge: '12' },
-                { id: 'products', label: 'Products', icon: '📦' },
-                { id: 'services', label: 'Services', icon: '⚙️' },
+                { id: 'access', label: 'Access', icon: '👥', badge: '12' },
+                { id: 'shop', label: 'Shop', icon: '📦' },
                 { id: 'orders', label: 'Orders', icon: '🛒', badge: '3' },
                 { id: 'customers', label: 'Customers', icon: '👤' }
             ]

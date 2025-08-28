@@ -79,10 +79,10 @@ const OverviewSection = ({ statsCards, currentData }) => {
                    <DataTable headers={['Name', 'Email', 'Role', 'Status']}>
                         {currentData.recentUsers.map((user) => (
                             <tr key={user.id}>
-                                <td>{user.name}</td>
-                                <td>{user.email}</td>
-                                <td>{user.role}</td>
-                                <td>
+                                <td data-label="Name">{user.name}</td>
+                                <td data-label="Email">{user.email}</td>
+                                <td data-label="Role">{user.role}</td>
+                                <td data-label="Status">
                                     <StatusBadge status={user.status} />
                                 </td>
                             </tr>
