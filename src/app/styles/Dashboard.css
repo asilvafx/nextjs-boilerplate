@@ -102,8 +102,10 @@ table th {
         border-bottom: 0;
     }
 }
-
-
+button {
+    pointer-events: auto;
+    cursor: pointer;
+}
 /* Dashboard Layout */
 .dashboard-container {
     min-height: 100vh;
@@ -210,6 +212,8 @@ table th {
 
 .sidebar-nav {
     padding: 1rem; /* p-4 */
+    height: 100%;
+    overflow-y: auto;
 }
 
 .sidebar-nav > * + * {

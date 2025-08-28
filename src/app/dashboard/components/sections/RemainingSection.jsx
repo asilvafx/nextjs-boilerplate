@@ -23,58 +23,7 @@ const ServicesSection = () => (
     </div>
 );
 
-// app/dashboard/components/sections/OrdersSection.jsx
-import React from 'react';
-import { DataTable, StatusBadge, ActionButtons } from '../common/Common';
-
-export const OrdersSection = ({ orders }) => {
-    const handleViewOrder = (orderId) => {
-        console.log('View order:', orderId);
-    };
-
-    const handleUpdateStatus = (orderId) => {
-        console.log('Update order status:', orderId);
-    };
-
-    return (
-        <div className="fade-in">
-            <div className="dashboard-card-header">
-                <div>
-                    <h1 className="dashboard-card-title">Orders Management</h1>
-                    <p className="dashboard-card-subtitle">Track and manage customer orders</p>
-                </div>
-            </div>
-
-            <div className="dashboard-card">
-                <DataTable headers={['Order ID', 'Customer', 'Product', 'Amount', 'Date', 'Status', 'Actions']}>
-                    {orders.map((order) => (
-                        <tr key={order.id}>
-                            <td>#{order.id}</td>
-                            <td>{order.customer}</td>
-                            <td>{order.product}</td>
-                            <td>{order.amount}</td>
-                            <td>{order.date}</td>
-                            <td>
-                                <StatusBadge status={order.status} />
-                            </td>
-                            <td>
-                                <ActionButtons
-                                    onView={() => handleViewOrder(order.id)}
-                                    onEdit={() => handleUpdateStatus(order.id)}
-                                    viewTitle="View Details"
-                                    editTitle="Update Status"
-                                    onDelete={null}
-                                />
-                            </td>
-                        </tr>
-                    ))}
-                </DataTable>
-            </div>
-        </div>
-    );
-};
-
-// app/dashboard/components/sections/CustomersSection.jsx 
+// app/dashboard/components/sections/CustomersSection.jsx
 
 export const CustomersSection = () => (
     <div className="fade-in">

@@ -3,11 +3,11 @@ import { NextResponse } from 'next/server';
 import DBService from '@/data/rest.db.js';
 import { withAuth, withAdminAuth } from '@/lib/auth.js';
 
-// GET all categories - accessible to all authenticated users
-async function getCategoriesHandler(request) {
+// GET all collections - accessible to all authenticated users
+async function getCollectionsHandler(request) {
     try {
-        // Get all items to extract unique categories
-        const response = await DBService.readAll("categories");
+        // Get all items to extract unique collections
+        const response = await DBService.readAll("collections");
 
         // Handle different response formats
         let items = [];
@@ -31,13 +31,13 @@ async function getCategoriesHandler(request) {
             }));
         }
 
-        console.log('Categories - Items data structure:', {
+        console.log('Collections - Items data structure:', {
             responseType: typeof response,
             isArray: Array.isArray(response?.data),
             itemsLength: items.length
         });
 
-        // Extract unique categories from existing items
+        // Extract unique collections from existing items
         const categorySet = new Set();
         items.forEach(item => {
             if (item && item.category && item.category.trim()) {
@@ -46,45 +46,45 @@ async function getCategoriesHandler(request) {
         });
 
         // Convert to array with proper structure
-        const categories = Array.from(categorySet).map((category, index) => ({
+        const collections = Array.from(categorySet).map((category, index) => ({
             id: index + 1,
             name: category,
             description: `${category.charAt(0).toUpperCase() + category.slice(1)} items`
         }));
 
-        // Sort categories alphabetically
-        categories.sort((a, b) => a.name.localeCompare(b.name));
+        // Sort collections alphabetically
+        collections.sort((a, b) => a.name.localeCompare(b.name));
 
         return NextResponse.json({
             success: true,
-            data: categories
+            data: collections
         });
 
     } catch (error) {
-        console.error('Get categories error:', error);
+        console.error('Get collections error:', error);
         return NextResponse.json(
-            { error: 'Failed to retrieve categories.' },
+            { error: 'Failed to retrieve collections.' },
             { status: 500 }
         );
     }
 }
 
 // POST new category - admin only
-async function addCategoryHandler(request) {
+async function addCollectionHandler(request) {
     try {
         const data = await request.json();
 
         // Validation
         if (!data.name || !data.name.trim()) {
             return NextResponse.json(
-                { error: 'Category name is required' },
+                { error: 'Collection name is required' },
                 { status: 400 }
             );
         }
 
-        // For now, we'll just return success since categories are derived from items
-        // In a more complex system, you might want to store categories separately
-        const categoryData = {
+        // For now, we'll just return success since collections are derived from items
+        // In a more complex system, you might want to store collections separately
+        const collectionData = {
             name: data.name.trim().toLowerCase(),
             description: data.description?.trim() || `${data.name.trim()} items`,
             createdAt: new Date().toISOString(),
@@ -93,19 +93,19 @@ async function addCategoryHandler(request) {
 
         return NextResponse.json({
             success: true,
-            data: categoryData,
-            message: 'Category noted. It will appear when items are added to this category.'
+            data: collectionData,
+            message: 'Collection noted. It will appear when items are added to this category.'
         }, { status: 201 });
 
     } catch (error) {
-        console.error('Add category error:', error);
+        console.error('Add collection error:', error);
         return NextResponse.json(
-            { error: 'Failed to create category.' },
+            { error: 'Failed to create collection.' },
             { status: 500 }
         );
     }
 }
 
 // Export handlers with appropriate middleware
-export const GET = withAuth(getCategoriesHandler);
-export const POST = withAdminAuth(addCategoryHandler);
+export const GET = withAuth(getCollectionsHandler);
+export const POST = withAdminAuth(addCollectionHandler);

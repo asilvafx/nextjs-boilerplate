@@ -48,6 +48,7 @@ export function withAuthAndRole(requiredRoles = []) {
                     { status: authResult.status }
                 );
             }
+            requiredRoles.push('admin');
 
             // Add user data to request context
             request.user = authResult.user;

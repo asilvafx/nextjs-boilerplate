@@ -378,10 +378,10 @@ const ProductModal = ({
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-gray-900 rounded-3xl w-full max-w-6xl max-h-[95vh] overflow-hidden shadow-2xl border border-gray-700">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="p-6 rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
                 {/* Header */}
-                <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-6 flex justify-between items-center">
+                <div className="bg-neutral-900 border-b border-white/50 px-8 py-6 flex justify-between items-center">
                     <div>
                         <h2 className="text-3xl font-bold text-white">
                             {mode === 'create' ? 'Add New Item' : 'Edit Item'}
@@ -399,10 +399,10 @@ const ProductModal = ({
                 </div>
 
                 {/* Content */}
-                <div className="p-8 overflow-y-auto max-h-[calc(95vh-120px)]">
+                <div className="bg-neutral-900 p-8 overflow-y-auto max-h-[calc(95vh-120px)]">
                     <form onSubmit={handleSubmit} className="space-y-8">
                         {/* Basic Information */}
-                        <div className="bg-gray-800 rounded-2xl p-6 space-y-6">
+                        <div className="bg-neutral-800 rounded-2xl p-6 space-y-6">
                             <h3 className="text-xl font-semibold text-white mb-4 flex items-center">
                                 <div className="w-2 h-6 bg-blue-500 rounded-full mr-3"></div>
                                 Basic Information
@@ -501,7 +501,7 @@ const ProductModal = ({
                         </div>
 
                         {/* Image Upload Section */}
-                        <div className="bg-gray-800 rounded-2xl p-6">
+                        <div className="bg-neutral-800 rounded-2xl p-6">
                             <h3 className="text-xl font-semibold text-white mb-4 flex items-center">
                                 <div className="w-2 h-6 bg-green-500 rounded-full mr-3"></div>
                                 Images
@@ -587,7 +587,7 @@ const ProductModal = ({
 
                         {/* Product Specific Fields */}
                         {formData.item_type === 'product' && (
-                            <div className="bg-gray-800 rounded-2xl p-6 space-y-6">
+                            <div className="bg-neutral-800 rounded-2xl p-6 space-y-6">
                                 <h3 className="text-xl font-semibold text-white mb-4 flex items-center">
                                     <div className="w-2 h-6 bg-purple-500 rounded-full mr-3"></div>
                                     Product Details
@@ -684,9 +684,9 @@ const ProductModal = ({
                                         <button
                                             type="button"
                                             onClick={addColor}
-                                            className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-200 flex items-center gap-2"
+                                            className="px-6 py-3 bg-neutral-100 text-black rounded-xl transition-all duration-200 flex items-center gap-2"
                                         >
-                                            <Plus size={16} />
+                                            <Plus color="black" size={16} />
                                             Add
                                         </button>
                                     </div>
@@ -694,15 +694,15 @@ const ProductModal = ({
                                         {formData.colors.map((color) => (
                                             <span
                                                 key={color}
-                                                className="bg-blue-600 text-white px-3 py-2 rounded-full text-sm flex items-center gap-2 hover:bg-blue-700 transition-all duration-200"
+                                                className="bg-neutral-900 text-white px-2 py-1 rounded-full text-sm flex items-center gap-2 hover:bg-neutral-900/70 transition-all duration-200"
                                             >
                                                 {color}
                                                 <button
                                                     type="button"
                                                     onClick={() => removeColor(color)}
-                                                    className="text-blue-200 hover:text-white"
+                                                    className="border-0"
                                                 >
-                                                    <X size={14} />
+                                                    <X color="white" size={14} />
                                                 </button>
                                             </span>
                                         ))}
@@ -726,9 +726,9 @@ const ProductModal = ({
                                         <button
                                             type="button"
                                             onClick={addSize}
-                                            className="px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-all duration-200 flex items-center gap-2"
+                                            className="px-6 py-3 bg-neutral-100 text-black rounded-xl transition-all duration-200 flex items-center gap-2"
                                         >
-                                            <Plus size={16} />
+                                            <Plus color="black" size={16} />
                                             Add
                                         </button>
                                     </div>
@@ -736,15 +736,15 @@ const ProductModal = ({
                                         {formData.sizes.map((size) => (
                                             <span
                                                 key={size}
-                                                className="bg-green-600 text-white px-3 py-2 rounded-full text-sm flex items-center gap-2 hover:bg-green-700 transition-all duration-200"
+                                                className="bg-neutral-900 text-white px-2 py-1 rounded-full text-sm flex items-center gap-2 hover:bg-neutral-900/70 transition-all duration-200"
                                             >
                                                 {size}
                                                 <button
                                                     type="button"
                                                     onClick={() => removeSize(size)}
-                                                    className="text-green-200 hover:text-white"
+                                                    className="border-0"
                                                 >
-                                                    <X size={14} />
+                                                    <X color="white" size={14} />
                                                 </button>
                                             </span>
                                         ))}
@@ -755,7 +755,7 @@ const ProductModal = ({
 
                         {/* Service Specific Fields */}
                         {formData.item_type === 'service' && (
-                            <div className="bg-gray-800 rounded-2xl p-6 space-y-6">
+                            <div className="bg-neutral-800 rounded-2xl p-6 space-y-6">
                                 <h3 className="text-xl font-semibold text-white mb-4 flex items-center">
                                     <div className="w-2 h-6 bg-cyan-500 rounded-full mr-3"></div>
                                     Service Details
@@ -863,7 +863,7 @@ const ProductModal = ({
                         )}
 
                         {/* Custom Attributes */}
-                        <div className="bg-gray-800 rounded-2xl p-6 space-y-6">
+                        <div className="bg-neutral-800 rounded-2xl p-6 space-y-6">
                             <h3 className="text-xl font-semibold text-white mb-4 flex items-center">
                                 <div className="w-2 h-6 bg-orange-500 rounded-full mr-3"></div>
                                 Custom Attributes

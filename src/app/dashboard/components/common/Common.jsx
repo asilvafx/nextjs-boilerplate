@@ -1,6 +1,8 @@
 // app/dashboard/components/common/Common.jsx
 "use client"
 
+import React from 'react';
+
 export const StatsCard = ({ title, value, icon, trend }) => (
     <div className="stat-card">
         <div className="stat-content">
@@ -56,11 +58,24 @@ export const LoadingSpinner = () => (
 );
 
 // app/dashboard/components/common/StatusBadge.jsx
-export const StatusBadge = ({ status }) => (
-    <span className={`status-badge ${status}`}>
-        {status}
+export const StatusBadge = ({ status }) => {
+    const getStatusColor = (status) => {
+        switch (status?.toLowerCase()) {
+            case 'completed': case 'delivered': return 'bg-green-100 text-green-800';
+            case 'processing': case 'confirmed': return 'bg-blue-100 text-blue-800';
+            case 'shipped': return 'bg-purple-100 text-purple-800';
+            case 'pending': return 'bg-yellow-100 text-yellow-800';
+            case 'cancelled': case 'refunded': return 'bg-red-100 text-red-800';
+            default: return 'bg-gray-100 text-gray-800';
+        }
+    };
+
+    return (
+        <span className={`status-badge ${getStatusColor(status)}`}>
+      {status || 'unknown'}
     </span>
-);
+    );
+};
 
 // app/dashboard/components/common/ActionButtons.jsx
 export const ActionButtons = ({ onEdit, onView, onDelete, editTitle = "Edit", viewTitle = "View", deleteTitle = "Delete" }) => (

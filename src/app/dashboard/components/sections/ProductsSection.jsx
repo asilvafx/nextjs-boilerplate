@@ -48,7 +48,6 @@ const ProductsSection = () => {
             if (response && response.success) {
                 setProductList(response.data);
                 setTotalPages(response.pagination.totalPages);
-                toast.success('Products loaded successfully', { id: loadingToast });
             }
         } catch (err) {
             console.error('Error loading products:', err);

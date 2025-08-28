@@ -1,6 +1,6 @@
+// app/dashboard/page.jsx
 "use client"
 
-// app/dashboard/page.jsx
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import '@/app/styles/Dashboard.css';
@@ -12,9 +12,10 @@ import MobileHeader from './components/layout/MobileHeader';
 // Section Components
 import OverviewSection from './components/sections/OverviewSection';
 import UsersSection from './components/sections/UsersSection';
+import ShopSection from './components/sections/ShopSection';
+import OrdersSection from './components/sections/OrdersSection';
 import ProductsSection from './components/sections/ProductsSection';
 import ServicesSection, {
-    OrdersSection,
     CustomersSection,
     GallerySection,
     PagesSection,
@@ -42,7 +43,8 @@ const DashboardPage = () => {
         overview: () => <OverviewSection statsCards={statsCards} currentData={currentData} />,
         analytics: () => <AnalyticsSection />,
         access: () => <UsersSection users={currentData.recentUsers} />,
-        shop: () => <ProductsSection products={currentData.products} />,
+        shop: () => <ShopSection products={currentData.products} />,
+        items: () => <ProductsSection products={currentData.products} />,
         orders: () => <OrdersSection orders={currentData.recentOrders} />,
         customers: () => <CustomersSection />,
         gallery: () => <GallerySection />,

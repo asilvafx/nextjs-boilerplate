@@ -1,6 +1,8 @@
 // lib/shop.js
-"use client"
-import {useState} from 'react';
+"use client";
+
+import { useState } from 'react';
+
 import { authenticatedFetch } from '@/utils/authUtils.js';
 
 export class ShopAPI {
@@ -38,6 +40,23 @@ export class ShopAPI {
     static async createItem(itemData) {
         try {
             const response = await authenticatedFetch('/api/shop/items', {
+                method: 'POST',
+                body: JSON.stringify(itemData)
+            });
+            if (!response) return null;
+
+            return await response.json();
+        } catch (error) {
+            console.error('Create item error:', error);
+            throw error;
+        }
+    }
+
+    // Create new item (admin only)
+    static async create(itemData, db) {
+        if(!db) return null;
+        try {
+            const response = await authenticatedFetch(`/api/shop/${db}`, {
                 method: 'POST',
                 body: JSON.stringify(itemData)
             });
@@ -90,6 +109,19 @@ export class ShopAPI {
             return await response.json();
         } catch (error) {
             console.error('Get categories error:', error);
+            throw error;
+        }
+    }
+
+    // Get all collections
+    static async getCollections() {
+        try {
+            const response = await authenticatedFetch('/api/shop/collections');
+            if (!response) return null;
+
+            return await response.json();
+        } catch (error) {
+            console.error('Get collection error:', error);
             throw error;
         }
     }
@@ -192,9 +224,11 @@ export const useShopAPI = () => {
         getAllItems: (params) => execute(() => ShopAPI.getAllItems(params)),
         getItem: (id) => execute(() => ShopAPI.getItem(id)),
         createItem: (data) => execute(() => ShopAPI.createItem(data)),
+        create: (data) => execute(() => ShopAPI.create(data)),
         updateItem: (id, data) => execute(() => ShopAPI.updateItem(id, data)),
         deleteItem: (id) => execute(() => ShopAPI.deleteItem(id)),
         getCategories: () => execute(() => ShopAPI.getCategories()),
+        getCollections: () => execute(() => ShopAPI.getCollections()),
         searchItems: (term, filters) => execute(() => ShopAPI.searchItems(term, filters)),
         // Advanced methods
         advancedSearch: (params) => execute(() => ShopAPI.advancedSearch(params)),

@@ -19,7 +19,7 @@ async function uploadHandler(request) {
         }
 
         // Create uploads directory if it doesn't exist
-        const uploadsDir = join(process.cwd(), 'public', 'uploads', 'products');
+        const uploadsDir = join(process.cwd(), 'public', 'uploads');
         try {
             await mkdir(uploadsDir, { recursive: true });
         } catch (error) {
@@ -28,7 +28,6 @@ async function uploadHandler(request) {
 
         const uploadedFiles = [];
         const maxFileSize = 5 * 1024 * 1024; // 5MB limit
-        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
 
         for (const file of files) {
             // Validation
@@ -39,13 +38,6 @@ async function uploadHandler(request) {
             if (file.size > maxFileSize) {
                 return NextResponse.json(
                     { error: `File ${file.name} is too large. Maximum size is 5MB.` },
-                    { status: 400 }
-                );
-            }
-
-            if (!allowedTypes.includes(file.type)) {
-                return NextResponse.json(
-                    { error: `File ${file.name} has unsupported format. Allowed: JPEG, PNG, WebP, GIF.` },
                     { status: 400 }
                 );
             }
@@ -61,7 +53,7 @@ async function uploadHandler(request) {
             await writeFile(filePath, buffer);
 
             // Create public URL
-            const publicUrl = `/uploads/products/${uniqueFilename}`;
+            const publicUrl = `/uploads/${uniqueFilename}`;
 
             uploadedFiles.push({
                 id: uuidv4(),
