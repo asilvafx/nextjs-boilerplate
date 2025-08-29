@@ -73,13 +73,11 @@ const LoginPage = () => {
             // Update Redux state with user data
             login(data.user);
             Cookies.set("access_data", data.userData, {
-                secure: true,
+                secure: process.env.NODE_ENV === 'production',
                 sameSite: 'lax',
                 path: '/',
                 expires: rememberMe ? 30 : 7 // 30 days if checked, 7 otherwise
             });
-
-            // Note: No need to manually set cookies - JWT token is set as HTTP-only cookie by the server
 
             toast.success(data.message);
             router.push("/");

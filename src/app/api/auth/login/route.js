@@ -64,7 +64,7 @@ export async function POST(request) {
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'lax',
             path: '/',
-            maxAge: `${rememberMe ? 30 : 7} * 24 * 60 * 60 * 1000` // 7 or 30 days in milliseconds
+            maxAge: (rememberMe ? 30 : 7) * 24 * 60 * 60 * 1000 // 7 or 30 days in milliseconds
         });
 
         return response;
