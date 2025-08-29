@@ -20,6 +20,16 @@ export function verifyToken(request) {
 // Higher-order function for protecting API routes
 export function withAuth(handler) {
     return async (request, context) => {
+
+        // Check if this is a public request
+        const xInternalHeader = request.headers.get('x-internal');
+
+        if (xInternalHeader === 'public') {
+            // Bypass token verification for public requests
+            return handler(request, context);
+        }
+
+        // Proceed with normal token verification for non-public requests
         const authResult = verifyToken(request);
 
         if (authResult.error) {

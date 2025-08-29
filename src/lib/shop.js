@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 
-import { authenticatedFetch } from '@/utils/authUtils.js';
+import { authenticatedFetch } from '@/hooks/useAuth.js';
 
 export class ShopAPI {
 

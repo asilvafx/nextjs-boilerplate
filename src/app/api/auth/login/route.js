@@ -12,7 +12,7 @@ export async function POST(request) {
     }
 
     try {
-        const { email, password } = await request.json();
+        const { email, password, rememberMe } = await request.json();
 
         // Validation
         if (!email || !password) {
@@ -47,7 +47,7 @@ export async function POST(request) {
                 role: user.role || 'user' // Include role if available
             },
             process.env.JWT_SECRET || 'your-secret-key',
-            { expiresIn: '7d' } // Token expires in 7 days
+            { expiresIn: rememberMe ? '30d' : '7d' } // Token expires in 7 days
         );
 
         // Create the response
@@ -64,7 +64,7 @@ export async function POST(request) {
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'lax',
             path: '/',
-            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days in milliseconds
+            maxAge: `${rememberMe ? 30 : 7} * 24 * 60 * 60 * 1000` // 7 or 30 days in milliseconds
         });
 
         return response;

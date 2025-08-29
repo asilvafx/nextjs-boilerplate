@@ -16,12 +16,28 @@ const LogoutPage = () => {
     useEffect(() => {
         const handleLogout = async () => {
             try {
+
+                const response = await fetch('/api/auth/logout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        "x-internal-secret": process.env.NEXT_PUBLIC_API_KEY,
+                    },
+                    credentials: 'include' // Important: Include cookies in the request
+                });
+
+                const data = await response.json();
+
+                if(!data.success){
+                    toast.error("Unable to logged out at this time.");
+                    return
+                }
+
                 // Clear Redux state
                 dispatch(logout());
 
                 // Clear authentication cookie
                 Cookies.remove("access_data", { path: '/' });
-                Cookies.remove("access_token", { path: '/' }); 
 
                 // Show success message
                 toast.success("Logged out successfully!");

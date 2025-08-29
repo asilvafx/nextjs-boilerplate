@@ -10,6 +10,7 @@ export default function Providers({ children }) {
         <Provider store={store}>
             <SafeCartProvider>
                 <ThemeProvider attribute="class" enableSystem={true} defaultTheme="system">
+
                     {children}
                 </ThemeProvider>
             </SafeCartProvider>

@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 import { FaShoppingBag, FaSpinner } from 'react-icons/fa';
 import { useTranslations } from 'next-intl';
 import { useState, useEffect } from 'react';
-import { fetchProducts } from '../data/products';
+import { getAll } from '@/lib/query.js';
 
 function Shop() {
     const t = useTranslations('Shop');
@@ -15,6 +15,7 @@ function Shop() {
 
     // State management
     const [items, setItems] = useState([]);
+    const [filteredItems, setFilteredItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [filter, setFilter] = useState('all');
@@ -22,23 +23,36 @@ function Shop() {
     // Fetch products on component mount
     useEffect(() => {
         loadProducts();
-    }, [filter]);
+    }, []);
+
+    // Filter items when filter or items change
+    useEffect(() => {
+        filterItems();
+    }, [filter, items]);
 
     const loadProducts = async () => {
         try {
             setLoading(true);
             setError(null);
 
-            const response = await fetchProducts({
-                category: filter,
-                inStock: true // Only show available items
-            });
+            const response = await getAll('catalog', true, true);
+      
+            if (response) {
+                // Transform the data to match component expectations
+                const transformedData = response.map(item => ({
+                    ...item,
+                    // Add inStock property based on stock number
+                    inStock: item.stock > 0,
+                    // Ensure we have the right image URL
+                    image: item.image || (item.images?.[0]?.url) || '/placeholder-image.jpg',
+                    // Transform item_type to category for filtering
+                    displayCategory: item.item_type,
+                }));
 
-            if (response.success) {
-                setItems(response.data);
+                setItems(transformedData);
             } else {
                 setError(response.message);
-                toast.error(response.message);
+                toast.error(response.message || "Request failed, please try again later.");
             }
         } catch (err) {
             const errorMessage = 'Failed to load products';
@@ -49,8 +63,30 @@ function Shop() {
         }
     };
 
+    const filterItems = () => {
+        if (filter === 'all') {
+            setFilteredItems(items);
+        } else {
+            const filtered = items.filter(item => {
+                // Check both item_type and category fields
+                return item.item_type === filter || item.category === filter || item.displayCategory === filter;
+            });
+            setFilteredItems(filtered);
+        }
+    };
+
     const addToCart = (product) => {
-        addItem(product);
+        // Ensure the product has required fields for cart
+        const cartItem = {
+            id: product.id,
+            name: product.name,
+            price: product.price,
+            image: product.image,
+            description: product.description,
+            // Add any other fields your cart needs
+        };
+
+        addItem(cartItem);
         toast.success(t('addedToCart', { productName: product.name }));
     };
 
@@ -137,7 +173,7 @@ function Shop() {
 
                 {/* Products Grid */}
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {items.map((item, index) => (
+                    {filteredItems.map((item, index) => (
                         <motion.div
                             key={item.id}
                             initial={{ opacity: 0, y: 20 }}
@@ -149,19 +185,28 @@ function Shop() {
                             {/* Category Badge */}
                             <div className="absolute top-2 right-2 z-10">
                                 <span className={`px-2 py-1 text-xs rounded-full ${
-                                    item.category === 'service'
+                                    item.item_type === 'service' || item.category === 'service'
                                         ? 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200'
                                         : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
                                 }`}>
-                                    {item.category === 'service' ? 'Service' : 'Product'}
+                                    {item.item_type === 'service' || item.category === 'service' ? 'Service' : 'Product'}
                                 </span>
                             </div>
 
-                            {/* Featured Badge */}
+                            {/* Featured Badge - you might need to add a featured field to your API */}
                             {item.featured && (
                                 <div className="absolute top-2 left-2 z-10">
                                     <span className="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
                                         Featured
+                                    </span>
+                                </div>
+                            )}
+
+                            {/* Stock Badge */}
+                            {item.stock === 0 && (
+                                <div className="absolute top-2 left-2 z-10">
+                                    <span className="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+                                        Out of Stock
                                     </span>
                                 </div>
                             )}
@@ -171,6 +216,9 @@ function Shop() {
                                     src={item.image}
                                     alt={item.name}
                                     className="w-full h-full object-cover rounded-xl"
+                                    onError={(e) => {
+                                        e.target.src = '/placeholder-image.jpg'; // Fallback image
+                                    }}
                                 />
                             </div>
                             <div className="p-2 flex flex-col flex-grow">
@@ -180,6 +228,12 @@ function Shop() {
                                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 flex-grow">
                                     {item.description}
                                 </p>
+
+                                {/* Stock info */}
+                                <p className="text-xs text-gray-500 dark:text-gray-500 mb-2">
+                                    Stock: {item.stock} {item.unit_type || 'pieces'}
+                                </p>
+
                                 <div className="flex items-center justify-between">
                                     <p className="text-lg font-bold text-gray-800 dark:text-gray-200">
                                         €{item.price.toFixed(2)}
@@ -204,10 +258,13 @@ function Shop() {
                 </div>
 
                 {/* No items message */}
-                {items.length === 0 && !loading && (
+                {filteredItems.length === 0 && !loading && (
                     <div className="text-center py-12">
                         <p className="text-gray-600 dark:text-gray-400 text-lg">
                             No items found for the selected filter.
+                        </p>
+                        <p className="text-sm text-gray-500 mt-2">
+                            Total items loaded: {items.length}
                         </p>
                     </div>
                 )}

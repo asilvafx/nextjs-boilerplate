@@ -56,7 +56,8 @@ const LoginPage = () => {
                 },
                 body: JSON.stringify({
                     email,
-                    password: passwordHash
+                    password: passwordHash,
+                    rememberMe
                 }),
                 credentials: 'include' // Important: Include cookies in the request
             });

@@ -1,5 +1,6 @@
 // lib/query.js - Query Helper Library
-import { authenticatedFetch } from '@/utils/authUtils.js';
+
+import { authenticatedFetch, publicFetch } from '@/hooks/useAuth.js';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_APP_URL || '';
 
@@ -16,25 +17,6 @@ export const convertToArray = (data, includeKey = true) => {
     }));
 };
 
-// Enhanced version of getAllItems that can return arrays
-export const getAllItemsAsArray = async (collection) => {
-    const data = await getAllItems(collection);
-    return convertToArray(data);
-};
-
-// Enhanced version with options
-export const getAllItemsWithOptions = async (collection, options = {}) => {
-    const { asArray = false, includeKey = true } = options;
-    const data = await getAllItems(collection);
-
-    if (asArray) {
-        return convertToArray(data, includeKey);
-    }
-
-    return data;
-};
-
-
 class QueryAPI {
     constructor() {
         this.baseURL = `${API_BASE_URL}/api/query`;
@@ -44,7 +26,13 @@ class QueryAPI {
     // Helper method for making API calls
     async makeRequest(url, options = {}) {
         try {
-            const response = await authenticatedFetch(url, options);
+            let fetch;
+            if(options.public){
+                fetch = await publicFetch(url, options);
+            } else {
+                fetch = await authenticatedFetch(url, options);
+            }
+            const response = fetch;
 
             if (!response) {
                 throw new Error('No response received');
@@ -63,10 +51,14 @@ class QueryAPI {
     }
 
     // GET all items from a collection
-    async getAllItems(collection) {
+    async getAllItems(collection, arrayOpt=false, isPublic=false) {
         const url = `${this.baseURL}/${collection}`;
-        const result = await this.makeRequest(url);
-        return result.data;
+        const result = await this.makeRequest(url, {public: isPublic});
+        const dataObj = result.data;
+        if(arrayOpt){
+            return convertToArray(dataObj);
+        }
+        return dataObj;
     }
 
     // GET single item by ID
@@ -236,11 +228,6 @@ class QueryAPI {
         return await this.deleteItem('users', userId);
     }
 
-    // Generic helpers for any collection
-    async getAll(collection) {
-        return await this.getAllItems(collection);
-    }
-
     async getById(collection, id) {
         return await this.getItem(collection, id);
     }
@@ -270,13 +257,11 @@ class QueryAPI {
 const queryAPI = new QueryAPI();
 
 // Export individual functions for convenience
-export const getAllItems = (collection) => queryAPI.getAllItems(collection);
 export const getItem = (collection, id) => queryAPI.getItem(collection, id);
 export const getItemByKey = (collection, key, value) => queryAPI.getItemByKey(collection, key, value);
 export const createItem = (collection, data) => queryAPI.createItem(collection, data);
 export const updateItem = (collection, id, data) => queryAPI.updateItem(collection, id, data);
 export const deleteItem = (collection, id) => queryAPI.deleteItem(collection, id);
-export const uploadFile = (file, path) => queryAPI.uploadFile(file, path);
 
 // Export batch operations
 export const batchCreate = (collection, items) => queryAPI.batchCreate(collection, items);
@@ -293,12 +278,11 @@ export const updateUser = (userId, userData) => queryAPI.updateUser(userId, user
 export const deleteUser = (userId) => queryAPI.deleteUser(userId);
 
 // Export generic helpers
-export const getAll = (collection) => queryAPI.getAll(collection);
+export const getAll = (collection, arrayOpt, isPublic) => queryAPI.getAllItems(collection, arrayOpt, isPublic);
 export const getById = (collection, id) => queryAPI.getById(collection, id);
 export const getByField = (collection, field, value) => queryAPI.getByField(collection, field, value);
 export const create = (collection, data) => queryAPI.create(collection, data);
 export const update = (collection, id, data) => queryAPI.update(collection, id, data);
-export const deleteRecord = (collection, id) => queryAPI.delete(collection, id);
 export const upload = (file, path) => queryAPI.upload(file, path);
 
 // Export the main class instance

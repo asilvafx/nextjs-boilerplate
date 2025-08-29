@@ -174,8 +174,9 @@ async function addItemHandler(request) {
             category: data.category?.trim() || 'general',
             item_type: data.item_type,
             image: data.image?.trim() || '',
-            stock: data.item_type === 'service' ? 0 : (parseInt(data.stock) || 0),
+            stock: data.item_type === 'service' ? -1 : (parseInt(data.stock) || -1),
             isActive: data.isActive !== undefined ? data.isActive : true,
+            featured: 0,
 
             // Product specific fields
             unit_type: data.item_type === 'product' ? (data.unit_type || 'piece') : null,

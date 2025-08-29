@@ -5,13 +5,20 @@ import { decryptHash } from "../../lib/crypto";
 
 let storedUser = null;
 try {
-    const encrypted = Cookies.get("access_data");
-    if (encrypted) {
-        storedUser = decryptHash(encrypted);
-        if(!storedUser){
+    const encrypted_data = Cookies.get("access_data");
+    const encrypted_token = Cookies.get("access_token");
+    if (encrypted_data) {
+        storedUser = decryptHash(encrypted_data);
+
+        if(!storedUser || !encrypted_token){
             storedUser = null;
             Cookies.remove("access_data");
+            return;
         }
+    } else
+    if(encrypted_token){
+        window.location.href('/api/auth/logout');
+        return;
     }
 } catch (e) {
     storedUser = null;

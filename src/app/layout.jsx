@@ -8,6 +8,7 @@ import CookieConsentComponent from "./ui/CookieConsent";
 import { Inter } from "next/font/google";
 import {Analytics} from '@vercel/analytics/next';
 import {SpeedInsights} from '@vercel/speed-insights/next';
+import ScrollToTop from './ui/ScrollToTop';
 
 import "@/app/globals.css";
 
@@ -31,6 +32,7 @@ export default async function RootLayout({ children }) {
         <NextIntlClientProvider>
             <Providers>
                 <Toaster position="top-right" />
+                <ScrollToTop />
                 <LayoutWrapper>
                     {children}
                 </LayoutWrapper>

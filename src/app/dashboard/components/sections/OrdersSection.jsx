@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { DataTable, StatusBadge } from '../common/Common';
-import { getAllItems, convertToArray } from '@/lib/query.js';
+import { getAll } from '@/lib/query.js';
 import { Eye, Edit3, Trash2, FileText, Truck, X, Check, AlertTriangle } from 'lucide-react';
 
 // Enhanced PDF Generator
@@ -67,10 +67,8 @@ const OrdersSection = () => {
 
     const fetchOrders = async () => {
 
-        const ordersData = await getAllItems('orders');
-        const dataArr = await convertToArray(ordersData);
-        setOrders(dataArr);
-        console.log(dataArr);
+        const ordersData = await getAll('orders', true);
+        setOrders(ordersData);
     }
 
     const formatDate = (timestamp) => {
@@ -407,7 +405,7 @@ const OrdersSection = () => {
                         <p className="dashboard-card-subtitle">
                             Suivre et gérer les commandes clients ({orders.length} total)
                         </p>
-                    </div> 
+                    </div>
                 </div>
 
                 <div className="p-6">
