@@ -13,12 +13,10 @@ try {
         if(!storedUser || !encrypted_token){
             storedUser = null;
             Cookies.remove("access_data");
-            return;
         }
     } else
     if(encrypted_token){
-        window.location.href('/api/auth/logout');
-        return;
+        window.location.href('/api/auth/logout'); 
     }
 } catch (e) {
     storedUser = null;
