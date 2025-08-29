@@ -28,14 +28,20 @@ const CollectionsManagement = () => {
 
     const { getAllItems } = useShopAPI();
 
-    useEffect(async() => {
-        loadCollections();
-        loadAllItems();
+    // Fixed useEffect - removed async and properly structured
+    useEffect(() => {
+        const initializeData = async () => {
+            await loadCollections();
+            await loadAllItems();
+        };
+
+        initializeData();
     }, []);
 
     const loadCollections = async () => {
-        // For demo purposes, using localStorage to store collections
-        // In a real app, this would be an API call
+        // Check if we're on the client side (Next.js SSR compatibility)
+        if (typeof window === 'undefined') return;
+
         try {
             const storedCollections = localStorage.getItem('shop_collections');
             if (storedCollections) {
@@ -43,6 +49,7 @@ const CollectionsManagement = () => {
             }
         } catch (err) {
             console.error('Error loading collections:', err);
+            toast.error('Failed to load collections');
         }
     };
 
@@ -62,10 +69,16 @@ const CollectionsManagement = () => {
     };
 
     const saveCollections = (updatedCollections) => {
-        // Save to localStorage for demo
-        // In a real app, this would be an API call
-        localStorage.setItem('shop_collections', JSON.stringify(updatedCollections));
-        setCollections(updatedCollections);
+        // Check if we're on the client side (Next.js SSR compatibility)
+        if (typeof window === 'undefined') return;
+
+        try {
+            localStorage.setItem('shop_collections', JSON.stringify(updatedCollections));
+            setCollections(updatedCollections);
+        } catch (err) {
+            console.error('Error saving collections:', err);
+            toast.error('Failed to save collections');
+        }
     };
 
     const handleAddCollection = async (collectionData) => {

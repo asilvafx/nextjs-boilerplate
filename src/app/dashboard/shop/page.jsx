@@ -1,6 +1,6 @@
 // app/dashboard/shop/page.jsx
 "use client"
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useShopAPI } from '@/lib/shop.js';
 import ProductsSection from '../components/sections/ProductsSection';
 import CategoriesManagement from '../components/sections/CategoriesManagement';
@@ -28,6 +28,7 @@ const DashboardStore = () => {
         categories: 0,
         collections: 0
     });
+    const [statsLoaded, setStatsLoaded] = useState(false);
 
     const {
         loading,
@@ -37,15 +38,17 @@ const DashboardStore = () => {
         getCollections
     } = useShopAPI();
 
-    // Load quick stats
+    // Load quick stats only once
     useEffect(() => {
-        loadQuickStats();
-    }, []);
+        if (!statsLoaded) {
+            loadQuickStats();
+        }
+    }, [statsLoaded]);
 
     const loadQuickStats = async () => {
         try {
             const [itemsResponse, categoriesResponse, collectionsResponse] = await Promise.all([
-                getAllItems({ limit: 1000 }), // Get all items for stats
+                getAllItems({ limit: 1000 }),
                 getCategories(),
                 getCollections()
             ]);
@@ -61,13 +64,15 @@ const DashboardStore = () => {
                     collections: collectionsResponse.data.length
                 };
                 setQuickStats(stats);
+                setStatsLoaded(true);
             }
         } catch (err) {
             console.error('Error loading quick stats:', err);
+            toast.error('Failed to load dashboard statistics');
         }
     };
 
-    const statsCards = [
+    const statsCards = useMemo(() => [
         {
             title: 'Total Products',
             value: quickStats.totalProducts,
@@ -116,7 +121,7 @@ const DashboardStore = () => {
             change: 'Featured',
             changeType: 'neutral'
         }
-    ];
+    ], [quickStats]);
 
     const tabNavigation = [
         { id: 'overview', label: 'Overview', icon: BarChart3 },
@@ -125,10 +130,15 @@ const DashboardStore = () => {
         { id: 'collections', label: 'Collections', icon: Star }
     ];
 
+    // Handle quick actions navigation
+    const handleQuickAction = (tabId) => {
+        setActiveTab(tabId);
+    };
+
     const renderTabContent = () => {
         switch (activeTab) {
             case 'overview':
-                return <OverviewContent statsCards={statsCards} />;
+                return <OverviewContent statsCards={statsCards} onQuickAction={handleQuickAction} />;
             case 'products':
                 return <ProductsContent />;
             case 'categories':
@@ -136,7 +146,7 @@ const DashboardStore = () => {
             case 'collections':
                 return <CollectionsContent />;
             default:
-                return <OverviewContent statsCards={statsCards} />;
+                return <OverviewContent statsCards={statsCards} onQuickAction={handleQuickAction} />;
         }
     };
 
@@ -194,7 +204,7 @@ const DashboardStore = () => {
 };
 
 // Overview Content Component
-const OverviewContent = ({ statsCards }) => (
+const OverviewContent = ({ statsCards, onQuickAction }) => (
     <div className="space-y-6">
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -232,28 +242,28 @@ const OverviewContent = ({ statsCards }) => (
             <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <button
-                    onClick={() => window.location.hash = '#products'}
+                    onClick={() => onQuickAction('products')}
                     className="flex items-center space-x-3 p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
                 >
                     <Plus className="w-5 h-5 text-blue-600" />
                     <span className="font-medium text-blue-700">Add Product</span>
                 </button>
                 <button
-                    onClick={() => window.location.hash = '#products'}
+                    onClick={() => onQuickAction('products')}
                     className="flex items-center space-x-3 p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors"
                 >
                     <Plus className="w-5 h-5 text-green-600" />
                     <span className="font-medium text-green-700">Add Service</span>
                 </button>
                 <button
-                    onClick={() => window.location.hash = '#categories'}
+                    onClick={() => onQuickAction('categories')}
                     className="flex items-center space-x-3 p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors"
                 >
                     <Tags className="w-5 h-5 text-purple-600" />
                     <span className="font-medium text-purple-700">Manage Categories</span>
                 </button>
                 <button
-                    onClick={() => window.location.hash = '#collections'}
+                    onClick={() => onQuickAction('collections')}
                     className="flex items-center space-x-3 p-4 bg-pink-50 rounded-lg hover:bg-pink-100 transition-colors"
                 >
                     <Star className="w-5 h-5 text-pink-600" />
@@ -264,19 +274,9 @@ const OverviewContent = ({ statsCards }) => (
     </div>
 );
 
-// Products Content Component
-const ProductsContent = () => (
-    <ProductsSection />
-);
-
-// Categories Content Component
-const CategoriesContent = () => (
-    <CategoriesManagement />
-);
-
-// Collections Content Component
-const CollectionsContent = () => (
-    <CollectionsManagement />
-);
+// Memoized components to prevent unnecessary re-renders
+const ProductsContent = () => <ProductsSection />;
+const CategoriesContent = () => <CategoriesManagement />;
+const CollectionsContent = () => <CollectionsManagement />;
 
 export default DashboardStore;
