@@ -1,18 +1,25 @@
 // app/dashboard/components/layout/Sidebar.jsx
 "use client"
 
-const Sidebar = ({
-                     activeSection,
-                     setActiveSection,
-                     sidebarOpen,
-                     setSidebarOpen
-                 }) => {
+
+import { useRouter } from "next/navigation";
+import { useDashboard } from '@/app/dashboard/context/DashboardContext';
+
+const Sidebar = () => {
+    const router = useRouter();
+    const { activeSection, setActiveSection, sidebarOpen, setSidebarOpen } = useDashboard();
+
+    const navigateUser = (route) => {
+        setActiveSection(route);
+        setSidebarOpen(false);
+        router.push(`/dashboard/${route}`);
+    }
     // Navigation items
     const navigationSections = [
         {
             title: 'Main',
             items: [
-                { id: 'overview', label: 'Overview', icon: '📊' },
+                { id: '', label: 'Overview', icon: '📊' },
                 { id: 'analytics', label: 'Analytics', icon: '📈' }
             ]
         },
@@ -59,8 +66,7 @@ const Sidebar = ({
                                 <button
                                     key={item.id}
                                     onClick={() => {
-                                        setActiveSection(item.id);
-                                        setSidebarOpen(false);
+                                        navigateUser(item.id);
                                     }}
                                     className={`sidebar-link ${activeSection === item.id ? 'active' : ''}`}
                                 >

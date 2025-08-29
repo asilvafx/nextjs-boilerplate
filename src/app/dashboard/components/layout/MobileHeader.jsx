@@ -1,7 +1,11 @@
 // app/dashboard/components/layout/MobileHeader.jsx
 "use client"
 
-const MobileHeader = ({ sidebarOpen, setSidebarOpen }) => {
+import { useDashboard } from '@/app/dashboard/context/DashboardContext';
+
+const MobileHeader = () => {
+    const { sidebarOpen, setSidebarOpen } = useDashboard();
+
     return (
         <div className="dashboard-mobile-header">
             <div className="mobile-header-content">

@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { DataTable, StatusBadge } from '../common/Common';
+"use client"
+
+import { useState, useEffect } from 'react';
+import { DataTable, StatusBadge } from '../components/common/Common';
 import { getAll } from '@/lib/query.js';
 import { Eye, Edit3, Trash2, FileText, Truck, X, Check, AlertTriangle } from 'lucide-react';
 
@@ -50,7 +52,7 @@ const Modal = ({ isOpen, onClose, title, children, size = "md" }) => {
     );
 };
 
-const OrdersSection = () => {
+const DashboardOrders = () => {
     const [orders, setOrders] = useState([]);
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
@@ -560,4 +562,4 @@ const OrdersSection = () => {
     );
 };
 
-export default OrdersSection;
+export default DashboardOrders;

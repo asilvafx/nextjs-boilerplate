@@ -1,11 +1,10 @@
-// app/dashboard/components/sections/ShopSection.jsx
+// app/dashboard/shop/page.jsx
 "use client"
 import { useState, useEffect } from 'react';
 import { useShopAPI } from '@/lib/shop.js';
-import ProductsSection from './ProductsSection';
-import CategoriesManagement from './CategoriesManagement';
-import CollectionsManagement from './CollectionsManagement';
-import { DataTable, StatusBadge, ActionButtons, EmptyState } from '../common/Common';
+import ProductsSection from '../components/sections/ProductsSection';
+import CategoriesManagement from '../components/sections/CategoriesManagement';
+import CollectionsManagement from '../components/sections/CollectionsManagement';
 import toast, { Toaster } from 'react-hot-toast';
 import {
     Package,
@@ -19,7 +18,7 @@ import {
     BarChart3
 } from 'lucide-react';
 
-const ShopSection = () => {
+const DashboardStore = () => {
     const [activeTab, setActiveTab] = useState('overview');
     const [quickStats, setQuickStats] = useState({
         totalProducts: 0,
@@ -166,7 +165,7 @@ const ShopSection = () => {
 
                 {/* Tab Navigation */}
                 <div className="my-4">
-                    <nav className="flex space-x-1 p-1 rounded-lg">
+                    <nav className="flex flex-wrap gap-2 space-x-1 p-1 rounded-lg">
                         {tabNavigation.map((tab) => {
                             const Icon = tab.icon;
                             return (
@@ -267,7 +266,7 @@ const OverviewContent = ({ statsCards }) => (
 
 // Products Content Component
 const ProductsContent = () => (
-   <ProductsSection />
+    <ProductsSection />
 );
 
 // Categories Content Component
@@ -280,4 +279,4 @@ const CollectionsContent = () => (
     <CollectionsManagement />
 );
 
-export default ShopSection;
+export default DashboardStore;
