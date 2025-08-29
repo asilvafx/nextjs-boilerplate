@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { fetchFeaturedProducts } from '../data/products';
+import { getAll } from '@/lib/query.js';
 
 const ProductsSection = () => {
     const [products, setProducts] = useState([]);
@@ -15,13 +15,31 @@ const ProductsSection = () => {
             setLoading(true);
             setError(null);
 
-            const response = await fetchFeaturedProducts(4); // Limit to 4 featured items
+            const response = await getAll('catalog', true, true);
 
-            if (response.success) {
-                setProducts(response.data);
+            if (response) {
+                // Transform the data to match component expectations
+                const transformedData = response.map(item => ({
+                    ...item,
+                    // Add inStock property based on stock number
+                    inStock: item.stock !== 0,
+                    // Ensure we have the right image URL
+                    image: item.image || (item.images?.[0]?.url) || '/placeholder-image.jpg',
+                    // Transform item_type to category for display
+                    category: item.item_type || item.category || 'general'
+                }));
+
+                // Filter for featured products only, or limit to 4 if no featured field exists
+                const featuredProducts = transformedData.filter(item => item.featured === true);
+
+                // If no featured products, take first 4 items
+                const displayProducts = featuredProducts.length > 0
+                    ? featuredProducts.slice(0, 4)
+                    : [];
+
+                setProducts(displayProducts);
             } else {
-                setError(response.message);
-                // Fallback to empty array to prevent component breaking
+                setError('Failed to load products');
                 setProducts([]);
             }
         } catch (err) {
@@ -82,35 +100,42 @@ const ProductsSection = () => {
                         <div key={product.id} className="product-card">
                             {/* Category and featured indicators */}
                             <div className="flex items-center justify-between mb-2">
-                                <span className={`text-xs px-2 py-1 rounded-full ${
-                                    product.category === 'service'
-                                        ? 'bg-purple-100 text-purple-800'
-                                        : 'bg-green-100 text-green-800'
-                                }`}>
-                                    {product.category === 'service' ? 'Service' : 'Product'}
-                                </span>
-                                {product.featured && (
-                                    <span className="text-xs px-2 py-1 rounded-full bg-yellow-100 text-yellow-800">
-                                        Featured
-                                    </span>
-                                )}
+
                             </div>
+
+                            {/* Product image */}
+                            {product.image && (
+                                <div className="mb-2">
+                                    <img
+                                        src={product.image}
+                                        alt={product.name}
+                                        className="w-full h-32 object-cover rounded"
+                                        onError={(e) => {
+                                            e.target.src = '/placeholder-image.jpg';
+                                        }}
+                                    />
+                                </div>
+                            )}
 
                             <h4>
                                 {product.name}
-                                <span className="price">€{product.price.toFixed(2)}</span>
                             </h4>
                             <p className="text-xs">{product.description}</p>
 
                             {/* Stock indicator */}
-                            <div className="mt-2">
+                            <div className="mt-2 flex items-center justify-between">
                                 <span className={`text-xs ${
                                     product.inStock
                                         ? 'text-green-600'
                                         : 'text-red-600'
                                 }`}>
-                                    {product.inStock ? 'In Stock' : 'Out of Stock'}
+                                    {product.inStock
+                                        ? `In Stock`
+                                        : 'Out of Stock'
+                                    }
                                 </span>
+
+                                <span className="price">€{product.price.toFixed(2)}</span>
                             </div>
                         </div>
                     ))}

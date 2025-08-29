@@ -36,13 +36,13 @@ function Shop() {
             setError(null);
 
             const response = await getAll('catalog', true, true);
-      
+
             if (response) {
                 // Transform the data to match component expectations
                 const transformedData = response.map(item => ({
                     ...item,
                     // Add inStock property based on stock number
-                    inStock: item.stock > 0,
+                    inStock: item.stock !== 0,
                     // Ensure we have the right image URL
                     image: item.image || (item.images?.[0]?.url) || '/placeholder-image.jpg',
                     // Transform item_type to category for filtering

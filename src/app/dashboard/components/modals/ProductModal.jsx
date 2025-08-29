@@ -19,10 +19,11 @@ const ProductModal = ({
         price: '',
         category: '',
         item_type: 'product',
-        stock: 0,
+        stock: -1,
         isActive: true,
         images: [], // Changed from single image to array
         coverImageId: null, // ID of the cover image
+        featured: false,
 
         // Product specific
         unit_type: 'piece',
@@ -163,6 +164,7 @@ const ProductModal = ({
                 item_type: 'product',
                 stock: 0,
                 isActive: true,
+                featured: false,
                 images: [],
                 coverImageId: null,
                 unit_type: 'piece',
@@ -498,6 +500,19 @@ const ProductModal = ({
                                     Active (visible to customers)
                                 </label>
                             </div>
+
+                            <div className="flex items-center">
+                                <input
+                                    type="checkbox"
+                                    name="featured"
+                                    checked={formData.featured}
+                                    onChange={handleInputChange}
+                                    className="w-5 h-5 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2"
+                                />
+                                <label className="ml-3 text-gray-300 font-medium">
+                                    Featured (Display on Homepage)
+                                </label>
+                            </div>
                         </div>
 
                         {/* Image Upload Section */}
@@ -604,7 +619,7 @@ const ProductModal = ({
                                             value={formData.stock}
                                             onChange={handleInputChange}
                                             className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                                            min="0"
+                                            min="-1"
                                             placeholder="0"
                                         />
                                     </div>
