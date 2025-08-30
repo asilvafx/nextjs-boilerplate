@@ -1,6 +1,6 @@
 // app/dashboard/gallery/page.jsx
 "use client"
-export const DashboardGallery = () => (
+const DashboardGallery = () => (
     <div className="fade-in">
         <div className="dashboard-card-header">
             <div>

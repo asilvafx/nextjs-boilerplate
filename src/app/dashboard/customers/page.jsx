@@ -2,7 +2,7 @@
 "use client"
 
 import { EmptyState } from '../components/common/Common';
-export const DashboardCustomers = () => (
+const DashboardCustomers = () => (
     <div className="fade-in">
         <div className="dashboard-card-header">
             <div>

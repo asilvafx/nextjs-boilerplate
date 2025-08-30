@@ -1,6 +1,6 @@
 // app/dashboard/settings/page.jsx
 "use client"
-export const DashboardSettings = () => (
+const DashboardSettings = () => (
     <div className="fade-in">
         <div className="dashboard-card-header">
             <div>

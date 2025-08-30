@@ -3,7 +3,7 @@
 
 import { EmptyState } from '../components/common/Common';
 
-export const DashboardAnalytics = () => (
+const DashboardAnalytics = () => (
     <div className="fade-in">
         <div className="dashboard-card-header">
             <div>
