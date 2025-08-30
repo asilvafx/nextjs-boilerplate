@@ -6,6 +6,7 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import Sidebar from './dashboard/components/layout/Sidebar';
 import MobileHeader from './dashboard/components/layout/MobileHeader';
+import { LayoutProvider } from './dashboard/context/LayoutContext';
 import { DashboardProvider } from './dashboard/context/DashboardContext';
 
 // Define layout rules
@@ -52,6 +53,7 @@ export default function LayoutWrapper({ children }) {
 
         case 'auth':
             return (
+                <LayoutProvider>
                 <div className="container">
                     <div className="screen">
                         <Header />
@@ -59,11 +61,13 @@ export default function LayoutWrapper({ children }) {
                         <Footer />
                     </div>
                 </div>
+                </LayoutProvider>
             );
 
         case 'main':
         default:
             return (
+                <LayoutProvider>
                 <div className="container">
                     <div className="screen">
                         <Header />
@@ -71,6 +75,7 @@ export default function LayoutWrapper({ children }) {
                         <Footer />
                     </div>
                 </div>
+                </LayoutProvider>
             );
     }
 }

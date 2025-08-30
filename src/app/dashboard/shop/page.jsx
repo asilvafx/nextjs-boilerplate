@@ -2,7 +2,7 @@
 "use client"
 import { useState, useEffect, useMemo } from 'react';
 import { useShopAPI } from '@/lib/shop.js';
-import ProductsSection from '../components/sections/ProductsSection';
+import CatalogManagement from '../components/sections/CatalogManagement';
 import CategoriesManagement from '../components/sections/CategoriesManagement';
 import CollectionsManagement from '../components/sections/CollectionsManagement';
 import toast, { Toaster } from 'react-hot-toast';
@@ -239,43 +239,42 @@ const OverviewContent = ({ statsCards, onQuickAction }) => (
 
         {/* Quick Actions */}
         <div className="dashboard-card">
-            <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <button
-                    onClick={() => onQuickAction('products')}
-                    className="flex items-center space-x-3 p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
-                >
-                    <Plus className="w-5 h-5 text-blue-600" />
-                    <span className="font-medium text-blue-700">Add Product</span>
-                </button>
-                <button
-                    onClick={() => onQuickAction('products')}
-                    className="flex items-center space-x-3 p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors"
-                >
-                    <Plus className="w-5 h-5 text-green-600" />
-                    <span className="font-medium text-green-700">Add Service</span>
-                </button>
-                <button
-                    onClick={() => onQuickAction('categories')}
-                    className="flex items-center space-x-3 p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors"
-                >
-                    <Tags className="w-5 h-5 text-purple-600" />
-                    <span className="font-medium text-purple-700">Manage Categories</span>
-                </button>
-                <button
-                    onClick={() => onQuickAction('collections')}
-                    className="flex items-center space-x-3 p-4 bg-pink-50 rounded-lg hover:bg-pink-100 transition-colors"
-                >
-                    <Star className="w-5 h-5 text-pink-600" />
-                    <span className="font-medium text-pink-700">Create Collection</span>
-                </button>
+            <div className="dashboard-card-header">
+                <h2 className="dashboard-card-title">Quick Actions</h2>
             </div>
+            <div className="quick-actions">
+                <div
+                     className="quick-action"
+                     onClick={() => onQuickAction('products')}
+                >
+                    <div className="quick-action-icon">+</div>
+                    <div className="quick-action-title">Add Item</div>
+                    <div className="quick-action-description">Create a new product and service listing</div>
+                </div>
+                <div
+                    className="quick-action"
+                    onClick={() => onQuickAction('categories')}
+                >
+                    <div className="quick-action-icon">👤</div>
+                    <div className="quick-action-title">Manage Categories</div>
+                    <div className="quick-action-description">Manage and view your categories</div>
+                </div>
+                <div
+                    className="quick-action"
+                    onClick={() => onQuickAction('collections')}
+                >
+                    <div className="quick-action-icon">📊</div>
+                    <div className="quick-action-title">Manage Collections</div>
+                    <div className="quick-action-description">Manage and view your collections</div>
+                </div>
+            </div>
+
         </div>
     </div>
 );
 
 // Memoized components to prevent unnecessary re-renders
-const ProductsContent = () => <ProductsSection />;
+const ProductsContent = () => <CatalogManagement />;
 const CategoriesContent = () => <CategoriesManagement />;
 const CollectionsContent = () => <CollectionsManagement />;
 

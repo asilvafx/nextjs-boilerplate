@@ -381,9 +381,9 @@ const ProductModal = ({
 
     return (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-            <div className="p-6 rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+            <div className="p-6 bg-neutral-900/90 m-4 rounded-2xl w-full max-w-4xl max-h-[90vh] lg:max-h-[80vh] overflow-x-hidden">
                 {/* Header */}
-                <div className="bg-neutral-900 border-b border-white/50 px-8 py-6 flex justify-between items-center">
+                <div className="border-b border-white/50 px-8 py-6 flex justify-between items-center">
                     <div>
                         <h2 className="text-3xl font-bold text-white">
                             {mode === 'create' ? 'Add New Item' : 'Edit Item'}
@@ -401,10 +401,10 @@ const ProductModal = ({
                 </div>
 
                 {/* Content */}
-                <div className="bg-neutral-900 p-8 overflow-y-auto max-h-[calc(95vh-120px)]">
+                <div className="w-full mt-4">
                     <form onSubmit={handleSubmit} className="space-y-8">
                         {/* Basic Information */}
-                        <div className="bg-neutral-800 rounded-2xl p-6 space-y-6">
+                        <div className="rounded-2xl p-4 lg:p-6 space-y-4 lg:space-y-6">
                             <h3 className="text-xl font-semibold text-white mb-4 flex items-center">
                                 <div className="w-2 h-6 bg-blue-500 rounded-full mr-3"></div>
                                 Basic Information
@@ -516,7 +516,7 @@ const ProductModal = ({
                         </div>
 
                         {/* Image Upload Section */}
-                        <div className="bg-neutral-800 rounded-2xl p-6">
+                        <div className="rounded-2xl p-4 lg:p-6 space-y-4 lg:space-y-6">
                             <h3 className="text-xl font-semibold text-white mb-4 flex items-center">
                                 <div className="w-2 h-6 bg-green-500 rounded-full mr-3"></div>
                                 Images
@@ -602,7 +602,7 @@ const ProductModal = ({
 
                         {/* Product Specific Fields */}
                         {formData.item_type === 'product' && (
-                            <div className="bg-neutral-800 rounded-2xl p-6 space-y-6">
+                            <div className="rounded-2xl p-4 lg:p-6 space-y-4 lg:space-y-6">
                                 <h3 className="text-xl font-semibold text-white mb-4 flex items-center">
                                     <div className="w-2 h-6 bg-purple-500 rounded-full mr-3"></div>
                                     Product Details
@@ -770,7 +770,7 @@ const ProductModal = ({
 
                         {/* Service Specific Fields */}
                         {formData.item_type === 'service' && (
-                            <div className="bg-neutral-800 rounded-2xl p-6 space-y-6">
+                            <div className="rounded-2xl p-4 lg:p-6 space-y-4 lg:space-y-6">
                                 <h3 className="text-xl font-semibold text-white mb-4 flex items-center">
                                     <div className="w-2 h-6 bg-cyan-500 rounded-full mr-3"></div>
                                     Service Details
@@ -878,7 +878,7 @@ const ProductModal = ({
                         )}
 
                         {/* Custom Attributes */}
-                        <div className="bg-neutral-800 rounded-2xl p-6 space-y-6">
+                        <div className="rounded-2xl p-4 lg:p-6 space-y-4 lg:space-y-6">
                             <h3 className="text-xl font-semibold text-white mb-4 flex items-center">
                                 <div className="w-2 h-6 bg-orange-500 rounded-full mr-3"></div>
                                 Custom Attributes

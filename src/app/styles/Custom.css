@@ -1,0 +1,970 @@
+@import 'tailwindcss';
+ 
+@layer base {
+    html, body {
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+        font-size: 16px;
+    }
+
+    /* Typography */
+    h1 {
+        @apply text-2xl font-bold mb-1;
+        color: var(--text-primary);
+    }
+
+    h2 {
+        @apply text-2xl font-bold mb-3;
+        color: var(--text-primary);
+    }
+
+    h3 {
+        @apply font-bold mb-2;
+        color: var(--text-primary);
+    }
+
+    h4 {
+        @apply font-semibold text-sm mb-2;
+        color: var(--text-primary);
+    }
+
+    h5 {
+        @apply font-medium text-sm mb-1;
+        color: var(--text-primary);
+    }
+
+    p {
+        color: var(--text-secondary);
+    }
+
+    span {
+        font-size: 16px;
+    }
+
+    p.subtitle {
+        color: var(--text-secondary);
+        @apply mb-6;
+    }
+
+    p.small {
+        @apply text-xs mt-3;
+        color: var(--text-secondary);
+    }
+
+    span.badge {
+        background-color: var(--surface);
+        color: var(--text-primary);
+        @apply px-3 py-1.5 rounded-full font-semibold;
+    }
+
+    span.price {
+        color: var(--primary);
+        @apply font-bold;
+    }
+
+    /* Form elements */
+    .border {
+        border-color: var(--border);
+    }
+
+    label {
+        color: var(--text-secondary);
+        @apply text-sm block mb-1;
+    }
+
+    textarea, input, .select {
+        font-size: 16px;
+        background-color: transparent;
+        color: var(--text-primary);
+        border-color: var(--border);
+        @apply w-full border p-3 rounded-lg transition-colors;
+    }
+    input, .select {
+        height: 45px;
+    }
+    input[type="checkbox"]{
+        width: 20px;
+        height: 20px;
+    }
+
+    textarea:focus, input:focus {
+        border-color: var(--border-focus);
+        @apply outline-none;
+    }
+
+    select {
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
+        border-color: var(--border);
+        @apply w-full border p-3 rounded-lg text-sm transition-colors;
+    }
+
+    select:focus {
+        border-color: var(--border-focus);
+        @apply outline-none;
+    }
+
+    textarea {
+        @apply min-h-20 resize-y;
+        resize: vertical;
+    }
+
+    /* Buttons */
+    button svg {
+        color: var(--text-primary);
+    }
+
+    button, .button {
+        background-color: transparent;
+        border-color: var(--border);
+        color: var(--text-primary);
+        @apply inline-flex items-center justify-center gap-2 text-center rounded-xl font-semibold border py-3 px-4 disabled:opacity-50 disabled:cursor-not-allowed transition-colors;
+    }
+
+    button.primary, .button.primary {
+        background: var(--gradient-primary);
+        color: var(--bg-secondary);
+        border-color: transparent;
+    }
+
+    button.full-width {
+        @apply w-full;
+    }
+
+    /* Layout components */
+    .card {
+        background-color: var(--surface);
+        border-color: var(--border);
+        box-shadow: var(--shadow-sm);
+        @apply backdrop-blur border rounded-2xl p-6 mb-6 space-y-4;
+    }
+
+    .card.sticky {
+        @apply sticky top-6;
+    }
+    .container {
+        @apply min-h-screen p-4 md:p-6 lg:p-8 mx-auto pt-28 md:pt-32 lg:pt-32;
+    }
+
+    .screen {
+        @apply max-w-full mx-auto h-screen flex flex-col;
+    }
+
+    .section {
+        @apply w-full mb-20;
+    }
+
+    .screen.xl {
+        @apply max-w-2xl lg:max-w-4xl;
+    }
+
+    .screen.lg {
+        @apply max-w-xl lg:max-w-2xl;
+    }
+
+    .screen.md {
+        @apply max-w-lg lg:max-w-xl;
+    }
+
+    .screen.sm {
+        @apply max-w-md lg:max-w-lg;
+    }
+
+    /* Header */
+    .header {
+        @apply fixed left-0 right-0 top-0 container mx-auto z-50 px-4 md:px-6 lg:px-8;
+    }
+
+    .header-navbar {
+        @apply relative flex flex-row flex-nowrap items-center justify-between gap-2 sm:gap-4 w-full px-2 sm:px-4 py-3 sm:py-4 rounded-bl-sm rounded-br-sm border-b border-neutral-300/10 backdrop-blur-lg opacity-90 drop-shadow-sm;
+        box-shadow: 0 3px 6px rgba(0,0,0, .1);
+        flex-wrap: nowrap;
+        background: var(--bg-primary);
+        height: 70px;
+        max-height: 70px;
+        overflow: visible;
+        transition: max-height 0.3s ease;
+    }
+
+    @media (min-width: 640px) {
+        .header-navbar {
+            height: 80px;
+            max-height: 80px;
+        }
+    }
+
+    .header-navbar.mobile-menu-open {
+        max-height: 180px;
+    }
+
+    .logo-container {
+        @apply flex items-center gap-2 sm:gap-3 max-w-[250px] sm:max-w-[300px] lg:max-w-[350px] flex-shrink min-w-0;
+    }
+
+    .logo-container h1 {
+        @apply text-sm sm:text-base lg:text-lg font-bold truncate;
+        line-height: 1.2;
+    }
+
+    .logo-container p {
+        @apply text-xs sm:text-sm lg:text-base text-gray-400 truncate;
+        line-height: 1.2;
+    }
+
+    .logo {
+        background: var(--gradient-primary);
+        color: var(--bg-secondary);
+        box-shadow: var(--shadow-lg);
+        @apply w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 rounded-lg sm:rounded-xl flex items-center justify-center font-bold text-sm sm:text-base lg:text-lg flex-shrink-0;
+    }
+
+    /* Desktop actions - hidden on mobile */
+    .desktop-actions {
+        @apply hidden lg:flex items-center gap-2 lg:gap-3 flex-shrink-0;
+    }
+
+    .desktop-actions .button {
+        @apply text-sm lg:text-base px-3 py-2 lg:px-4 lg:py-2 whitespace-nowrap;
+    }
+
+    /* Mobile menu toggle button */
+    .mobile-menu-toggle {
+        @apply flex flex-col justify-center items-center w-8 h-8 sm:w-10 sm:h-10 bg-transparent border-none cursor-pointer p-0 flex-shrink-0;
+        position: relative;
+    }
+
+    .hamburger-line {
+        @apply block w-4 sm:w-6 h-0.5 bg-white rounded-sm transition-all duration-300 ease-in-out;
+        margin: 0;
+        transform-origin: center;
+    }
+
+    .hamburger-line:first-child.open {
+        transform: rotate(45deg) translate(3px, 3px);
+    }
+
+    .hamburger-line:nth-child(2).open {
+        opacity: 0;
+    }
+
+    .hamburger-line:last-child.open {
+        transform: rotate(-45deg) translate(3px, -3px);
+    }
+
+    /* Mobile dropdown menu */
+    .mobile-menu {
+        @apply absolute top-full left-0 right-0 bg-black/90 backdrop-blur-lg border-t border-neutral-300/10 opacity-0 invisible transition-all duration-300 ease-in-out transform translate-y-[-10px] lg:hidden;
+        background: var(--bg-primary);
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .mobile-menu.open {
+        @apply opacity-100 visible translate-y-0;
+    }
+
+    .mobile-menu-content {
+        @apply flex flex-col gap-3 p-3 sm:p-4;
+    }
+
+    .mobile-menu-item {
+        @apply w-full text-center justify-center text-sm sm:text-base px-3 py-2;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 1023px) {
+        .header-actions {
+            display: none;
+        }
+    }
+
+    @media (min-width: 1024px) {
+        .mobile-menu-toggle {
+            display: none;
+        }
+
+        .mobile-menu {
+            display: none;
+        }
+
+        .desktop-actions {
+            display: flex;
+        }
+    }
+
+    /* Content scaling for better fit */
+    @media (max-width: 380px) {
+        .logo-container p {
+            display: none;
+        }
+    }
+    @media (max-width: 480px) {
+        .header-navbar {
+            height: 65px;
+            max-height: 65px;
+            gap: 1rem;
+            padding: 0.5rem 0.75rem;
+        }
+
+        .header-navbar.mobile-menu-open {
+            max-height: 170px;
+        }
+
+        .logo-container {
+            max-width: 200px;
+            gap: 0.5rem;
+        }
+
+        .logo-container h1 {
+            font-size: 0.875rem;
+        }
+
+        .logo-container p {
+            font-size: 0.75rem;
+            max-width: 250px;
+            text-overflow: ellipsis;
+        }
+
+        .logo {
+            width: 2.25rem;
+            height: 2.25rem;
+            font-size: 0.875rem;
+        }
+    }
+
+    /* Ensure smooth transitions */
+    * {
+        transition: all 0.3s ease;
+    }
+
+    /* Grid layouts */
+    .main-grid {
+        @apply grid lg:grid-cols-3 gap-6 mb-20;
+    }
+
+    .main-content {
+        @apply lg:col-span-2;
+    }
+
+    .sidebar {
+        @apply lg:col-span-1;
+    }
+
+    .products-grid {
+        @apply grid md:grid-cols-2 gap-3;
+    }
+
+    .button-group {
+        @apply flex flex-col md:flex-row flex-wrap gap-3 mb-6;
+        text-wrap: nowrap;
+    }
+
+    .button-group .button {
+        @apply flex-1 md:flex-[initial];
+    }
+
+    /* Product cards */
+
+    .product-card {
+        background-color: var(--surface);
+        border-color: var(--border);
+        @apply p-3 rounded-lg border;
+    }
+
+    /* Feature cards */
+    .features-section {
+        @apply my-4;
+    }
+
+    .features-grid {
+        @apply grid md:grid-cols-2 gap-3;
+    }
+
+    .feature-card {
+        background-color: var(--surface);
+        border-color: var(--border);
+        @apply p-4 rounded-lg border flex gap-3 items-start;
+    }
+
+    .feature-icon {
+        @apply text-2xl flex-shrink-0;
+    }
+
+    .feature-content {
+        @apply flex-1;
+    }
+
+    .feature-content h4 {
+        @apply mb-2;
+    }
+
+    /* Auth section */
+    .auth-section {
+        border-color: var(--border);
+        @apply mt-8 pt-6 border-t;
+    }
+
+    .auth-container {
+        @apply flex flex-wrap gap-4 items-center justify-center;
+    }
+
+    .auth-welcome {
+        color: var(--text-accent);
+    }
+
+    .auth-links {
+        @apply flex gap-2;
+    }
+
+    .auth-link {
+        color: var(--primary);
+        @apply transition-colors;
+    }
+
+    .auth-link:hover {
+        color: var(--primary-dark);
+    }
+
+    .auth-link.secondary {
+        color: var(--text-secondary);
+        @apply transition-colors;
+    }
+
+    .auth-link.secondary:hover {
+        color: var(--text-accent);
+    }
+
+    .auth-register-btn {
+        background-color: color-mix(in srgb, var(--primary) 20%, transparent);
+        color: var(--primary);
+        @apply px-4 py-2 rounded-lg transition-colors;
+    }
+
+    .auth-register-btn:hover {
+        background-color: color-mix(in srgb, var(--primary) 30%, transparent);
+    }
+
+    /* Booking form */
+    .booking-form {
+        @apply space-y-4;
+    }
+
+    .booking-header p {
+        @apply text-sm;
+        color: var(--text-secondary);
+    }
+
+    .form-row {
+        @apply flex gap-3;
+    }
+
+    .form-field {
+        @apply flex-1 flex flex-col;
+    }
+
+    .form-field label {
+        @apply mb-2;
+    }
+
+    /* Form validation */
+    input.error,
+    textarea.error,
+    .datepicker-input.error {
+        border-color: var(--error) !important;
+    }
+
+    .react-select-error .react-select__control {
+        border-color: var(--error) !important;
+    }
+
+    .error-text {
+        color: var(--error);
+        @apply text-xs mt-1;
+    }
+
+    /* React DatePicker Styles */
+    .datepicker-input {
+        background-color: transparent !important;
+        color: var(--text-primary) !important;
+        border-color: var(--border) !important;
+        font-size: 16px !important;
+        @apply w-full border p-3 rounded-lg transition-colors;
+    }
+
+    .datepicker-input:focus {
+        border-color: var(--border-focus) !important;
+        @apply outline-none;
+    }
+
+    .react-datepicker-wrapper {
+        @apply w-full;
+    }
+
+    .react-datepicker {
+        background-color: var(--bg-secondary) !important;
+        border-color: var(--border) !important;
+        color: var(--text-primary) !important;
+    }
+    .react-datepicker__time {
+        background-color: var(--bg-secondary) !important;
+    }
+
+    .react-datepicker__header {
+        background-color: var(--surface) !important;
+        border-bottom-color: var(--border) !important;
+    }
+    .react-datepicker-time__header {
+        color: var(--text-primary) !important;
+    }
+
+    .react-datepicker__current-month,
+    .react-datepicker__day-name,
+    .react-datepicker__day {
+        color: var(--text-primary) !important;
+    }
+
+    .react-datepicker__day:hover {
+        background-color: var(--surface) !important;
+    }
+
+    .react-datepicker__day--selected {
+        background-color: var(--primary) !important;
+        color: var(--bg-primary) !important;
+    }
+
+    .react-datepicker__time-container {
+        border-left-color: var(--border) !important;
+    }
+
+    .react-datepicker__time-list-item:hover {
+        background-color: var(--surface) !important;
+    }
+
+    .react-datepicker__time-list-item--selected {
+        background-color: var(--primary) !important;
+        color: var(--bg-primary) !important;
+    }
+
+    /* React Phone Input Styles */
+    .phone-input-container {
+        @apply w-full;
+    }
+
+    .phone-input-container input {
+        background-color: transparent !important;
+        color: var(--text-primary) !important;
+        border-color: var(--border) !important;
+        font-size: 16px !important;
+        @apply w-full border p-3 rounded-lg transition-colors;
+        padding-left: 58px !important;
+    }
+
+    .phone-input-container input:focus {
+        border-color: var(--border-focus) !important;
+        @apply outline-none;
+    }
+
+    .phone-input-container input.error {
+        border-color: var(--error) !important;
+    }
+
+    .phone-input-button {
+        background-color: transparent !important;
+        border-color: var(--border) !important;
+        border-right: none !important;
+    }
+
+    .react-tel-input .form-control {
+        width: 100% !important;
+        height: 45px !important;
+        font-size: 16px !important;
+    }
+
+    .react-tel-input .flag-dropdown {
+        border: none !important;
+        background-color: transparent !important;
+    }
+
+    .phone-input-container .selected-flag {
+        background-color: transparent !important;
+    }
+
+    .phone-input-container .country-list {
+        background-color: var(--bg-secondary) !important;
+        border-color: var(--border) !important;
+        color: var(--text-primary) !important;
+    }
+
+    .phone-input-container .country-list .country:hover {
+        background-color: var(--surface) !important;
+    }
+
+    /* Google Places Autocomplete Styles */
+    gmp-place-autocomplete {
+        color-scheme: dark;
+        font-size: 16px !important;
+        height: 45px !important;
+        max-height: 45px !important;
+        @apply !rounded-lg relative;
+    }
+    gmp-place-autocomplete:focus, gmp-place-autocomplete:active {
+        font-size: 16px !important;
+    }
+
+    .google-places-input {
+        background-color: transparent !important;
+        color: var(--text-primary) !important;
+        border-color: var(--border) !important;
+        @apply w-full border p-3 rounded-lg text-sm transition-colors;
+    }
+
+    .google-places-input:focus {
+        border-color: var(--border-focus) !important;
+        @apply outline-none;
+    }
+
+    .google-places-input.error {
+        border-color: var(--error) !important;
+    }
+
+    /* Style the Google Places dropdown */
+    .pac-container {
+        background-color: var(--bg-secondary) !important;
+        border-color: var(--border) !important;
+        border-radius: 0.5rem !important;
+        border: 1px solid var(--border) !important;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+        margin-top: 2px !important;
+    }
+
+    .pac-item {
+        background-color: transparent !important;
+        color: var(--text-primary) !important;
+        border-color: var(--border) !important;
+        padding: 12px 16px !important;
+        font-size: 16px !important;
+    }
+
+    .pac-item:hover {
+        background-color: var(--surface) !important;
+    }
+
+    .pac-item-selected {
+        background-color: var(--surface-hover) !important;
+    }
+
+    .pac-matched {
+        color: var(--primary) !important;
+        font-weight: 600 !important;
+    }
+
+    .pac-item-query {
+        color: var(--text-primary) !important;
+        font-size: 0.875rem !important;
+    }
+
+    .pac-icon {
+        display: none !important;
+    }
+
+    /* Hide the Google logo and powered by */
+    .google-places-container {
+        position: relative;
+        touch-action: manipulation;
+        max-height: 400px;
+        font-size: 16px;
+    }
+    .google-places-container gmp-place-autocomplete {
+        padding: 0.3rem !important;
+    }
+    .pac-logo:after {
+        display: none !important;
+    }
+
+    .hdpi.pac-logo:after {
+        display: none !important;
+    }
+
+    /* Footer */
+    footer, .footer {
+        color: var(--text-secondary);
+        @apply text-center text-sm mt-auto !pb-10;
+    }
+
+    /* Links */
+    a.underline-link {
+        @apply underline;
+    }
+
+    /* CTA Banner */
+    .cta-banner {
+        background: var(--gradient-cta);
+        border-color: color-mix(in srgb, var(--primary) 20%, transparent);
+        @apply relative backdrop-blur border rounded-2xl p-6 mb-6 overflow-hidden;
+    }
+
+    .cta-banner::before {
+        content: '';
+        background: linear-gradient(to right,
+        color-mix(in srgb, var(--primary) 5%, transparent),
+        color-mix(in srgb, var(--secondary) 5%, transparent));
+        @apply absolute inset-0 rounded-2xl;
+    }
+
+    .cta-banner.authenticated {
+        background: var(--gradient-cta-auth);
+        border-color: color-mix(in srgb, var(--accent) 20%, transparent);
+    }
+
+    .cta-banner.authenticated::before {
+        background: linear-gradient(to right,
+        color-mix(in srgb, var(--accent) 5%, transparent),
+        color-mix(in srgb, var(--accent-light) 5%, transparent));
+    }
+
+    .cta-content {
+        @apply relative z-10 flex flex-col items-start justify-between gap-6;
+    }
+
+    .cta-text {
+        @apply flex-1;
+    }
+
+    .cta-text h3 {
+        color: var(--text-primary);
+        @apply text-xl font-bold mb-2;
+    }
+
+    .cta-text p {
+        color: var(--text-accent);
+        @apply mb-4;
+    }
+
+    .cta-benefits {
+        @apply flex flex-col gap-2;
+    }
+
+    .benefit {
+        color: var(--text-accent);
+        @apply text-sm flex items-center gap-2;
+    }
+
+    .cta-actions {
+        @apply flex flex-col w-full sm:flex-row gap-3 min-w-fit;
+    }
+
+    .cta-actions .button {
+        @apply min-w-[140px] justify-center w-full md:w-auto;
+    }
+
+    /* GDPR Cookie Banner Styles */
+    .gdpr-banner {
+        position: fixed;
+        bottom: 25px;
+        left: 0;
+        right: 0;
+        width: 90%;
+        margin: 0 auto;
+        z-index: 50;
+    }
+
+    @media (min-width: 576px) {
+        .gdpr-banner {
+            max-width: 576px; /* sm:max-w-xl */
+        }
+    }
+
+    @media (min-width: 768px) {
+        .gdpr-banner {
+            max-width: 672px; /* md:max-w-2xl */
+        }
+    }
+
+    @media (min-width: 1024px) {
+        .gdpr-banner {
+            max-width: 896px; /* lg:max-w-4xl */
+        }
+    }
+
+    @media (min-width: 1280px) {
+        .gdpr-banner {
+            max-width: 1152px; /* xl:max-w-6xl */
+        }
+    }
+
+    .gdpr-banner-container {
+        background-color: rgb(76 76 76 / 70%);
+        border-top: 1px solid #878787;
+        border-radius: .75rem;
+        width: 100%;
+        margin: 0 auto;
+        padding: 1rem;
+        position: relative;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, .1), 0 4px 6px -2px rgba(0, 0, 0, .05);
+        backdrop-filter: blur(10px);
+    }
+
+    .gdpr-banner-content {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        justify-content: start;
+        align-items: center;
+    }
+
+    .gdpr-banner-header {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+    }
+    @media (min-width: 1280px) {
+        .gdpr-banner-header {
+            flex-direction: row;
+        }
+    }
+
+    .gdpr-banner-text {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: .3rem;
+        align-self: flex-start;
+    }
+
+    .gdpr-banner-text .gdpr-banner-title {
+        font-size: 1.3rem;
+        color: #dfdfdf;
+        font-weight: bold;
+    }
+
+    .gdpr-banner-text p {
+        font-size: 0.875rem;
+        color: #cccccc;
+        font-weight: bolder;
+    }
+
+    .gdpr-banner-text a {
+        color: #f9fafb;
+        text-decoration: none;
+        transition: text-decoration 0.2s;
+    }
+
+    .gdpr-banner-text a:hover {
+        text-decoration: underline;
+    }
+
+    .gdpr-banner-actions {
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 0.5rem;
+        flex-direction: row;
+    }
+
+    @media (max-width: 576px) {
+        .gdpr-banner-actions{
+            flex-direction: column;
+            flex-wrap: wrap;
+        }
+    }
+    @media (max-width: 1280px) {
+        .gdpr-banner-actions {
+            width: 100%;
+        }
+    }
+
+    .gdpr-btn {
+        text-wrap: nowrap;
+        font-weight: bolder;
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+        border-radius: 0.5rem;
+        transition: background-color 0.2s, color 0.2s;
+        border: none;
+        cursor: pointer;
+        font-family: inherit;
+        width: 100%;
+        height: max-content;
+    }
+
+    @media (min-width: 576px) {
+        .gdpr-banner {
+            width: auto;
+        }
+    }
+
+    .gdpr-btn-decline {
+        background-color: #e5e7eb;
+        color: #1f2937;
+    }
+
+    .gdpr-btn-decline:hover {
+        background-color: #e5e7eb;
+    }
+
+    .gdpr-btn-accept {
+        background-color: #000;
+        color: #fff;
+    }
+
+    .gdpr-btn-accept:hover {
+        background-color: #373737;
+    }
+
+    .gdpr-btn-accept-all {
+        background-color: #000;
+        color: #fff;
+    }
+
+    .gdpr-btn-accept-all:hover {
+        background-color: #373737;
+    }
+
+    .gdpr-preferences-grid {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        font-size: 0.875rem;
+    }
+
+    @media (min-width: 768px) {
+        .gdpr-preferences-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    .gdpr-preference-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.5rem;
+        background-color: #f9fafb;
+        border-radius: 0.25rem;
+    }
+
+    .gdpr-preference-content strong {
+        color: #1f2937;
+        display: block;
+        margin-bottom: 0.25rem;
+    }
+
+    .gdpr-preference-content p {
+        color: #6b7280;
+        font-size: 0.75rem;
+        margin: 0;
+    }
+
+    .gdpr-preference-checkbox {
+        margin-left: 0.5rem;
+        width: 16px;
+        height: 16px;
+        accent-color: var(--primary);
+    }
+
+    .gdpr-preference-checkbox:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+}

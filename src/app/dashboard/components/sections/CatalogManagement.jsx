@@ -1,12 +1,13 @@
-// app/dashboard/components/sections/ProductsSection.jsx
+// app/dashboard/components/sections/CatalogManagement.jsx
 "use client"
 import { useState, useEffect } from 'react';
 import { useShopAPI } from '@/lib/shop.js';
 import ProductModal from '../modals/ProductModal';
 import { DataTable, StatusBadge, ActionButtons, EmptyState } from '../common/Common';
 import toast, { Toaster } from 'react-hot-toast';
+import { Box } from 'lucide-react';
 
-const ProductsSection = () => {
+const CatalogManagement = () => {
     const [showAddModal, setShowAddModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState(null);
@@ -29,13 +30,11 @@ const ProductsSection = () => {
 
     // Load initial data
     useEffect(() => {
-        loadProducts();
+        loadItems();
         loadCategories();
     }, [currentPage, searchTerm, filterCategory]);
 
-    const loadProducts = async () => {
-        const loadingToast = toast.loading('Loading products...');
-
+    const loadItems = async () => {
         try {
             const params = {
                 page: currentPage,
@@ -50,8 +49,8 @@ const ProductsSection = () => {
                 setTotalPages(response.pagination.totalPages);
             }
         } catch (err) {
-            console.error('Error loading products:', err);
-            toast.error('Failed to load products', { id: loadingToast });
+            console.error('Error loading items:', err);
+            toast.error('Failed to load items', { id: loadingToast });
         }
     };
 
@@ -72,7 +71,7 @@ const ProductsSection = () => {
             const response = await createItem(productData);
             if (response && response.success) {
                 setShowAddModal(false);
-                await loadProducts(); // Refresh the list
+                await loadItems(); // Refresh the list
             }
         } catch (err) {
             console.error('Error creating product:', err);
@@ -94,7 +93,7 @@ const ProductsSection = () => {
             if (response && response.success) {
                 setShowEditModal(false);
                 setSelectedProduct(null);
-                await loadProducts(); // Refresh the list
+                await loadItems(); // Refresh the list
             }
         } catch (err) {
             console.error('Error updating product:', err);
@@ -165,7 +164,7 @@ const ProductsSection = () => {
                                 try {
                                     const response = await deleteItem(productId);
                                     if (response && response.success) {
-                                        await loadProducts();
+                                        await loadItems();
                                         resolve();
                                     } else {
                                         reject(new Error('Failed to delete item'));
@@ -196,7 +195,7 @@ const ProductsSection = () => {
     const handleSearch = (e) => {
         e.preventDefault();
         setCurrentPage(1); // Reset to first page when searching
-        loadProducts();
+        loadItems();
     };
 
     const handlePageChange = (newPage) => {
@@ -315,7 +314,7 @@ const ProductsSection = () => {
                         </div>
                     ) : productList.length === 0 ? (
                         <EmptyState
-                            icon="📦"
+                            icon={<Box className="w-16 h-16 text-gray-400" />}
                             title="No Items Found"
                             description="Start by adding your first product or service to the catalog."
                             actionButton={
@@ -436,4 +435,4 @@ const ProductsSection = () => {
     );
 };
 
-export default ProductsSection;
+export default CatalogManagement;

@@ -1,0 +1,23 @@
+"use client"
+
+import { createContext, useContext } from 'react';
+import '@/app/styles/Custom.css';
+
+const LayoutContext = createContext();
+
+export const LayoutProvider = ({ children }) => {
+
+    return (
+        <LayoutContext.Provider value={{}}>
+            {children}
+        </LayoutContext.Provider>
+    );
+};
+
+export const useLayout = () => {
+    const context = useContext(LayoutContext);
+    if (!context) {
+        throw new Error('useLayout must be used within a Provider');
+    }
+    return context;
+};
