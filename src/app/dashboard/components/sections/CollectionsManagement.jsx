@@ -1,7 +1,6 @@
 // app/dashboard/components/sections/CollectionsManagement.jsx
 "use client"
 import { useState, useEffect } from 'react';
-import { useShopAPI } from '@/lib/shop.js';
 import { create, getAll } from '@/lib/query.js';
 import { DataTable, StatusBadge, ActionButtons, EmptyState } from '../common/Common';
 import toast, { Toaster } from 'react-hot-toast';
@@ -21,16 +20,12 @@ import {
 const CollectionsManagement = () => {
     const [collections, setCollections] = useState([]);
     const [allItems, setAllItems] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [showAddModal, setShowAddModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [selectedCollection, setSelectedCollection] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
 
-    const {
-        getCollections,
-        getAllItems
-    } = useShopAPI();
     // Load all data on component mount
     useEffect(() => {
         const loadData = async () => {
@@ -41,6 +36,7 @@ const CollectionsManagement = () => {
     }, []);
 
     const loadCollections = async () => {
+        setLoading(true);
         try {
             const storedCollections = await getAll('collections');
 
@@ -48,20 +44,12 @@ const CollectionsManagement = () => {
                 // Extract collections from nested structure
                 const collectionsData = storedCollections.data;
 
-                // Get the first (and likely only) key that contains the collections
-                const dataKeys = Object.keys(collectionsData);
-                if (dataKeys.length > 0) {
-                    const collectionsContainer = collectionsData[dataKeys[0]];
-
-                    // Extract collection objects, filtering out metadata like createdAt/updatedAt
-                    const collectionsArray = Object.values(collectionsContainer).filter(item =>
-                        item && typeof item === 'object' && item.id && item.name
-                    );
-
-                    setCollections(collectionsArray);
-                } else {
-                    setCollections([]);
-                }
+                // Convert the object to an array, adding the ID from the key to each item
+                const itemsArray = Object.entries(collectionsData).map(([id, item]) => ({
+                    id, // Add the key as the id property
+                    ...item // Spread the item properties
+                }));
+                setCollections(itemsArray);
             } else {
                 setCollections([]);
             }
@@ -76,7 +64,7 @@ const CollectionsManagement = () => {
         try {
             // Load items from catalog
             const response = await getAll('catalog');
-            
+
             if (response && response.success && response.data) {
                 // For catalog, the data structure is a flat object where keys are item IDs
                 // and values are the item objects directly
@@ -105,7 +93,8 @@ const CollectionsManagement = () => {
         try {
             // Send the collections array directly
             await create(updatedCollections, 'collections');
-            setCollections(updatedCollections);
+            console.log(response);
+            setCollections(response);
         } catch (err) {
             console.error('Error saving collections:', err);
             throw err;
@@ -121,11 +110,13 @@ const CollectionsManagement = () => {
                 updatedAt: new Date().toISOString()
             };
 
+            await create(newCollection, 'collections');
+
             const updatedCollections = Array.isArray(collections)
                 ? [...collections, newCollection]
                 : [newCollection];
-            await saveCollections(updatedCollections);
 
+            setCollections(updatedCollections);
             setShowAddModal(false);
             toast.success('Collection created successfully!');
         } catch (err) {
@@ -361,7 +352,7 @@ const CollectionsManagement = () => {
                                                 </div>
                                             </div>
                                         </td>
-                                        <td>
+                                        <td data-label="Type">
                                             <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                                                 collection.type === 'featured' ? 'bg-yellow-100 text-yellow-800' :
                                                     collection.type === 'seasonal' ? 'bg-green-100 text-green-800' :
@@ -372,16 +363,16 @@ const CollectionsManagement = () => {
                                                 {collection.type}
                                             </span>
                                         </td>
-                                        <td>
-                                            <div className="flex items-center gap-2">
+                                        <td data-label="Catalog">
+                                            <div className="flex items-center justify-end md:justify-center gap-2">
                                                 <ShoppingBag className="w-4 h-4 text-gray-500" />
                                                 <span>{collection.itemIds?.length || 0} items</span>
                                             </div>
                                         </td>
-                                        <td>
+                                        <td data-label="Status">
                                             <StatusBadge status={collection.isActive ? 'active' : 'inactive'} />
                                         </td>
-                                        <td>
+                                        <td data-label="Created at">
                                             <div className="text-sm text-gray-600">
                                                 {new Date(collection.createdAt).toLocaleDateString()}
                                             </div>

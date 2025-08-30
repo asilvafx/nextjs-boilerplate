@@ -240,7 +240,7 @@ class QueryAPI {
         return await this.getItemByKey(collection, field, value);
     }
 
-    async create(collection, data) {
+    async create(data, collection) {
         return await this.createItem(collection, data);
     }
 

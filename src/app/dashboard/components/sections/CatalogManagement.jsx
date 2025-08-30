@@ -1,6 +1,6 @@
 // app/dashboard/components/sections/CatalogManagement.jsx
 "use client"
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useShopAPI } from '@/lib/shop.js';
 import ProductModal from '../modals/ProductModal';
 import { DataTable, StatusBadge, ActionButtons, EmptyState } from '../common/Common';
@@ -18,6 +18,16 @@ const CatalogManagement = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [filterCategory, setFilterCategory] = useState('');
 
+    // Separate loading states
+    const [loadingItems, setLoadingItems] = useState(false); // Changed from true to false
+    const [loadingCategories, setLoadingCategories] = useState(false); // Changed from true to false
+    const [isSearching, setIsSearching] = useState(false);
+
+    // Refs to prevent double API calls
+    const itemsLoadedRef = useRef(false);
+    const categoriesLoadedRef = useRef(false);
+    const searchTimeoutRef = useRef(null);
+
     const {
         loading,
         error,
@@ -28,14 +38,18 @@ const CatalogManagement = () => {
         deleteItem
     } = useShopAPI();
 
-    // Load initial data
-    useEffect(() => {
-        loadItems();
-        loadCategories();
-    }, [currentPage, searchTerm, filterCategory]);
+    // Memoized loadItems function to prevent double calls
+    const loadItems = useCallback(async (isInitialLoad = false) => {
+        // Prevent double calls on initial load
+        if (isInitialLoad && itemsLoadedRef.current) return;
+        if (isInitialLoad) itemsLoadedRef.current = true;
 
-    const loadItems = async () => {
         try {
+            // Only set loading to true if we don't have data yet or it's not initial load
+            if (productList.length === 0 || !isInitialLoad) {
+                setLoadingItems(true);
+            }
+
             const params = {
                 page: currentPage,
                 limit: 10,
@@ -44,27 +58,126 @@ const CatalogManagement = () => {
             };
 
             const response = await getAllItems(params);
+
             if (response && response.success) {
                 setProductList(response.data);
                 setTotalPages(response.pagination.totalPages);
+                // Ensure loading is set to false when data is successfully loaded
+                setLoadingItems(false);
+            } else {
+                setLoadingItems(false);
             }
         } catch (err) {
             console.error('Error loading items:', err);
-            toast.error('Failed to load items', { id: loadingToast });
+            toast.error('Failed to load items');
+            // Reset ref on error so user can retry
+            if (isInitialLoad) itemsLoadedRef.current = false;
+            setLoadingItems(false);
         }
-    };
+    }, [currentPage, searchTerm, filterCategory, getAllItems, productList.length]);
 
-    const loadCategories = async () => {
+    // Memoized loadCategories function to prevent double calls
+    const loadCategories = useCallback(async () => {
+        // Prevent double calls
+        if (categoriesLoadedRef.current) return;
+        categoriesLoadedRef.current = true;
+
         try {
+            // Only set loading if we don't have categories yet
+            if (categories.length === 0) {
+                setLoadingCategories(true);
+            }
+
             const response = await getCategories();
             if (response && response.success) {
                 setCategories(response.data);
+                // Ensure loading is set to false when data is successfully loaded
+                setLoadingCategories(false);
+            } else {
+                setLoadingCategories(false);
             }
         } catch (err) {
             console.error('Error loading categories:', err);
             toast.error('Failed to load categories');
+            // Reset ref on error so user can retry
+            categoriesLoadedRef.current = false;
+            setLoadingCategories(false);
         }
-    };
+    }, [getCategories, categories.length]);
+
+    // Initial load effect - only runs once
+    useEffect(() => {
+        loadItems(true); // Initial load
+        loadCategories();
+
+        // Cleanup function
+        return () => {
+            if (searchTimeoutRef.current) {
+                clearTimeout(searchTimeoutRef.current);
+            }
+        };
+    }, []); // Empty dependency array - only run once
+
+    // Effect for pagination and filtering changes (not initial load)
+    useEffect(() => {
+        if (itemsLoadedRef.current) {
+            loadItems(false); // Not initial load
+        }
+    }, [currentPage, searchTerm, filterCategory, loadItems]);
+
+    // Retry functions
+    const retryLoadItems = useCallback(() => {
+        itemsLoadedRef.current = false;
+        loadItems(true);
+    }, [loadItems]);
+
+    const retryLoadCategories = useCallback(() => {
+        categoriesLoadedRef.current = false;
+        loadCategories();
+    }, [loadCategories]);
+
+    // Skeleton Components
+    const ItemsSkeletonLoader = () => (
+        <div className="space-y-4">
+            <div className="animate-pulse">
+                <div className="h-8 bg-gray-200 rounded w-1/4 mb-4"></div>
+            </div>
+            {Array.from({ length: 5 }).map((_, index) => (
+                <div key={index} className="animate-pulse border-b border-gray-200 pb-4">
+                    <div className="flex items-center space-x-4">
+                        <div className="w-12 h-12 bg-gray-300 rounded-lg"></div>
+                        <div className="flex-1 space-y-2">
+                            <div className="h-4 bg-gray-300 rounded w-1/2"></div>
+                            <div className="h-3 bg-gray-300 rounded w-1/3"></div>
+                        </div>
+                        <div className="w-16 h-6 bg-gray-300 rounded"></div>
+                        <div className="w-12 h-6 bg-gray-300 rounded"></div>
+                        <div className="w-20 h-6 bg-gray-300 rounded"></div>
+                        <div className="w-24 h-8 bg-gray-300 rounded"></div>
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
+
+    const SearchSkeletonLoader = () => (
+        <div className="dashboard-card mb-4">
+            <div className="animate-pulse">
+                <div className="flex gap-4 items-end">
+                    <div className="flex-1">
+                        <div className="h-4 bg-gray-300 rounded w-1/4 mb-2"></div>
+                        <div className="h-10 bg-gray-300 rounded"></div>
+                    </div>
+                    <div className="flex-1">
+                        <div className="h-4 bg-gray-300 rounded w-1/4 mb-2"></div>
+                        <div className="h-10 bg-gray-300 rounded"></div>
+                    </div>
+                    <div className="w-20 h-10 bg-gray-300 rounded"></div>
+                    <div className="w-16 h-10 bg-gray-300 rounded"></div>
+                </div>
+            </div>
+        </div>
+    );
 
     const handleAddProduct = async (productData) => {
         try {
@@ -195,7 +308,16 @@ const CatalogManagement = () => {
     const handleSearch = (e) => {
         e.preventDefault();
         setCurrentPage(1); // Reset to first page when searching
-        loadItems();
+        setIsSearching(true);
+
+        // Add a small delay to show searching state
+        if (searchTimeoutRef.current) {
+            clearTimeout(searchTimeoutRef.current);
+        }
+
+        searchTimeoutRef.current = setTimeout(() => {
+            setIsSearching(false);
+        }, 500);
     };
 
     const handlePageChange = (newPage) => {
@@ -210,6 +332,8 @@ const CatalogManagement = () => {
         if (itemType === 'service') return 'N/A';
         return stock || 0;
     };
+
+    const isLoading = loadingItems || loadingCategories;
 
     return (
         <>
@@ -248,70 +372,96 @@ const CatalogManagement = () => {
                     <button
                         className="button primary"
                         onClick={() => setShowAddModal(true)}
-                        disabled={loading}
+                        disabled={isLoading}
                     >
                         Add Item
                     </button>
                 </div>
 
+                {/* Error Display */}
+                {error && (
+                    <div className="bg-red-50 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                        <div className="flex items-center justify-between">
+                            <span>Error: {error}</span>
+                            <div className="space-x-2">
+                                <button
+                                    onClick={retryLoadItems}
+                                    className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
+                                    disabled={loadingItems}
+                                >
+                                    {loadingItems ? 'Retrying Items...' : 'Retry Items'}
+                                </button>
+                                <button
+                                    onClick={retryLoadCategories}
+                                    className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
+                                    disabled={loadingCategories}
+                                >
+                                    {loadingCategories ? 'Retrying Categories...' : 'Retry Categories'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {/* Search and Filters */}
-                <div className="dashboard-card mb-4">
-                    <form onSubmit={handleSearch} className="flex gap-4 items-end">
-                        <div className="flex-1">
-                            <label className="block text-sm font-medium mb-2">Search Items</label>
-                            <input
-                                type="text"
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                placeholder="Search by name or description..."
-                                className="input"
-                            />
-                        </div>
-                        <div className="flex-1">
-                            <label className="block text-sm font-medium mb-2">Category</label>
-                            <select
-                                value={filterCategory}
-                                onChange={(e) => setFilterCategory(e.target.value)}
-                                className="input"
+                {loadingCategories ? (
+                    <SearchSkeletonLoader />
+                ) : (
+                    <div className="dashboard-card mb-4">
+                        <form onSubmit={handleSearch} className="flex gap-4 items-end">
+                            <div className="flex-1">
+                                <label className="block text-sm font-medium mb-2">Search Items</label>
+                                <input
+                                    type="text"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    placeholder="Search by name or description..."
+                                    className="input"
+                                    disabled={isLoading}
+                                />
+                            </div>
+                            <div className="flex-1">
+                                <label className="block text-sm font-medium mb-2">Category</label>
+                                <select
+                                    value={filterCategory}
+                                    onChange={(e) => setFilterCategory(e.target.value)}
+                                    className="input"
+                                    disabled={isLoading}
+                                >
+                                    <option value="">All Categories</option>
+                                    {categories.map((category) => (
+                                        <option key={category.id || category.name} value={category.name}>
+                                            {category.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            <button
+                                type="submit"
+                                className="button secondary"
+                                disabled={isLoading || isSearching}
                             >
-                                <option value="">All Categories</option>
-                                {categories.map((category) => (
-                                    <option key={category.id || category.name} value={category.name}>
-                                        {category.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                        <button type="submit" className="button secondary" disabled={loading}>
-                            {loading ? 'Searching...' : 'Search'}
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => {
-                                setSearchTerm('');
-                                setFilterCategory('');
-                                setCurrentPage(1);
-                            }}
-                            className="button outline"
-                            disabled={loading}
-                        >
-                            Clear
-                        </button>
-                    </form>
-                </div>
+                                {isSearching ? 'Searching...' : (loadingItems ? 'Loading...' : 'Search')}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setSearchTerm('');
+                                    setFilterCategory('');
+                                    setCurrentPage(1);
+                                }}
+                                className="button outline"
+                                disabled={isLoading}
+                            >
+                                Clear
+                            </button>
+                        </form>
+                    </div>
+                )}
 
                 <div className="dashboard-card">
-                    {error && (
-                        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                            Error: {error}
-                        </div>
-                    )}
-
-                    {loading ? (
-                        <div className="text-center py-8">
-                            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-                            <p className="mt-2">Loading items...</p>
-                        </div>
+                    {loadingItems ? (
+                        <ItemsSkeletonLoader />
                     ) : productList.length === 0 ? (
                         <EmptyState
                             icon={<Box className="w-16 h-16 text-gray-400" />}
@@ -390,14 +540,14 @@ const CatalogManagement = () => {
                                     <div className="flex gap-2">
                                         <button
                                             onClick={() => handlePageChange(currentPage - 1)}
-                                            disabled={currentPage === 1 || loading}
+                                            disabled={currentPage === 1 || loadingItems}
                                             className="button outline small"
                                         >
                                             Previous
                                         </button>
                                         <button
                                             onClick={() => handlePageChange(currentPage + 1)}
-                                            disabled={currentPage === totalPages || loading}
+                                            disabled={currentPage === totalPages || loadingItems}
                                             className="button outline small"
                                         >
                                             Next
@@ -430,6 +580,19 @@ const CatalogManagement = () => {
                     mode="edit"
                     initialData={selectedProduct}
                 />
+
+                {/* Loading Indicator for ongoing operations */}
+                {loadingItems && (
+                    <div className="fixed bottom-4 right-4 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg">
+                        <div className="flex items-center space-x-2">
+                            <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
+                            <span className="text-sm">
+                                {loadingItems && loadingCategories ? 'Loading catalog data...' :
+                                    loadingItems ? 'Loading items...' : 'Loading categories...'}
+                            </span>
+                        </div>
+                    </div>
+                )}
             </div>
         </>
     );

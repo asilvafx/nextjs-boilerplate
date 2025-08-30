@@ -7,7 +7,7 @@ const DashboardContext = createContext();
 
 export const DashboardProvider = ({ children }) => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
-    const [activeSection, setActiveSection] = useState('');
+    const [activeSection, setActiveSection] = useState(null);
 
     return (
         <DashboardContext.Provider value={{

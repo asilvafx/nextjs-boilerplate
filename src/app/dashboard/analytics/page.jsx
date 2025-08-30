@@ -1,9 +1,9 @@
 // app/dashboard/analytics/page.jsx
 "use client"
 
-import { EmptyState } from '../components/common/Common'; 
+import { EmptyState } from '../components/common/Common';
 
-export const DashboardAnalytics = () => (
+export const Analytics = () => (
     <div className="fade-in">
         <div className="dashboard-card-header">
             <div>
@@ -36,4 +36,4 @@ export const DashboardAnalytics = () => (
     </div>
 );
 
-export default DashboardAnalytics;
+export default Analytics;

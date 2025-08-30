@@ -1,12 +1,13 @@
 // app/dashboard/components/layout/Sidebar.jsx
 "use client"
 
-
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
+import { useEffect } from "react";
 import { useDashboard } from '@/app/dashboard/context/DashboardContext';
 
 const Sidebar = () => {
     const router = useRouter();
+    const pathname = usePathname();
     const { activeSection, setActiveSection, sidebarOpen, setSidebarOpen } = useDashboard();
 
     const navigateUser = (route) => {
@@ -14,6 +15,7 @@ const Sidebar = () => {
         setSidebarOpen(false);
         router.push(`/dashboard/${route}`);
     }
+
     // Navigation items
     const navigationSections = [
         {
@@ -41,6 +43,23 @@ const Sidebar = () => {
             ]
         }
     ];
+
+    // Effect to set active section based on current pathname
+    useEffect(() => {
+        // Extract the section from the pathname (e.g., "/dashboard/shop" -> "shop")
+        const pathSegments = pathname.split('/');
+        const currentSection = pathSegments[2] || ''; // Index 2 because [0]="", [1]="dashboard", [2]="section"
+
+        // Check if the current section exists in any of the navigation sections
+        const sectionExists = navigationSections.some(section =>
+            section.items.some(item => item.id === currentSection)
+        );
+
+        // Only set active section if it exists in navigation and is different from current
+        if (sectionExists && currentSection !== activeSection) {
+            setActiveSection(currentSection);
+        }
+    }, [pathname, activeSection, setActiveSection, navigationSections]);
 
     return (
         <>

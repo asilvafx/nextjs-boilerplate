@@ -16,7 +16,7 @@ import {
 
 const CategoriesManagement = () => {
     const [categories, setCategories] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [showAddModal, setShowAddModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState(null);
