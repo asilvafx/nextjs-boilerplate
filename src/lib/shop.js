@@ -56,7 +56,7 @@ export class ShopAPI {
     static async create(itemData, db) {
         if(!db) return null;
         try {
-            const response = await authenticatedFetch(`/api/shop/${db}`, {
+            const response = await authenticatedFetch(`/api/query/${db}`, {
                 method: 'POST',
                 body: JSON.stringify(itemData)
             });

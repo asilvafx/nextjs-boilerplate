@@ -52,13 +52,17 @@ class QueryAPI {
 
     // GET all items from a collection
     async getAllItems(collection, arrayOpt=false, isPublic=false) {
-        const url = `${this.baseURL}/${collection}`;
-        const result = await this.makeRequest(url, {public: isPublic});
-        const dataObj = result.data;
-        if(arrayOpt){
-            return convertToArray(dataObj);
+
+        try {
+            const url = `${this.baseURL}/${collection}`;
+            const response = await this.makeRequest(url, {public: isPublic});
+
+            if (!response) return null;
+            return await response;
+        } catch (error) {
+            console.error('Get all items error:', error);
+            throw error;
         }
-        return dataObj;
     }
 
     // GET single item by ID

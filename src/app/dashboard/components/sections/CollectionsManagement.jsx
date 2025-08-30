@@ -41,7 +41,6 @@ const CollectionsManagement = () => {
     const loadCatalog = async () => {
         try {
             const storedData = await getAll('catalog');
-            console.log('Catalog data:', storedData);
 
             if (storedData && storedData.success) {
                 setCatalog(storedData.data || []);
@@ -58,7 +57,7 @@ const CollectionsManagement = () => {
 
     const loadCollections = async () => {
         try {
-            const storedCollections = await getAll('collections');
+            const storedCollections = await getAll('collections', true);
 
             console.log('Items response:', storedCollections);
             if (storedCollections && storedCollections.success) {
@@ -81,9 +80,7 @@ const CollectionsManagement = () => {
             const response = await getAll('catalog');
 
             if (response && response.success) {
-                setAllItems(response.data ? response.data.filter(item => item.isActive !== false) : []);
-            } else if (Array.isArray(response)) {
-                setAllItems(response.filter(item => item.isActive !== false));
+                setAllItems(response.data);
             } else {
                 setAllItems([]);
             }
