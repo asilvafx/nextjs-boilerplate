@@ -3,7 +3,7 @@
 
 import { EmptyState } from '../components/common/Common';
 
-export const Analytics = () => (
+export const DashboardAnalytics = () => (
     <div className="fade-in">
         <div className="dashboard-card-header">
             <div>
@@ -36,4 +36,4 @@ export const Analytics = () => (
     </div>
 );
 
-export default Analytics;
+export default DashboardAnalytics;
