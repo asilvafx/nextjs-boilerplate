@@ -37,7 +37,7 @@ const CategoriesManagement = () => {
         try {
             const [categoriesResponse, itemsResponse] = await Promise.all([
                 getCategories(),
-                getAllItems({ limit: 1000 }) // Get all items to count products per category
+                getAllItems({ limit: 1000 })
             ]);
 
             if (categoriesResponse?.success && itemsResponse?.success) {
@@ -64,6 +64,8 @@ const CategoriesManagement = () => {
 
     const handleAddCategory = async (categoryData) => {
         try {
+            console.log('Creating category with data:', categoryData);
+
             // Create a placeholder item for the category to register it in the system
             const placeholderItem = {
                 name: `${categoryData.name} Category Placeholder`,
@@ -74,19 +76,30 @@ const CategoriesManagement = () => {
                 stock: 0,
                 isActive: false, // Hidden placeholder
                 custom_attributes: {
-                    is_category_placeholder: true
+                    is_category_placeholder: true,
+                    category_color: categoryData.color,
+                    category_icon: categoryData.icon
                 }
             };
 
+            console.log('Sending placeholder item:', placeholderItem);
+
+            // Call create function with the item data and database parameter
             const response = await create(placeholderItem, 'categories');
+
+            console.log('Create response:', response);
+
             if (response && response.success) {
                 setShowAddModal(false);
                 await loadCategories();
                 toast.success('Category created successfully!');
+            } else {
+                console.error('Create failed:', response);
+                toast.error(response?.message || 'Failed to create category');
             }
         } catch (err) {
             console.error('Error creating category:', err);
-            toast.error('Failed to create category');
+            toast.error(`Failed to create category: ${err.message}`);
         }
     };
 
@@ -115,7 +128,6 @@ const CategoriesManagement = () => {
         const category = categories.find(c => c.id === categoryId);
         if (!category) return;
 
-        // Custom confirmation toast
         toast.custom((t) => (
             <div className={`bg-gray-800 text-white p-4 rounded-xl shadow-lg border border-red-500 max-w-md ${
                 t.visible ? 'animate-in' : 'animate-out'
@@ -141,7 +153,6 @@ const CategoriesManagement = () => {
                     <button
                         onClick={async () => {
                             toast.dismiss(t.id);
-                            // In a full implementation, you'd handle the deletion logic here
                             toast.success('Category deletion initiated (placeholder)');
                         }}
                         className="px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
@@ -158,7 +169,7 @@ const CategoriesManagement = () => {
 
     const filteredCategories = categories.filter(category =>
         category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        category.description.toLowerCase().includes(searchTerm.toLowerCase())
+        category.description?.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     return (

@@ -19,8 +19,8 @@ export const convertToArray = (data, includeKey = true) => {
 
 class QueryAPI {
     constructor() {
-        this.baseURL = `${API_BASE_URL}/api/query`;
-        this.uploadURL = `${API_BASE_URL}/api/upload`;
+        this.baseURL = `/api/query`;
+        this.uploadURL = `/api/upload`;
     }
 
     // Helper method for making API calls

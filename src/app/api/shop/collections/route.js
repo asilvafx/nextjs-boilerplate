@@ -1,63 +1,16 @@
-// app/api/shop/categories/route.js
+// app/api/shop/collections/route.js
 import { NextResponse } from 'next/server';
 import DBService from '@/data/rest.db.js';
 import { withAuth, withAdminAuth } from '@/lib/auth.js';
 
-// GET all collections - accessible to all authenticated users
+// GET all collections
 async function getCollectionsHandler(request) {
     try {
-        // Get all items to extract unique collections
         const response = await DBService.readAll("collections");
-
-        // Handle different response formats
-        let items = [];
-        if (Array.isArray(response)) {
-            items = response;
-        } else if (response && Array.isArray(response.data)) {
-            items = response.data;
-        } else if (response && response.success && Array.isArray(response.data)) {
-            items = response.data;
-        } else if (response && typeof response === 'object') {
-            // Handle object format where keys are IDs and values are items
-            items = Object.entries(response).map(([id, item]) => ({
-                id,
-                ...item
-            }));
-        } else if (response && response.data && typeof response.data === 'object') {
-            // Handle wrapped object format
-            items = Object.entries(response.data).map(([id, item]) => ({
-                id,
-                ...item
-            }));
-        }
-
-        console.log('Collections - Items data structure:', {
-            responseType: typeof response,
-            isArray: Array.isArray(response?.data),
-            itemsLength: items.length
-        });
-
-        // Extract unique collections from existing items
-        const categorySet = new Set();
-        items.forEach(item => {
-            if (item && item.category && item.category.trim()) {
-                categorySet.add(item.category.toLowerCase().trim());
-            }
-        });
-
-        // Convert to array with proper structure
-        const collections = Array.from(categorySet).map((category, index) => ({
-            id: index + 1,
-            name: category,
-            description: `${category.charAt(0).toUpperCase() + category.slice(1)} items`
-        }));
-
-        // Sort collections alphabetically
-        collections.sort((a, b) => a.name.localeCompare(b.name));
-
+ 
         return NextResponse.json({
             success: true,
-            data: collections
+            data: response
         });
 
     } catch (error) {
@@ -69,38 +22,33 @@ async function getCollectionsHandler(request) {
     }
 }
 
-// POST new category - admin only
-async function addCollectionHandler(request) {
+// POST/PUT collections (save entire collections array)
+async function saveCollectionsHandler(request) {
     try {
-        const data = await request.json();
+        const collections = await request.json();
 
-        // Validation
-        if (!data.name || !data.name.trim()) {
+        // Validate that it's an array
+        if (!Array.isArray(collections)) {
+            console.log('Expected an array of collections');
             return NextResponse.json(
-                { error: 'Collection name is required' },
+                { error: 'Expected an array of collections' },
                 { status: 400 }
             );
         }
 
-        // For now, we'll just return success since collections are derived from items
-        // In a more complex system, you might want to store collections separately
-        const collectionData = {
-            name: data.name.trim().toLowerCase(),
-            description: data.description?.trim() || `${data.name.trim()} items`,
-            createdAt: new Date().toISOString(),
-            createdBy: request.user.id
-        };
+        // Save collections
+        await DBService.create(collections, "collections");
 
         return NextResponse.json({
             success: true,
-            data: collectionData,
-            message: 'Collection noted. It will appear when items are added to this category.'
-        }, { status: 201 });
+            data: collections,
+            message: 'Collections saved successfully'
+        });
 
     } catch (error) {
-        console.error('Add collection error:', error);
+        console.error('Save collections error:', error);
         return NextResponse.json(
-            { error: 'Failed to create collection.' },
+            { error: 'Failed to save collections.' },
             { status: 500 }
         );
     }
@@ -108,4 +56,5 @@ async function addCollectionHandler(request) {
 
 // Export handlers with appropriate middleware
 export const GET = withAuth(getCollectionsHandler);
-export const POST = withAdminAuth(addCollectionHandler);
+export const POST = withAdminAuth(saveCollectionsHandler);
+export const PUT = withAdminAuth(saveCollectionsHandler);

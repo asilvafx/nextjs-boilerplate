@@ -2,6 +2,7 @@
 "use client"
 import { useState, useEffect } from 'react';
 import { useShopAPI } from '@/lib/shop.js';
+import { create, getAll } from '@/lib/query.js';
 import { DataTable, StatusBadge, ActionButtons, EmptyState } from '../common/Common';
 import toast, { Toaster } from 'react-hot-toast';
 import {
@@ -20,64 +21,90 @@ import {
 const CollectionsManagement = () => {
     const [collections, setCollections] = useState([]);
     const [allItems, setAllItems] = useState([]);
+    const [catalog, setCatalog] = useState([]);
     const [loading, setLoading] = useState(false);
     const [showAddModal, setShowAddModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [selectedCollection, setSelectedCollection] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
 
-    const { getAllItems } = useShopAPI();
-
-    // Fixed useEffect - removed async and properly structured
+    // Load all data on component mount
     useEffect(() => {
-        const initializeData = async () => {
+        const loadData = async () => {
             await loadCollections();
             await loadAllItems();
+            await loadCatalog();
         };
-
-        initializeData();
+        loadData();
     }, []);
 
-    const loadCollections = async () => {
-        // Check if we're on the client side (Next.js SSR compatibility)
-        if (typeof window === 'undefined') return;
-
+    const loadCatalog = async () => {
         try {
-            const storedCollections = localStorage.getItem('shop_collections');
-            if (storedCollections) {
-                setCollections(JSON.parse(storedCollections));
+            const storedData = await getAll('catalog');
+            console.log('Catalog data:', storedData);
+
+            if (storedData && storedData.success) {
+                setCatalog(storedData.data || []);
+            } else if (Array.isArray(storedData)) {
+                setCatalog(storedData);
+            } else {
+                setCatalog([]);
+            }
+        } catch (err) {
+            console.error('Error loading catalog:', err);
+            setCatalog([]);
+        }
+    };
+
+    const loadCollections = async () => {
+        try {
+            const storedCollections = await getAll('collections');
+
+            console.log('Items response:', storedCollections);
+            if (storedCollections && storedCollections.success) {
+                setCollections(storedCollections.data || []);
+            } else if (Array.isArray(storedCollections)) {
+                setCollections(storedCollections);
+            } else {
+                setCollections([]);
             }
         } catch (err) {
             console.error('Error loading collections:', err);
-            toast.error('Failed to load collections');
+            setCollections([]);
         }
     };
 
     const loadAllItems = async () => {
         setLoading(true);
         try {
-            const response = await getAllItems({ limit: 1000 });
-            if (response?.success) {
-                setAllItems(response.data.filter(item => item.isActive));
+            // Load items from catalog instead of collections
+            const response = await getAll('catalog');
+
+            if (response && response.success) {
+                setAllItems(response.data ? response.data.filter(item => item.isActive !== false) : []);
+            } else if (Array.isArray(response)) {
+                setAllItems(response.filter(item => item.isActive !== false));
+            } else {
+                setAllItems([]);
             }
         } catch (err) {
             console.error('Error loading items:', err);
             toast.error('Failed to load items');
+            setAllItems([]);
         } finally {
             setLoading(false);
         }
     };
 
-    const saveCollections = (updatedCollections) => {
-        // Check if we're on the client side (Next.js SSR compatibility)
-        if (typeof window === 'undefined') return;
-
+    const saveCollections = async (updatedCollections) => {
         try {
-            localStorage.setItem('shop_collections', JSON.stringify(updatedCollections));
+            console.log('Saving collections:', updatedCollections);
+            // Send the collections array directly
+            await create(updatedCollections, 'collections');
             setCollections(updatedCollections);
         } catch (err) {
             console.error('Error saving collections:', err);
-            toast.error('Failed to save collections');
+            throw err;
         }
     };
 
@@ -90,8 +117,10 @@ const CollectionsManagement = () => {
                 updatedAt: new Date().toISOString()
             };
 
-            const updatedCollections = [...collections, newCollection];
-            saveCollections(updatedCollections);
+            const updatedCollections = Array.isArray(collections)
+                ? [...collections, newCollection]
+                : [newCollection];
+            await saveCollections(updatedCollections);
 
             setShowAddModal(false);
             toast.success('Collection created successfully!');
@@ -102,7 +131,7 @@ const CollectionsManagement = () => {
     };
 
     const handleEditCollection = (collectionId) => {
-        const collection = collections.find(c => c.id === collectionId);
+        const collection = Array.isArray(collections) ? collections.find(c => c.id === collectionId) : null;
         if (collection) {
             setSelectedCollection(collection);
             setShowEditModal(true);
@@ -111,13 +140,15 @@ const CollectionsManagement = () => {
 
     const handleUpdateCollection = async (collectionData) => {
         try {
-            const updatedCollections = collections.map(collection =>
-                collection.id === selectedCollection.id
-                    ? { ...collection, ...collectionData, updatedAt: new Date().toISOString() }
-                    : collection
-            );
+            const updatedCollections = Array.isArray(collections)
+                ? collections.map(collection =>
+                    collection.id === selectedCollection.id
+                        ? { ...collection, ...collectionData, updatedAt: new Date().toISOString() }
+                        : collection
+                )
+                : [];
 
-            saveCollections(updatedCollections);
+            await saveCollections(updatedCollections);
 
             setShowEditModal(false);
             setSelectedCollection(null);
@@ -129,7 +160,7 @@ const CollectionsManagement = () => {
     };
 
     const handleDeleteCollection = async (collectionId) => {
-        const collection = collections.find(c => c.id === collectionId);
+        const collection = Array.isArray(collections) ? collections.find(c => c.id === collectionId) : null;
         if (!collection) return;
 
         toast.custom((t) => (
@@ -153,9 +184,16 @@ const CollectionsManagement = () => {
                     <button
                         onClick={async () => {
                             toast.dismiss(t.id);
-                            const updatedCollections = collections.filter(c => c.id !== collectionId);
-                            saveCollections(updatedCollections);
-                            toast.success('Collection deleted successfully!');
+                            try {
+                                const updatedCollections = Array.isArray(collections)
+                                    ? collections.filter(c => c.id !== collectionId)
+                                    : [];
+                                await saveCollections(updatedCollections);
+                                toast.success('Collection deleted successfully!');
+                            } catch (err) {
+                                console.error('Error deleting collection:', err);
+                                toast.error('Failed to delete collection');
+                            }
                         }}
                         className="px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
                     >
@@ -170,7 +208,7 @@ const CollectionsManagement = () => {
     };
 
     const handleViewCollection = (collectionId) => {
-        const collection = collections.find(c => c.id === collectionId);
+        const collection = Array.isArray(collections) ? collections.find(c => c.id === collectionId) : null;
         if (collection) {
             toast.custom((t) => (
                 <div className={`bg-gray-800 text-white p-4 rounded-xl shadow-lg border border-gray-700 max-w-md ${
@@ -208,11 +246,11 @@ const CollectionsManagement = () => {
         }
     };
 
-    const filteredCollections = collections.filter(collection =>
-        collection.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        collection.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        collection.type.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredCollections = Array.isArray(collections) ? collections.filter(collection =>
+        collection?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        collection?.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        collection?.type?.toLowerCase().includes(searchTerm.toLowerCase())
+    ) : [];
 
     const getCollectionIcon = (type) => {
         switch (type) {
@@ -362,7 +400,7 @@ const CollectionsManagement = () => {
                             <div className="mt-6 pt-4 border-t border-gray-200">
                                 <div className="text-sm text-gray-600">
                                     Total Collections: {filteredCollections.length}
-                                    {searchTerm && ` (filtered from ${collections.length})`}
+                                    {searchTerm && ` (filtered from ${Array.isArray(collections) ? collections.length : 0})`}
                                 </div>
                             </div>
                         </>
@@ -506,10 +544,10 @@ const CollectionModal = ({
         }));
     };
 
-    const filteredItems = allItems.filter(item =>
-        item.name.toLowerCase().includes(itemSearch.toLowerCase()) ||
-        item.category?.toLowerCase().includes(itemSearch.toLowerCase())
-    );
+    const filteredItems = Array.isArray(allItems) ? allItems.filter(item =>
+        item?.name?.toLowerCase().includes(itemSearch.toLowerCase()) ||
+        item?.category?.toLowerCase().includes(itemSearch.toLowerCase())
+    ) : [];
 
     if (!isOpen) return null;
 

@@ -185,7 +185,7 @@ const DashboardStore = () => {
                                     className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
                                         activeTab === tab.id
                                             ? 'bg-neutral-100 text-black shadow-sm'
-                                            : 'text-gray-600 hover:text-white'
+                                            : 'text-gray-400 hover:text-white'
                                     }`}
                                 >
                                     <Icon color={activeTab === tab.id ? "black" : "white"} size={18} />

@@ -224,7 +224,7 @@ export const useShopAPI = () => {
         getAllItems: (params) => execute(() => ShopAPI.getAllItems(params)),
         getItem: (id) => execute(() => ShopAPI.getItem(id)),
         createItem: (data) => execute(() => ShopAPI.createItem(data)),
-        create: (data) => execute(() => ShopAPI.create(data)),
+        create: (data, db) => execute(() => ShopAPI.create(data, db)),
         updateItem: (id, data) => execute(() => ShopAPI.updateItem(id, data)),
         deleteItem: (id) => execute(() => ShopAPI.deleteItem(id)),
         getCategories: () => execute(() => ShopAPI.getCategories()),
