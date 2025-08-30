@@ -40,13 +40,6 @@ async function getAllItemsHandler(request) {
             }));
         }
 
-        console.log('Items data structure:', {
-            responseType: typeof response,
-            isArray: Array.isArray(response?.data),
-            itemsLength: items.length,
-            firstItem: items[0]
-        });
-
         // Filter by item type if provided
         if (item_type && items.length > 0) {
             items = items.filter(item =>

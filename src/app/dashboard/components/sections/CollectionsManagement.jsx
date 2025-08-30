@@ -21,49 +21,47 @@ import {
 const CollectionsManagement = () => {
     const [collections, setCollections] = useState([]);
     const [allItems, setAllItems] = useState([]);
-    const [catalog, setCatalog] = useState([]);
     const [loading, setLoading] = useState(false);
     const [showAddModal, setShowAddModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [selectedCollection, setSelectedCollection] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
 
+    const {
+        getCollections,
+        getAllItems
+    } = useShopAPI();
     // Load all data on component mount
     useEffect(() => {
         const loadData = async () => {
             await loadCollections();
             await loadAllItems();
-            await loadCatalog();
         };
         loadData();
     }, []);
 
-    const loadCatalog = async () => {
-        try {
-            const storedData = await getAll('catalog');
-
-            if (storedData && storedData.success) {
-                setCatalog(storedData.data || []);
-            } else if (Array.isArray(storedData)) {
-                setCatalog(storedData);
-            } else {
-                setCatalog([]);
-            }
-        } catch (err) {
-            console.error('Error loading catalog:', err);
-            setCatalog([]);
-        }
-    };
-
     const loadCollections = async () => {
         try {
-            const storedCollections = await getAll('collections', true);
+            const storedCollections = await getAll('collections');
 
-            console.log('Items response:', storedCollections);
-            if (storedCollections && storedCollections.success) {
-                setCollections(storedCollections.data || []);
-            } else if (Array.isArray(storedCollections)) {
-                setCollections(storedCollections);
+            if (storedCollections && storedCollections.success && storedCollections.data) {
+                // Extract collections from nested structure
+                const collectionsData = storedCollections.data;
+
+                // Get the first (and likely only) key that contains the collections
+                const dataKeys = Object.keys(collectionsData);
+                if (dataKeys.length > 0) {
+                    const collectionsContainer = collectionsData[dataKeys[0]];
+
+                    // Extract collection objects, filtering out metadata like createdAt/updatedAt
+                    const collectionsArray = Object.values(collectionsContainer).filter(item =>
+                        item && typeof item === 'object' && item.id && item.name
+                    );
+
+                    setCollections(collectionsArray);
+                } else {
+                    setCollections([]);
+                }
             } else {
                 setCollections([]);
             }
@@ -76,11 +74,21 @@ const CollectionsManagement = () => {
     const loadAllItems = async () => {
         setLoading(true);
         try {
-            // Load items from catalog instead of collections
+            // Load items from catalog
             const response = await getAll('catalog');
+            
+            if (response && response.success && response.data) {
+                // For catalog, the data structure is a flat object where keys are item IDs
+                // and values are the item objects directly
+                const itemsData = response.data;
 
-            if (response && response.success) {
-                setAllItems(response.data);
+                // Convert the object to an array, adding the ID from the key to each item
+                const itemsArray = Object.entries(itemsData).map(([id, item]) => ({
+                    id, // Add the key as the id property
+                    ...item // Spread the item properties
+                }));
+
+                setAllItems(itemsArray);
             } else {
                 setAllItems([]);
             }
@@ -95,7 +103,6 @@ const CollectionsManagement = () => {
 
     const saveCollections = async (updatedCollections) => {
         try {
-            console.log('Saving collections:', updatedCollections);
             // Send the collections array directly
             await create(updatedCollections, 'collections');
             setCollections(updatedCollections);
