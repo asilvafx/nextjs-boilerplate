@@ -15,11 +15,11 @@ const ProductsSection = () => {
             setLoading(true);
             setError(null);
 
-            const response = await getAll('catalog', true, true);
-
-            if (response) {
+            const response = await getAll('catalog', false, true);
+console.log(response);
+            if (response && response.success) {
                 // Transform the data to match component expectations
-                const transformedData = response.map(item => ({
+                const transformedData = response.data.map(item => ({
                     ...item,
                     // Add inStock property based on stock number
                     inStock: item.stock !== 0,

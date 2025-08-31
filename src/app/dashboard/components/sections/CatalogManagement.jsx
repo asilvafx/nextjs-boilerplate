@@ -19,14 +19,15 @@ const CatalogManagement = () => {
     const [filterCategory, setFilterCategory] = useState('');
 
     // Separate loading states
-    const [loadingItems, setLoadingItems] = useState(false); // Changed from true to false
-    const [loadingCategories, setLoadingCategories] = useState(false); // Changed from true to false
+    const [loadingItems, setLoadingItems] = useState(true);
+    const [loadingCategories, setLoadingCategories] = useState(true);
     const [isSearching, setIsSearching] = useState(false);
 
     // Refs to prevent double API calls
     const itemsLoadedRef = useRef(false);
     const categoriesLoadedRef = useRef(false);
     const searchTimeoutRef = useRef(null);
+    const mountedRef = useRef(true);
 
     const {
         loading,
@@ -38,17 +39,17 @@ const CatalogManagement = () => {
         deleteItem
     } = useShopAPI();
 
-    // Memoized loadItems function to prevent double calls
+    // Fixed loadItems function - removed productList.length dependency
     const loadItems = useCallback(async (isInitialLoad = false) => {
         // Prevent double calls on initial load
         if (isInitialLoad && itemsLoadedRef.current) return;
         if (isInitialLoad) itemsLoadedRef.current = true;
 
+        // Don't proceed if component is unmounted
+        if (!mountedRef.current) return;
+
         try {
-            // Only set loading to true if we don't have data yet or it's not initial load
-            if (productList.length === 0 || !isInitialLoad) {
-                setLoadingItems(true);
-            }
+            setLoadingItems(true);
 
             const params = {
                 page: currentPage,
@@ -59,71 +60,82 @@ const CatalogManagement = () => {
 
             const response = await getAllItems(params);
 
+            // Check if component is still mounted before updating state
+            if (!mountedRef.current) return;
+
             if (response && response.success) {
                 setProductList(response.data);
                 setTotalPages(response.pagination.totalPages);
-                // Ensure loading is set to false when data is successfully loaded
-                setLoadingItems(false);
-            } else {
-                setLoadingItems(false);
             }
         } catch (err) {
+            if (!mountedRef.current) return;
             console.error('Error loading items:', err);
             toast.error('Failed to load items');
             // Reset ref on error so user can retry
             if (isInitialLoad) itemsLoadedRef.current = false;
-            setLoadingItems(false);
+        } finally {
+            if (mountedRef.current) {
+                setLoadingItems(false);
+            }
         }
-    }, [currentPage, searchTerm, filterCategory, getAllItems, productList.length]);
+    }, [currentPage, searchTerm, filterCategory, getAllItems]);
 
-    // Memoized loadCategories function to prevent double calls
+    // Fixed loadCategories function
     const loadCategories = useCallback(async () => {
         // Prevent double calls
         if (categoriesLoadedRef.current) return;
         categoriesLoadedRef.current = true;
 
+        // Don't proceed if component is unmounted
+        if (!mountedRef.current) return;
+
         try {
-            // Only set loading if we don't have categories yet
-            if (categories.length === 0) {
-                setLoadingCategories(true);
-            }
+            setLoadingCategories(true);
 
             const response = await getCategories();
+
+            // Check if component is still mounted before updating state
+            if (!mountedRef.current) return;
+
             if (response && response.success) {
                 setCategories(response.data);
-                // Ensure loading is set to false when data is successfully loaded
-                setLoadingCategories(false);
-            } else {
-                setLoadingCategories(false);
             }
         } catch (err) {
+            if (!mountedRef.current) return;
             console.error('Error loading categories:', err);
             toast.error('Failed to load categories');
             // Reset ref on error so user can retry
             categoriesLoadedRef.current = false;
-            setLoadingCategories(false);
+        } finally {
+            if (mountedRef.current) {
+                setLoadingCategories(false);
+            }
         }
-    }, [getCategories, categories.length]);
+    }, [getCategories]);
 
     // Initial load effect - only runs once
     useEffect(() => {
+        mountedRef.current = true;
+
         loadItems(true); // Initial load
         loadCategories();
 
         // Cleanup function
         return () => {
+            mountedRef.current = false;
             if (searchTimeoutRef.current) {
                 clearTimeout(searchTimeoutRef.current);
             }
         };
     }, []); // Empty dependency array - only run once
 
-    // Effect for pagination and filtering changes (not initial load)
+    // Effect for pagination and filtering changes - removed loadItems dependency
     useEffect(() => {
-        if (itemsLoadedRef.current) {
+        // Only trigger if we've had an initial load and the component is mounted
+        if (itemsLoadedRef.current && mountedRef.current) {
             loadItems(false); // Not initial load
         }
-    }, [currentPage, searchTerm, filterCategory, loadItems]);
+    }, [currentPage, searchTerm, filterCategory]); // Removed loadItems from dependencies
 
     // Retry functions
     const retryLoadItems = useCallback(() => {
@@ -316,7 +328,9 @@ const CatalogManagement = () => {
         }
 
         searchTimeoutRef.current = setTimeout(() => {
-            setIsSearching(false);
+            if (mountedRef.current) {
+                setIsSearching(false);
+            }
         }, 500);
     };
 
@@ -580,19 +594,7 @@ const CatalogManagement = () => {
                     mode="edit"
                     initialData={selectedProduct}
                 />
-
-                {/* Loading Indicator for ongoing operations */}
-                {loadingItems && (
-                    <div className="fixed bottom-4 right-4 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg">
-                        <div className="flex items-center space-x-2">
-                            <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
-                            <span className="text-sm">
-                                {loadingItems && loadingCategories ? 'Loading catalog data...' :
-                                    loadingItems ? 'Loading items...' : 'Loading categories...'}
-                            </span>
-                        </div>
-                    </div>
-                )}
+ 
             </div>
         </>
     );

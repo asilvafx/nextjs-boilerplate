@@ -70,7 +70,10 @@ const DashboardOrders = () => {
     const fetchOrders = async () => {
 
         const ordersData = await getAll('orders', true);
-        setOrders(ordersData);
+        console.log(ordersData);
+
+
+        //setOrders(ordersData.data);
     }
 
     const formatDate = (timestamp) => {

@@ -1,3 +1,4 @@
+// data/redis.db.js
 import { createClient } from 'redis';
 import { put } from '@vercel/blob';
 
@@ -295,8 +296,24 @@ class RedisDBService {
             // Ensure path doesn't start with slash for Vercel Blob
             const cleanPath = path.startsWith('/') ? path.slice(1) : path;
 
-            // Upload to Vercel Blob
-            const blob = await put(cleanPath, file, {
+            // Extract the buffer from the file object
+            let fileData;
+            if (file.buffer) {
+                // If file has a buffer property, use it
+                fileData = file.buffer;
+            } else if (Buffer.isBuffer(file)) {
+                // If file is already a buffer
+                fileData = file;
+            } else if (file.stream) {
+                // If file has a stream property
+                fileData = file.stream;
+            } else {
+                // Fallback - try to use the file directly
+                fileData = file;
+            }
+
+            // Upload to Vercel Blob with the raw buffer/data
+            const blob = await put(cleanPath, fileData, {
                 access: 'public',
                 token: blobToken
             });
@@ -306,9 +323,10 @@ class RedisDBService {
                 originalPath: path,
                 blobUrl: blob.url,
                 fileName: cleanPath,
-                size: blob.size,
+                size: blob.size || file.size,
                 uploadedAt: new Date().toISOString(),
-                contentType: file.type || 'application/octet-stream'
+                contentType: file.mimetype || file.type || 'application/octet-stream',
+                originalName: file.originalname || file.filename || cleanPath
             };
 
             // Store metadata in Redis with a special key pattern for files
@@ -317,6 +335,7 @@ class RedisDBService {
 
             return {
                 url: blob.url,
+                publicUrl: blob.url, // Add this for compatibility
                 path: cleanPath,
                 size: blob.size,
                 metadata: fileMetadata

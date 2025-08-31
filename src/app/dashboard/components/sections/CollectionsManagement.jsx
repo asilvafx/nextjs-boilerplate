@@ -744,33 +744,7 @@ const CollectionModal = ({
                                     </div>
                                 )}
                             </div>
-
-                            {/* Selected Items Preview */}
-                            {formData.itemIds.length > 0 && (
-                                <div className="bg-blue-50 rounded-xl p-4">
-                                    <h4 className="font-medium text-gray-800 mb-3">Selected Items ({formData.itemIds.length})</h4>
-                                    <div className="flex flex-wrap gap-2">
-                                        {formData.itemIds.map((itemId) => {
-                                            const item = allItems.find(i => i.id === itemId);
-                                            return item ? (
-                                                <span
-                                                    key={itemId}
-                                                    className="bg-white px-3 py-1 rounded-full text-sm flex items-center gap-2 shadow-sm"
-                                                >
-                                                    {item.name}
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => toggleItemSelection(itemId)}
-                                                        className="text-gray-500 hover:text-red-500 transition-colors"
-                                                    >
-                                                        <X size={14} />
-                                                    </button>
-                                                </span>
-                                            ) : null;
-                                        })}
-                                    </div>
-                                </div>
-                            )}
+ 
                         </div>
 
                         {/* Action Buttons */}

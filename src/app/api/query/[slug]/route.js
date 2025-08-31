@@ -3,6 +3,19 @@ import { NextResponse } from 'next/server';
 import DBService from '@/data/rest.db.js';
 import { withAuth, withAdminAuth } from '@/lib/auth.js';
 
+// Helper function to convert object data to array format
+const convertToArray = (data, includeKey = true) => {
+    if (!data || typeof data !== 'object') return [];
+
+    return Object.entries(data).map(([key, item]) => ({
+        ...item,
+        // Add the key as a property if it doesn't exist
+        key: key,
+        // Use key as id if no id exists
+        id: item.id || key
+    }));
+};
+
 // Helper function to get request body safely
 async function getRequestBody(request) {
     try {
@@ -67,7 +80,7 @@ async function handleGet(request, { params }) {
 
         return NextResponse.json({
             success: true,
-            data: result
+            data: convertToArray(result)
         });
 
     } catch (error) {
@@ -119,7 +132,7 @@ async function handlePost(request, { params }) {
 
         return NextResponse.json({
             success: true,
-            data: newItem,
+            data: convertToArray(newItem),
             message: 'Record created successfully!'
         }, { status: 201 });
 
@@ -180,7 +193,7 @@ async function handlePut(request, { params }) {
 
         return NextResponse.json({
             success: true,
-            data: updatedItem,
+            data: convertToArray(updatedItem),
             message: 'Record updated successfully!'
         });
 

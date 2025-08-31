@@ -1,4 +1,4 @@
-// rest.db.js - Unified Database Service
+// data/rest.db.js
 import FirebaseService from './firebase.db.js';
 import RedisService from './redis.db.js';
 // Import future providers here

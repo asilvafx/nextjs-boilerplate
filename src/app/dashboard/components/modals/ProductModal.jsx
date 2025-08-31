@@ -203,45 +203,92 @@ const ProductModal = ({
     const handleImageUpload = async (files) => {
         if (!files || files.length === 0) return;
 
+        // Validate files before upload
+        const maxFileSize = 10 * 1024 * 1024; // 10MB
+
+        for (const file of Array.from(files)) {
+            if (file.size > maxFileSize) {
+                toast.error(`File ${file.name} is too large. Maximum size is 10MB.`);
+                return;
+            }
+        }
+
         setUploading(true);
+
         const uploadPromise = new Promise(async (resolve, reject) => {
             try {
+                // Create FormData
                 const formDataUpload = new FormData();
                 Array.from(files).forEach(file => {
                     formDataUpload.append('files', file);
                 });
 
+                // Get auth token from cookies (assuming it's stored in httpOnly cookie)
+                // or from wherever your app stores it
                 const response = await fetch('/api/upload', {
                     method: 'POST',
                     body: formDataUpload,
+                    credentials: 'include', // Important for httpOnly cookies
+                    headers: {
+                        // Don't set Content-Type header - let browser set it with boundary for multipart
+                    }
                 });
 
                 if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || 'Upload failed');
+                    let errorMessage = 'Upload failed';
+                    try {
+                        const errorData = await response.json();
+                        errorMessage = errorData.error || errorData.message || errorMessage;
+                    } catch (parseError) {
+                        // If response isn't JSON, use status text
+                        errorMessage = response.statusText || errorMessage;
+                    }
+                    throw new Error(errorMessage);
                 }
 
                 const result = await response.json();
 
-                setFormData(prev => ({
-                    ...prev,
-                    images: [...prev.images, ...result.data],
-                    coverImageId: prev.coverImageId || result.data[0]?.id || null
-                }));
+                // Validate response structure
+                if (!result.success || !result.data || !Array.isArray(result.data)) {
+                    throw new Error('Invalid response format from upload endpoint');
+                }
+
+                // Update form data with new images
+                setFormData(prev => {
+                    const newImages = [...prev.images, ...result.data];
+                    return {
+                        ...prev,
+                        images: newImages,
+                        // Set first uploaded image as cover if no cover is set
+                        coverImageId: prev.coverImageId || result.data[0]?.id || null
+                    };
+                });
 
                 resolve(result);
+
             } catch (error) {
+                console.error('Upload error:', error);
                 reject(error);
             } finally {
                 setUploading(false);
             }
         });
 
+        // Show toast notifications
         toast.promise(uploadPromise, {
-            loading: 'Uploading images...',
-            success: (data) => `${data.data.length} image(s) uploaded successfully!`,
-            error: (error) => error.message || 'Upload failed'
+            loading: `Uploading ${files.length} image(s)...`,
+            success: (data) => {
+                const count = data.data?.length || files.length;
+                return `${count} image(s) uploaded successfully!`;
+            },
+            error: (error) => {
+                const message = error.message || 'Upload failed';
+                console.error('Upload failed:', error);
+                return message;
+            }
         });
+
+        return uploadPromise;
     };
 
     const handleFileInputChange = (e) => {

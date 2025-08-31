@@ -4,19 +4,6 @@ import { authenticatedFetch, publicFetch } from '@/hooks/useAuth.js';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_APP_URL || '';
 
-// Helper function to convert object data to array format
-export const convertToArray = (data, includeKey = true) => {
-    if (!data || typeof data !== 'object') return [];
-
-    return Object.entries(data).map(([key, item]) => ({
-        ...item,
-        // Add the key as a property if it doesn't exist
-        key: key,
-        // Use key as id if no id exists
-        id: item.id || key
-    }));
-};
-
 class QueryAPI {
     constructor() {
         this.baseURL = `/api/query`;
@@ -58,7 +45,9 @@ class QueryAPI {
             const response = await this.makeRequest(url, {public: isPublic});
 
             if (!response) return null;
+
             return await response;
+
         } catch (error) {
             console.error('Get all items error:', error);
             throw error;
