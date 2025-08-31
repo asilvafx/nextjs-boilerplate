@@ -1,8 +1,6 @@
-// lib/query.js - Query Helper Library
+// lib/query.js - Minimized Query Helper Library
 
 import { authenticatedFetch, publicFetch } from '@/hooks/useAuth.js';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_APP_URL || '';
 
 class QueryAPI {
     constructor() {
@@ -13,13 +11,12 @@ class QueryAPI {
     // Helper method for making API calls
     async makeRequest(url, options = {}) {
         try {
-            let fetch;
-            if(options.public){
-                fetch = await publicFetch(url, options);
+            let response;
+            if (options.public) {
+                response = await publicFetch(url, options);
             } else {
-                fetch = await authenticatedFetch(url, options);
+                response = await authenticatedFetch(url, options);
             }
-            const response = fetch;
 
             if (!response) {
                 throw new Error('No response received');
@@ -38,39 +35,21 @@ class QueryAPI {
     }
 
     // GET all items from a collection
-    async getAllItems(collection, arrayOpt=false, isPublic=false) {
-
-        try {
-            const url = `${this.baseURL}/${collection}`;
-            const response = await this.makeRequest(url, {public: isPublic});
-
-            if (!response) return null;
-
-            return await response;
-
-        } catch (error) {
-            console.error('Get all items error:', error);
-            throw error;
-        }
+    async getAll(collection, params={}, isPublic = false) {
+        const queryString = new URLSearchParams(params).toString();
+        const url = `${this.baseURL}/${collection}${queryString ? `?${queryString}` : ''}`;
+        return await this.makeRequest(url, { public: isPublic });
     }
 
     // GET single item by ID
-    async getItem(collection, id) {
+    async get(collection, id) {
         const url = `${this.baseURL}/${collection}?id=${encodeURIComponent(id)}`;
         const result = await this.makeRequest(url);
         return result.data;
     }
 
-    // GET single item by ID
-    async getItemByKey(collection, key, value) {
-        const url = `${this.baseURL}/${collection}?key=${encodeURIComponent(key)}&value=${encodeURIComponent(value)}`;
-        const result = await this.makeRequest(url);
-        return result.data;
-    }
-
-
     // POST create new item
-    async createItem(collection, data) {
+    async create(collection, data) {
         const url = `${this.baseURL}/${collection}`;
         const options = {
             method: 'POST',
@@ -81,7 +60,7 @@ class QueryAPI {
     }
 
     // PUT update item
-    async updateItem(collection, id, data) {
+    async update(collection, id, data) {
         const url = `${this.baseURL}/${collection}`;
         const updateData = { ...data, id };
         const options = {
@@ -93,7 +72,7 @@ class QueryAPI {
     }
 
     // DELETE item
-    async deleteItem(collection, id) {
+    async delete(collection, id) {
         const url = `${this.baseURL}/${collection}?id=${encodeURIComponent(id)}`;
         const options = {
             method: 'DELETE'
@@ -103,29 +82,22 @@ class QueryAPI {
     }
 
     // UPLOAD file
-    async uploadFile(file, path = 'uploads') {
+    async upload(files, path = 'uploads') {
         const formData = new FormData();
-        formData.append('file', file);
-        formData.append('path', path);
+
+        // Handle single file or multiple files
+        if (Array.isArray(files)) {
+            files.forEach(file => formData.append('files', file));
+        } else {
+            formData.append('files', files);
+        }
 
         const options = {
             method: 'POST',
-            body: formData,
-            headers: {} // Remove Content-Type header to let browser set it for FormData
+            body: formData
         };
 
-        // Remove Content-Type from default headers for FormData
-        const response = await authenticatedFetch(this.uploadURL, {
-            ...options,
-            headers: {
-                // Don't set Content-Type for FormData
-                ...Object.fromEntries(
-                    Object.entries(options.headers || {}).filter(
-                        ([key]) => key.toLowerCase() !== 'content-type'
-                    )
-                )
-            }
-        });
+        const response = await authenticatedFetch(this.uploadURL, options);
 
         if (!response) {
             throw new Error('No response received');
@@ -140,12 +112,12 @@ class QueryAPI {
         return result.data;
     }
 
-    // Batch operations
+    // Batch create
     async batchCreate(collection, items) {
         const results = [];
         for (const item of items) {
             try {
-                const result = await this.createItem(collection, item);
+                const result = await this.create(collection, item);
                 results.push({ success: true, data: result });
             } catch (error) {
                 results.push({ success: false, error: error.message, data: item });
@@ -154,11 +126,12 @@ class QueryAPI {
         return results;
     }
 
+    // Batch update
     async batchUpdate(collection, updates) {
         const results = [];
         for (const update of updates) {
             try {
-                const result = await this.updateItem(collection, update.id, update.data);
+                const result = await this.update(collection, update.id, update.data);
                 results.push({ success: true, data: result, id: update.id });
             } catch (error) {
                 results.push({ success: false, error: error.message, id: update.id });
@@ -167,11 +140,12 @@ class QueryAPI {
         return results;
     }
 
+    // Batch delete
     async batchDelete(collection, ids) {
         const results = [];
         for (const id of ids) {
             try {
-                const result = await this.deleteItem(collection, id);
+                const result = await this.delete(collection, id);
                 results.push({ success: true, data: result, id });
             } catch (error) {
                 results.push({ success: false, error: error.message, id });
@@ -179,104 +153,23 @@ class QueryAPI {
         }
         return results;
     }
-
-    // Advanced queries (if your DBService supports them)
-    async searchItems(collection, searchParams) {
-        const queryString = new URLSearchParams(searchParams).toString();
-        const url = `${this.baseURL}/${collection}?${queryString}`;
-        const result = await this.makeRequest(url);
-        return result.data;
-    }
-
-    // Helper methods for common use cases
-    async getUserById(userId) {
-        return await this.getItem('users', userId);
-    }
-
-    async getUsersByRole(role) {
-        return await this.getItemByKey('users', 'role', role);
-    }
-
-    async getUsersByEmail(email) {
-        return await this.getItemByKey('users', 'email', email);
-    }
-
-    async getCustomers(email) {
-        return await this.getAllItems('orders');
-    }
-
-    async getAllUsers() {
-        return await this.getAllItems('users');
-    }
-
-    async createUser(userData) {
-        return await this.createItem('users', userData);
-    }
-
-    async updateUser(userId, userData) {
-        return await this.updateItem('users', userId, userData);
-    }
-
-    async deleteUser(userId) {
-        return await this.deleteItem('users', userId);
-    }
-
-    async getById(collection, id) {
-        return await this.getItem(collection, id);
-    }
-
-    async getByField(collection, field, value) {
-        return await this.getItemByKey(collection, field, value);
-    }
-
-    async create(data, collection) {
-        return await this.createItem(collection, data);
-    }
-
-    async update(collection, id, data) {
-        return await this.updateItem(collection, id, data);
-    }
-
-    async delete(collection, id) {
-        return await this.deleteItem(collection, id);
-    }
-
-    async upload(file, path) {
-        return await this.uploadFile(file, path);
-    }
 }
 
 // Create and export a singleton instance
 const queryAPI = new QueryAPI();
 
-// Export individual functions for convenience
-export const getItem = (collection, id) => queryAPI.getItem(collection, id);
-export const getItemByKey = (collection, key, value) => queryAPI.getItemByKey(collection, key, value);
-export const createItem = (collection, data) => queryAPI.createItem(collection, data);
-export const updateItem = (collection, id, data) => queryAPI.updateItem(collection, id, data);
-export const deleteItem = (collection, id) => queryAPI.deleteItem(collection, id);
+// Export individual functions
+export const get = (collection, id) => queryAPI.get(collection, id);
+export const getAll = (collection, isPublic = false) => queryAPI.getAll(collection, isPublic);
+export const create = (collection, data) => queryAPI.create(collection, data);
+export const update = (collection, id, data) => queryAPI.update(collection, id, data);
+export const deleteItem = (collection, id) => queryAPI.delete(collection, id);
+export const upload = (files, path) => queryAPI.upload(files, path);
 
 // Export batch operations
 export const batchCreate = (collection, items) => queryAPI.batchCreate(collection, items);
 export const batchUpdate = (collection, updates) => queryAPI.batchUpdate(collection, updates);
 export const batchDelete = (collection, ids) => queryAPI.batchDelete(collection, ids);
-
-// Export user-specific helpers
-export const getUserById = (userId) => queryAPI.getUserById(userId);
-export const getUsersByRole = (role) => queryAPI.getUsersByRole(role);
-export const getUsersByEmail = (email) => queryAPI.getUsersByEmail(email);
-export const getAllUsers = () => queryAPI.getAllUsers();
-export const createUser = (userData) => queryAPI.createUser(userData);
-export const updateUser = (userId, userData) => queryAPI.updateUser(userId, userData);
-export const deleteUser = (userId) => queryAPI.deleteUser(userId);
-
-// Export generic helpers
-export const getAll = (collection, arrayOpt, isPublic) => queryAPI.getAllItems(collection, arrayOpt, isPublic);
-export const getById = (collection, id) => queryAPI.getById(collection, id);
-export const getByField = (collection, field, value) => queryAPI.getByField(collection, field, value);
-export const create = (collection, data) => queryAPI.create(collection, data);
-export const update = (collection, id, data) => queryAPI.update(collection, id, data);
-export const upload = (file, path) => queryAPI.upload(file, path);
 
 // Export the main class instance
 export default queryAPI;

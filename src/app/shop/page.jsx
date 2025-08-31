@@ -35,11 +35,11 @@ function Shop() {
             setLoading(true);
             setError(null);
 
-            const response = await getAll('catalog', true, true);
+            const response = await getAll('catalog', null, true);
 
-            if (response) {
+            if (response && response.success) {
                 // Transform the data to match component expectations
-                const transformedData = response.map(item => ({
+                const transformedData = response.data.map(item => ({
                     ...item,
                     // Add inStock property based on stock number
                     inStock: item.stock !== 0,

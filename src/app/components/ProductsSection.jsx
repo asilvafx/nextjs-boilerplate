@@ -15,8 +15,8 @@ const ProductsSection = () => {
             setLoading(true);
             setError(null);
 
-            const response = await getAll('catalog', false, true);
-console.log(response);
+            const response = await getAll('catalog', null, true);
+
             if (response && response.success) {
                 // Transform the data to match component expectations
                 const transformedData = response.data.map(item => ({

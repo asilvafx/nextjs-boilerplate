@@ -37,6 +37,9 @@ async function handleGet(request, { params }) {
         const id = url.searchParams.get('id');
         const key = url.searchParams.get('key');
         const value = url.searchParams.get('value');
+        const page = parseInt(url.searchParams.get('page')) || 1;
+        const limit = parseInt(url.searchParams.get('limit')) || 10;
+        const search = url.searchParams.get('search');
 
         if (!slug) {
             return NextResponse.json(
@@ -78,9 +81,67 @@ async function handleGet(request, { params }) {
             }
         }
 
+        
+        const response = result;
+
+        // Handle different response formats
+        let items = [];
+        if (Array.isArray(response)) {
+            items = response;
+        } else if (response && Array.isArray(response.data)) {
+            items = response.data;
+        } else if (response && response.success && Array.isArray(response.data)) {
+            items = response.data;
+        } else if (response && typeof response === 'object') {
+            // Handle object format where keys are IDs and values are items
+            items = Object.entries(response).map(([id, item]) => ({
+                id,
+                ...item
+            }));
+        } else if (response && response.data && typeof response.data === 'object') {
+            // Handle wrapped object format
+            items = Object.entries(response.data).map(([id, item]) => ({
+                id,
+                ...item
+            }));
+        }
+
+        // Search functionality
+        if (search && items.length > 0) {
+            const searchTerm = search.toLowerCase();
+            items = items.filter(item =>
+                    item && (
+                        (item.name && item.name.toLowerCase().includes(searchTerm)) ||
+                        (item.description && item.description.toLowerCase().includes(searchTerm)) ||
+                        (item.category && item.category.toLowerCase().includes(searchTerm))
+                    )
+            );
+        }
+
+        // Sort by created date (newest first) - only if items exist
+        if (items.length > 0) {
+            items.sort((a, b) => {
+                const dateA = a.createdAt ? new Date(a.createdAt) : new Date(0);
+                const dateB = b.createdAt ? new Date(b.createdAt) : new Date(0);
+                return dateB - dateA;
+            });
+        }
+
+        // Pagination
+        const startIndex = (page - 1) * limit;
+        const endIndex = startIndex + limit;
+        const paginatedItems = items.slice(startIndex, endIndex);
+
         return NextResponse.json({
             success: true,
-            data: convertToArray(result)
+            data: paginatedItems,
+            pagination: {
+                currentPage: page,
+                totalItems: items.length,
+                totalPages: Math.ceil(items.length / limit),
+                hasNext: endIndex < items.length,
+                hasPrev: page > 1
+            }
         });
 
     } catch (error) {
