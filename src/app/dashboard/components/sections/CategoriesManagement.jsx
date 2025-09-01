@@ -1,7 +1,7 @@
 // app/dashboard/components/sections/CategoriesManagement.jsx
 "use client"
-import { useState, useEffect } from 'react';
-import { useShopAPI } from '@/lib/shop.js';
+import { useState, useEffect } from 'react'; 
+import { create, getAll } from '@/lib/query.js';
 import { DataTable, StatusBadge, ActionButtons, EmptyState } from '../common/Common';
 import toast, { Toaster } from 'react-hot-toast';
 import {
@@ -22,12 +22,6 @@ const CategoriesManagement = () => {
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
 
-    const {
-        getAllItems,
-        getCategories,
-        create
-    } = useShopAPI();
-
     useEffect(() => {
         loadCategories();
     }, []);
@@ -36,8 +30,8 @@ const CategoriesManagement = () => {
         setLoading(true);
         try {
             const [categoriesResponse, itemsResponse] = await Promise.all([
-                getCategories(),
-                getAllItems({ limit: 1000 })
+                await getAll('categories'),
+                await getAll('catalog', { limit: 1000 })
             ]);
 
             if (categoriesResponse?.success && itemsResponse?.success) {

@@ -92,9 +92,9 @@ const CollectionsManagement = () => {
     const saveCollections = async (updatedCollections) => {
         try {
             // Send the collections array directly
-            await create(updatedCollections, 'collections');
+            const response = await create(updatedCollections, 'collections');
             console.log(response);
-            setCollections(response);
+            setCollections(response.data);
         } catch (err) {
             console.error('Error saving collections:', err);
             throw err;
@@ -744,7 +744,7 @@ const CollectionModal = ({
                                     </div>
                                 )}
                             </div>
- 
+
                         </div>
 
                         {/* Action Buttons */}

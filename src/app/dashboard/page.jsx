@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 // Section Components
-import OverviewSection from './components/sections/OverviewSection';
+import OverviewShop from './components/sections/OverviewShop';
 
 import { LoadingSpinner } from './components/common/Common';
 
@@ -21,7 +21,7 @@ const DashboardPage = () => {
 
     // Render content based on active section
     const renderContent = () => {
-        return <OverviewSection statsCards={statsCards} currentData={currentData} />
+        return <OverviewShop statsCards={statsCards} currentData={currentData} />
     };
 
     if (error) {

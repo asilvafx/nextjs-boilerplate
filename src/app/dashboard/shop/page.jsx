@@ -125,7 +125,7 @@ const DashboardStore = () => {
 
     const tabNavigation = [
         { id: 'overview', label: 'Overview', icon: BarChart3 },
-        { id: 'products', label: 'Products', icon: Package },
+        { id: 'catalog', label: 'Catalog', icon: Package },
         { id: 'categories', label: 'Categories', icon: Tags },
         { id: 'collections', label: 'Collections', icon: Star }
     ];
@@ -139,8 +139,8 @@ const DashboardStore = () => {
         switch (activeTab) {
             case 'overview':
                 return <OverviewContent statsCards={statsCards} onQuickAction={handleQuickAction} />;
-            case 'products':
-                return <ProductsContent />;
+            case 'catalog':
+                return <CatalogContent />;
             case 'categories':
                 return <CategoriesContent />;
             case 'collections':
@@ -274,7 +274,7 @@ const OverviewContent = ({ statsCards, onQuickAction }) => (
 );
 
 // Memoized components to prevent unnecessary re-renders
-const ProductsContent = () => <CatalogManagement />;
+const CatalogContent = () => <CatalogManagement />;
 const CategoriesContent = () => <CategoriesManagement />;
 const CollectionsContent = () => <CollectionsManagement />;
 

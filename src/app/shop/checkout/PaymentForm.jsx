@@ -143,7 +143,7 @@ const PaymentForm = ({ cartTotal, subTotal, shippingCost }) => {
                     currency: paymentIntent.currency,
                     method: paymentIntent.payment_method_types[0],
                     created_at: paymentIntent.created,
-                    status: "processing",
+                    status: "pending",
                     tracking: "",
                     shipping_address: JSON.stringify(shippingAddress),
                     delivery_notes: deliveryNotes,

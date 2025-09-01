@@ -17,7 +17,6 @@ class QueryAPI {
             } else {
                 response = await authenticatedFetch(url, options);
             }
-
             if (!response) {
                 throw new Error('No response received');
             }
@@ -36,6 +35,7 @@ class QueryAPI {
 
     // GET all items from a collection
     async getAll(collection, params={}, isPublic = false) {
+      
         const queryString = new URLSearchParams(params).toString();
         const url = `${this.baseURL}/${collection}${queryString ? `?${queryString}` : ''}`;
         return await this.makeRequest(url, { public: isPublic });
@@ -49,7 +49,7 @@ class QueryAPI {
     }
 
     // POST create new item
-    async create(collection, data) {
+    async create(data, collection) {
         const url = `${this.baseURL}/${collection}`;
         const options = {
             method: 'POST',
@@ -60,7 +60,7 @@ class QueryAPI {
     }
 
     // PUT update item
-    async update(collection, id, data) {
+    async update(id, data, collection) {
         const url = `${this.baseURL}/${collection}`;
         const updateData = { ...data, id };
         const options = {
@@ -72,7 +72,7 @@ class QueryAPI {
     }
 
     // DELETE item
-    async delete(collection, id) {
+    async delete(id, collection) {
         const url = `${this.baseURL}/${collection}?id=${encodeURIComponent(id)}`;
         const options = {
             method: 'DELETE'
@@ -113,7 +113,7 @@ class QueryAPI {
     }
 
     // Batch create
-    async batchCreate(collection, items) {
+    async batchCreate(items, collection) {
         const results = [];
         for (const item of items) {
             try {
@@ -127,7 +127,7 @@ class QueryAPI {
     }
 
     // Batch update
-    async batchUpdate(collection, updates) {
+    async batchUpdate(updates, collection) {
         const results = [];
         for (const update of updates) {
             try {
@@ -141,7 +141,7 @@ class QueryAPI {
     }
 
     // Batch delete
-    async batchDelete(collection, ids) {
+    async batchDelete(ids, collection) {
         const results = [];
         for (const id of ids) {
             try {
@@ -159,11 +159,11 @@ class QueryAPI {
 const queryAPI = new QueryAPI();
 
 // Export individual functions
-export const get = (collection, id) => queryAPI.get(collection, id);
-export const getAll = (collection, isPublic = false) => queryAPI.getAll(collection, isPublic);
-export const create = (collection, data) => queryAPI.create(collection, data);
-export const update = (collection, id, data) => queryAPI.update(collection, id, data);
-export const deleteItem = (collection, id) => queryAPI.delete(collection, id);
+export const get = (id, collection) => queryAPI.get(id, collection);
+export const getAll = (collection, params = {}, isPublic = false) => queryAPI.getAll(collection, params, isPublic);
+export const create = (data, collection) => queryAPI.create(data, collection);
+export const update = (id, data, collection) => queryAPI.update(id, data, collection);
+export const deleteItem = (id, collection) => queryAPI.delete(id, collection);
 export const upload = (files, path) => queryAPI.upload(files, path);
 
 // Export batch operations

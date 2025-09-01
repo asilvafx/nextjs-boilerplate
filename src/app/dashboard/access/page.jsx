@@ -2,6 +2,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { ActionButtons, DataTable, StatusBadge } from '../components/common/Common';
+import SkeletonRow from '../components/skeletons/SkeletonRow';
 import { getAll } from '@/lib/query';
 
 const DashboardUsers = () => {
@@ -17,11 +18,11 @@ const DashboardUsers = () => {
                 setLoading(true);
                 setError(null);
 
-                const response = await getAll('users', true, true); // Fixed: properly await the function
+                const response = await getAll('users', null, true); // Fixed: properly await the function
 
-                if (response) {
+                if (response && response.success) {
                     // Transform data if needed (similar to your shop component)
-                    const transformedUsers = response.map(user => ({
+                    const transformedUsers = response.data.map(user => ({
                         ...user,
                         // Add any transformations needed
                         joined: user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A',
@@ -63,24 +64,6 @@ const DashboardUsers = () => {
         return matchesSearch && matchesRole;
     });
 
-    // Skeleton loading component
-    const SkeletonRow = () => (
-        <tr className="animate-pulse">
-            <td><div className="h-4 bg-gray-300 rounded w-3/4"></div></td>
-            <td><div className="h-4 bg-gray-300 rounded w-full"></div></td>
-            <td><div className="h-4 bg-gray-300 rounded w-1/2"></div></td>
-            <td><div className="h-6 bg-gray-300 rounded-full w-16"></div></td>
-            <td><div className="h-4 bg-gray-300 rounded w-2/3"></div></td>
-            <td>
-                <div className="flex gap-1">
-                    <div className="h-6 w-6 bg-gray-300 rounded"></div>
-                    <div className="h-6 w-6 bg-gray-300 rounded"></div>
-                    <div className="h-6 w-6 bg-gray-300 rounded"></div>
-                </div>
-            </td>
-        </tr>
-    );
-
     return (
         <div className="fade-in">
             <div className="dashboard-card-header">
@@ -115,7 +98,7 @@ const DashboardUsers = () => {
             </div>
 
             {/* Users Table */}
-            <div className="dashboard-card">
+            <div className="p-4 lg:p-6">
                 {error ? (
                     <div className="text-center py-8">
                         <div className="text-red-600 mb-4">
@@ -132,21 +115,20 @@ const DashboardUsers = () => {
                 ) : (
                     <DataTable headers={['Name', 'Email', 'Role', 'Status', 'Joined', 'Actions']}>
                         {loading ? (
-                            // Show skeleton loading rows
-                            Array.from({ length: 5 }).map((_, index) => (
+                            Array.from({ length: 3 }).map((_, index) => (
                                 <SkeletonRow key={index} />
                             ))
                         ) : filteredUsers.length > 0 ? (
                             // Show actual user data
                             filteredUsers.map((user) => (
                                 <tr key={user.id}>
-                                    <td>{user.name || 'N/A'}</td>
-                                    <td>{user.email || 'N/A'}</td>
-                                    <td className="capitalize">{user.role || 'N/A'}</td>
-                                    <td>
+                                    <td data-label="Account name">{user.name || 'N/A'}</td>
+                                    <td data-label="Email">{user.email || 'N/A'}</td>
+                                    <td data-label="Role" className="capitalize">{user.role || 'N/A'}</td>
+                                    <td data-label="Status">
                                         <StatusBadge status={user.status || 'inactive'} />
                                     </td>
-                                    <td>{user.joined}</td>
+                                    <td data-label="Joined at">{user.joined}</td>
                                     <td>
                                         <ActionButtons
                                             onEdit={() => handleEditUser(user.id)}

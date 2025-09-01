@@ -2,12 +2,12 @@
 "use client"
 import { StatsCard, DataTable, StatusBadge } from '../common/Common';
 
-const OverviewSection = ({ statsCards, currentData }) => {
+const OverviewShop = ({ statsCards, currentData }) => {
     return (
         <div className="fade-in">
             <div className="dashboard-card-header">
                 <div>
-                    <h1 className="dashboard-card-title">Dashboard Overview</h1>
+                    <h1 className="dashboard-card-title">Store Overview</h1>
                     <p className="dashboard-card-subtitle">Welcome back! Here's what's happening.</p>
                 </div>
             </div>
@@ -94,4 +94,4 @@ const OverviewSection = ({ statsCards, currentData }) => {
     );
 };
 
-export default OverviewSection;
+export default OverviewShop;

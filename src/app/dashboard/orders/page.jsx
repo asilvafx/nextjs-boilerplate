@@ -1,17 +1,25 @@
 "use client"
 
-import { useState, useEffect } from 'react';
-import { DataTable, StatusBadge } from '../components/common/Common';
-import { getAll } from '@/lib/query.js';
-import { Eye, Edit3, Trash2, FileText, Truck, X, Check, AlertTriangle } from 'lucide-react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { getAll, get, update, deleteItem, create } from '@/lib/query.js';
+import { AlertTriangle, X } from 'lucide-react';
+
+// Import the new components
+import OrdersQuickStats from '../components/sections/OrdersQuickStats';
+import OrdersFilterTabs from '../components/sections/OrdersFilterTabs';
+import OrdersTable from '../components/sections/OrdersTable';
+import CreateOrderForm from '../components/sections/CreateOrderForm';
+import {
+    Modal,
+    OrderPreview,
+    OrderEdit,
+    DeleteConfirmation,
+    InvoiceViewer
+} from '../components/modals/OrdersModal';
 
 // Enhanced PDF Generator
 const generatePDF = (order) => {
-    // This would use jsPDF - for demo purposes, we'll simulate the functionality
     console.log('Generating PDF for order:', order.uid);
-
-    // In real implementation, you'd use your existing generatePDF function
-    // For demo, we'll create a mock download
     const mockPDFContent = `Invoice for Order ${order.uid}\nCustomer: ${order.cst_name}\nAmount: €${order.amount}`;
     const blob = new Blob([mockPDFContent], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
@@ -24,94 +32,127 @@ const generatePDF = (order) => {
     URL.revokeObjectURL(url);
 };
 
-const Modal = ({ isOpen, onClose, title, children, size = "md" }) => {
-    if (!isOpen) return null;
-
-    const sizeClasses = {
-        sm: "max-w-md",
-        md: "max-w-2xl",
-        lg: "max-w-4xl",
-        xl: "max-w-6xl"
-    };
-
-    return (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-            <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-                <div className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" onClick={onClose}></div>
-                <div className={`inline-block w-full ${sizeClasses[size]} p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-lg`}>
-                    <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-medium text-gray-900">{title}</h3>
-                        <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
-                            <X className="w-6 h-6" />
-                        </button>
-                    </div>
-                    {children}
-                </div>
-            </div>
-        </div>
-    );
-};
-
 const DashboardOrders = () => {
+    // State management
     const [orders, setOrders] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [selectedOrder, setSelectedOrder] = useState(null);
+    const [actionLoading, setActionLoading] = useState(false);
+
+    // Filter state
+    const [activeFilter, setActiveFilter] = useState('pending');
+
+    // Modal states
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
     const [isInvoiceOpen, setIsInvoiceOpen] = useState(false);
+    const [isCreateOpen, setIsCreateOpen] = useState(false);
+
+    // Form states
     const [deleteConfirmation, setDeleteConfirmation] = useState('');
     const [editForm, setEditForm] = useState({});
+    const [createForm, setCreateForm] = useState({
+        cst_name: '',
+        cst_email: '',
+        items: [{ name: '', price: 0, quantity: 1, sku: '', image: '' }],
+        shipping: 5.99,
+        currency: 'eur',
+        method: 'card',
+        status: 'pending',
+        shipping_address: {
+            name: '',
+            street: '',
+            apartment: '',
+            city: '',
+            state: '',
+            zip: '',
+            country: 'FR',
+            phone: ''
+        },
+        tracking: '',
+        delivery_notes: '',
+        ref: ''
+    });
 
-    // Mock data for demo - replace with your actual data fetching
-    useEffect(() => {
-        fetchOrders();
+    // Fetch orders from API
+    const fetchOrders = useCallback(async () => {
+        setError(null);
+        setLoading(true);
+        try {
+            const response = await getAll('orders');
+            console.log('Orders response:', response);
+            if (response && response.success) {
+                setOrders(response.data || []);
+            } else {
+                setOrders([]);
+                setError('Failed to load orders');
+            }
+        } catch (err) {
+            console.error('Error fetching orders:', err);
+            setError(`Failed to load orders: ${err.message}`);
+            setOrders([]);
+        } finally {
+            setLoading(false);
+        }
     }, []);
 
-    const fetchOrders = async () => {
+    // Load orders on component mount
+    useEffect(() => {
+        fetchOrders();
+    }, [fetchOrders]);
 
-        const ordersData = await getAll('orders', true);
-        console.log(ordersData);
+    // Filter orders based on active filter
+    const filteredOrders = useMemo(() => {
+        if (activeFilter === 'all') {
+            return orders;
+        }
+        return orders.filter(order => order.status === activeFilter);
+    }, [orders, activeFilter]);
 
-
-        //setOrders(ordersData.data);
-    }
-
-    const formatDate = (timestamp) => {
-        if (!timestamp) return 'N/A';
-        const date = typeof timestamp === 'number'
-            ? new Date(timestamp > 1000000000000 ? timestamp : timestamp * 1000)
-            : new Date(timestamp);
-        return date.toLocaleDateString('fr-FR');
-    };
-
-    const formatCurrency = (amount, currency = 'eur') => {
-        return new Intl.NumberFormat('fr-FR', {
-            style: 'currency',
-            currency: currency.toUpperCase()
-        }).format(amount);
-    };
-
-    const parseJSON = (jsonString, fallback = {}) => {
+    // Enhanced preview handler - fetch fresh data
+    const handlePreview = async (order) => {
         try {
-            return typeof jsonString === 'string' ? JSON.parse(jsonString) : jsonString || fallback;
-        } catch {
-            return fallback;
+            setActionLoading(true);
+            const freshOrderData = await get('orders', order.id);
+            setSelectedOrder(freshOrderData || order);
+            setIsPreviewOpen(true);
+        } catch (error) {
+            console.error('Error fetching order details:', error);
+            setSelectedOrder(order);
+            setIsPreviewOpen(true);
+        } finally {
+            setActionLoading(false);
         }
     };
 
-    const handlePreview = (order) => {
-        setSelectedOrder(order);
-        setIsPreviewOpen(true);
-    };
+    // Enhanced edit handler
+    const handleEdit = async (order) => {
+        try {
+            setActionLoading(true);
+            const freshOrderData = await get('orders', order.id);
+            const orderToEdit = freshOrderData || order;
 
-    const handleEdit = (order) => {
-        setSelectedOrder(order);
-        setEditForm({
-            status: order.status,
-            tracking: order.tracking || '',
-            delivery_notes: order.delivery_notes || ''
-        });
-        setIsEditOpen(true);
+            setSelectedOrder(orderToEdit);
+            setEditForm({
+                status: orderToEdit.status || 'pending',
+                tracking: orderToEdit.tracking || '',
+                delivery_notes: orderToEdit.delivery_notes || ''
+            });
+            setIsEditOpen(true);
+        } catch (error) {
+            console.error('Error fetching order for edit:', error);
+            setSelectedOrder(order);
+            setEditForm({
+                status: order.status || 'pending',
+                tracking: order.tracking || '',
+                delivery_notes: order.delivery_notes || ''
+            });
+            setIsEditOpen(true);
+        } finally {
+            setActionLoading(false);
+        }
     };
 
     const handleDelete = (order) => {
@@ -125,363 +166,288 @@ const DashboardOrders = () => {
         setIsInvoiceOpen(true);
     };
 
+    const handleCreateOrder = () => {
+        setCreateForm({
+            cst_name: '',
+            cst_email: '',
+            items: [{ name: '', price: 0, quantity: 1, sku: '', image: '' }],
+            shipping: 5.99,
+            currency: 'eur',
+            method: 'card',
+            status: 'pending',
+            shipping_address: {
+                name: '',
+                street: '',
+                apartment: '',
+                city: '',
+                state: '',
+                zip: '',
+                country: 'FR',
+                phone: ''
+            },
+            tracking: '',
+            delivery_notes: '',
+            ref: ''
+        });
+        setIsCreateOpen(true);
+    };
+
+    // Enhanced delete function
     const confirmDelete = async () => {
-        if (deleteConfirmation === 'delete') {
-            try {
-                // Here you would call your delete API
-                // await deleteItem('orders', selectedOrder.id);
-                setOrders(orders.filter(o => o.id !== selectedOrder.id));
-                setIsDeleteOpen(false);
-                setSelectedOrder(null);
-                console.log('Order deleted:', selectedOrder.uid);
-            } catch (error) {
-                console.error('Error deleting order:', error);
-            }
+        if (deleteConfirmation !== 'delete') {
+            return;
+        }
+
+        try {
+            setActionLoading(true);
+            await deleteItem(selectedOrder.id, 'orders');
+
+            setOrders(prevOrders =>
+                prevOrders.filter(order => order.id !== selectedOrder.id)
+            );
+
+            setIsDeleteOpen(false);
+            setSelectedOrder(null);
+            setDeleteConfirmation('');
+
+            console.log('Order deleted successfully:', selectedOrder.uid);
+        } catch (error) {
+            console.error('Error deleting order:', error);
+            setError(`Failed to delete order: ${error.message}`);
+        } finally {
+            setActionLoading(false);
         }
     };
 
+    // Enhanced save edit function
     const saveEdit = async () => {
+        if (!selectedOrder) return;
+
         try {
-            // Here you would call your update API
-            // await updateItem('orders', selectedOrder.id, editForm);
-            setOrders(orders.map(o =>
-                o.id === selectedOrder.id
-                    ? { ...o, ...editForm }
-                    : o
-            ));
+            setActionLoading(true);
+
+            const updatedOrder = await update(selectedOrder.id, editForm, 'orders');
+
+            setOrders(prevOrders =>
+                prevOrders.map(order =>
+                    order.id === selectedOrder.id
+                        ? { ...order, ...updatedOrder }
+                        : order
+                )
+            );
+
             setIsEditOpen(false);
-            console.log('Order updated:', selectedOrder.uid, editForm);
+            setSelectedOrder(null);
+            setEditForm({});
+
+            console.log('Order updated successfully:', selectedOrder.uid);
         } catch (error) {
             console.error('Error updating order:', error);
+            setError(`Failed to update order: ${error.message}`);
+        } finally {
+            setActionLoading(false);
         }
     };
 
-    const OrderPreview = ({ order }) => {
-        const items = parseJSON(order.items, []);
-        const address = parseJSON(order.shipping_address, {});
+    // Create new order function
+    const createOrder = async () => {
+        try {
+            setActionLoading(true);
 
-        return (
-            <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-4">
-                        <div>
-                            <h4 className="font-semibold text-gray-900">Informations de commande</h4>
-                            <div className="mt-2 space-y-1 text-sm">
-                                <p><span className="font-medium">ID:</span> {order.uid}</p>
-                                <p><span className="font-medium">Date:</span> {formatDate(order.created_at)}</p>
-                                <p><span className="font-medium">Statut:</span> <StatusBadge status={order.status} /></p>
-                                <p><span className="font-medium">Méthode:</span> {order.method}</p>
-                                <p><span className="font-medium">Transaction:</span> {order.tx}</p>
-                            </div>
-                        </div>
+            const timestamp = Math.floor(Date.now() / 1000);
+            const randomNum = Math.floor(Math.random() * 1000);
+            const uid = `ORD-${timestamp}-${randomNum}`;
+            const tx = `manual_${timestamp}_${Math.random().toString(36).substr(2, 9)}`;
 
-                        <div>
-                            <h4 className="font-semibold text-gray-900">Client</h4>
-                            <div className="mt-2 space-y-1 text-sm">
-                                <p><span className="font-medium">Nom:</span> {order.cst_name}</p>
-                                <p><span className="font-medium">Email:</span> {order.cst_email}</p>
-                                {address.phone && <p><span className="font-medium">Téléphone:</span> {address.phone}</p>}
-                            </div>
-                        </div>
+            const subtotal = createForm.items.reduce((sum, item) =>
+                sum + (parseFloat(item.price) * parseInt(item.quantity)), 0
+            );
 
-                        <div>
-                            <h4 className="font-semibold text-gray-900">Livraison</h4>
-                            <div className="mt-2 space-y-1 text-sm">
-                                {address.street && <p>{address.street}</p>}
-                                {address.apartment && <p>{address.apartment}</p>}
-                                {(address.city || address.zip) && <p>{address.zip} {address.city}</p>}
-                                {address.state && <p>{address.state}</p>}
-                                {address.country && <p>{address.country}</p>}
-                                {order.tracking && <p><span className="font-medium">Suivi:</span> {order.tracking}</p>}
-                                {order.delivery_notes && <p><span className="font-medium">Notes:</span> {order.delivery_notes}</p>}
-                            </div>
-                        </div>
-                    </div>
+            const orderData = {
+                uid,
+                tx,
+                cst_email: createForm.cst_email,
+                cst_name: createForm.cst_name,
+                items: JSON.stringify(createForm.items.map(item => ({
+                    id: Math.floor(Math.random() * 10000),
+                    name: item.name,
+                    price: parseFloat(item.price),
+                    quantity: parseInt(item.quantity),
+                    sku: item.sku || null,
+                    image: item.image || "https://placehold.co/300x300"
+                }))),
+                amount: subtotal + parseFloat(createForm.shipping),
+                subtotal: subtotal.toString(),
+                shipping: parseFloat(createForm.shipping),
+                shipping_address: JSON.stringify({
+                    name: createForm.shipping_address.name || createForm.cst_name,
+                    street: createForm.shipping_address.street,
+                    apartment: createForm.shipping_address.apartment,
+                    city: createForm.shipping_address.city,
+                    state: createForm.shipping_address.state,
+                    zip: createForm.shipping_address.zip,
+                    country: createForm.shipping_address.country,
+                    phone: createForm.shipping_address.phone
+                }),
+                currency: createForm.currency,
+                method: createForm.method,
+                status: createForm.status,
+                created_at: timestamp,
+                tracking: createForm.tracking,
+                delivery_notes: createForm.delivery_notes,
+                ref: createForm.ref
+            };
 
-                    <div className="space-y-4">
-                        <div>
-                            <h4 className="font-semibold text-gray-900">Articles</h4>
-                            <div className="mt-2 space-y-2">
-                                {items.map((item, index) => (
-                                    <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                                        <div className="flex-1">
-                                            <p className="font-medium">{item.name}</p>
-                                            <p className="text-sm text-gray-600">Quantité: {item.quantity}</p>
-                                        </div>
-                                        <div className="text-right">
-                                            <p className="font-medium">{formatCurrency(item.price * item.quantity)}</p>
-                                            <p className="text-sm text-gray-600">{formatCurrency(item.price)} × {item.quantity}</p>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
+            const newOrder = await create(orderData, 'orders');
 
-                        <div className="border-t pt-4">
-                            <h4 className="font-semibold text-gray-900">Récapitulatif</h4>
-                            <div className="mt-2 space-y-1 text-sm">
-                                <div className="flex justify-between">
-                                    <span>Sous-total:</span>
-                                    <span>{formatCurrency(parseFloat(order.subtotal || 0))}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span>Livraison:</span>
-                                    <span>{formatCurrency(order.shipping || 0)}</span>
-                                </div>
-                                <div className="flex justify-between font-semibold border-t pt-2">
-                                    <span>Total:</span>
-                                    <span>{formatCurrency(order.amount)}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        );
+            setOrders(prevOrders => [newOrder, ...prevOrders]);
+
+            closeModal('create');
+
+            console.log('Order created successfully:', uid);
+        } catch (error) {
+            console.error('Error creating order:', error);
+            setError(`Failed to create order: ${error.message}`);
+        } finally {
+            setActionLoading(false);
+        }
     };
 
-    const OrderEdit = ({ order, form, setForm }) => (
-        <div className="space-y-4">
-            <div>
-                <label className="block text-sm font-medium text-gray-700">Statut de la commande</label>
-                <select
-                    value={form.status}
-                    onChange={(e) => setForm({ ...form, status: e.target.value })}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                >
-                    <option value="pending">En attente</option>
-                    <option value="confirmed">Confirmée</option>
-                    <option value="processing">En cours</option>
-                    <option value="shipped">Expédiée</option>
-                    <option value="delivered">Livrée</option>
-                    <option value="cancelled">Annulée</option>
-                    <option value="refunded">Remboursée</option>
-                </select>
-            </div>
-
-            <div>
-                <label className="block text-sm font-medium text-gray-700">Numéro de suivi</label>
-                <input
-                    type="text"
-                    value={form.tracking}
-                    onChange={(e) => setForm({ ...form, tracking: e.target.value })}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                    placeholder="Ex: FR123456789"
-                />
-            </div>
-
-            <div>
-                <label className="block text-sm font-medium text-gray-700">Notes de livraison</label>
-                <textarea
-                    value={form.delivery_notes}
-                    onChange={(e) => setForm({ ...form, delivery_notes: e.target.value })}
-                    rows={3}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                    placeholder="Instructions spéciales pour la livraison..."
-                />
-            </div>
-
-            <div className="flex justify-end space-x-3">
-                <button
-                    onClick={() => setIsEditOpen(false)}
-                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
-                >
-                    Annuler
-                </button>
-                <button
-                    onClick={saveEdit}
-                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
-                >
-                    Enregistrer
-                </button>
-            </div>
-        </div>
-    );
-
-    const InvoiceViewer = ({ order }) => (
-        <div className="space-y-6">
-            <div className="bg-white p-8 rounded-lg border" style={{ fontFamily: 'Arial, sans-serif' }}>
-                <div className="border-b pb-4 mb-6">
-                    <div className="flex justify-between items-start">
-                        <div>
-                            <h1 className="text-2xl font-bold">LOST-FOREVER</h1>
-                            <p className="text-gray-600">www.lost-forever.com</p>
-                            <p className="text-gray-600">Boutique de vêtements</p>
-                        </div>
-                        <div className="text-right">
-                            <h2 className="text-xl font-bold">FACTURE</h2>
-                            <p>N° {order.uid}</p>
-                            <p>{formatDate(order.created_at)}</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-8 mb-6">
-                    <div>
-                        <h3 className="font-semibold mb-2">INFORMATIONS CLIENT</h3>
-                        <p>{order.cst_name}</p>
-                        <p>{order.cst_email}</p>
-                    </div>
-                    <div>
-                        <h3 className="font-semibold mb-2">ADRESSE DE LIVRAISON</h3>
-                        {(() => {
-                            const address = parseJSON(order.shipping_address, {});
-                            return (
-                                <>
-                                    <p>{address.name || order.cst_name}</p>
-                                    {address.street && <p>{address.street}</p>}
-                                    {(address.zip || address.city) && <p>{address.zip} {address.city}</p>}
-                                    {address.country && <p>{address.country}</p>}
-                                </>
-                            );
-                        })()}
-                    </div>
-                </div>
-
-                <div className="mb-6">
-                    <h3 className="font-semibold mb-4">DÉTAIL DE LA COMMANDE</h3>
-                    <table className="w-full">
-                        <thead>
-                        <tr className="border-b">
-                            <th className="text-left py-2">Article</th>
-                            <th className="text-center py-2">Qté</th>
-                            <th className="text-right py-2">Prix U.</th>
-                            <th className="text-right py-2">Total</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {parseJSON(order.items, []).map((item, index) => (
-                            <tr key={index} className="border-b">
-                                <td className="py-2">{item.name}</td>
-                                <td className="text-center py-2">{item.quantity}</td>
-                                <td className="text-right py-2">{formatCurrency(item.price)}</td>
-                                <td className="text-right py-2">{formatCurrency(item.price * item.quantity)}</td>
-                            </tr>
-                        ))}
-                        </tbody>
-                    </table>
-                </div>
-
-                <div className="flex justify-end">
-                    <div className="w-64">
-                        <div className="flex justify-between py-1">
-                            <span>Sous-total:</span>
-                            <span>{formatCurrency(parseFloat(order.subtotal || 0))}</span>
-                        </div>
-                        <div className="flex justify-between py-1">
-                            <span>Frais de port:</span>
-                            <span>{formatCurrency(order.shipping || 0)}</span>
-                        </div>
-                        <div className="flex justify-between py-1">
-                            <span>TVA (20%):</span>
-                            <span>Incluse</span>
-                        </div>
-                        <div className="flex justify-between py-2 border-t font-semibold">
-                            <span>TOTAL:</span>
-                            <span>{formatCurrency(order.amount)}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div className="flex justify-center space-x-4">
-                <button
-                    onClick={() => window.print()}
-                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
-                >
-                    Imprimer
-                </button>
-                <button
-                    onClick={() => generatePDF(order)}
-                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
-                >
-                    Télécharger PDF
-                </button>
-            </div>
-        </div>
-    );
+    // Close modals and reset state
+    const closeModal = (modalType) => {
+        switch (modalType) {
+            case 'preview':
+                setIsPreviewOpen(false);
+                break;
+            case 'edit':
+                setIsEditOpen(false);
+                setEditForm({});
+                break;
+            case 'create':
+                setIsCreateOpen(false);
+                setCreateForm({
+                    cst_name: '',
+                    cst_email: '',
+                    items: [{ name: '', price: 0, quantity: 1, sku: '', image: '' }],
+                    shipping: 5.99,
+                    currency: 'eur',
+                    method: 'card',
+                    status: 'pending',
+                    shipping_address: {
+                        name: '',
+                        street: '',
+                        apartment: '',
+                        city: '',
+                        state: '',
+                        zip: '',
+                        country: 'FR',
+                        phone: ''
+                    },
+                    tracking: '',
+                    delivery_notes: '',
+                    ref: ''
+                });
+                break;
+            case 'delete':
+                setIsDeleteOpen(false);
+                setDeleteConfirmation('');
+                break;
+            case 'invoice':
+                setIsInvoiceOpen(false);
+                break;
+        }
+        setSelectedOrder(null);
+    };
 
     return (
-        <div className="space-y-6">
-            <div className="dashboard-card">
-                <div className="dashboard-card-header">
-                    <div>
-                        <h1 className="dashboard-card-header">Gestion des Commandes</h1>
-                        <p className="dashboard-card-subtitle">
-                            Suivre et gérer les commandes clients ({orders.length} total)
-                        </p>
-                    </div>
+        <div className="fade-in">
+            <div className="dashboard-card-header">
+                <div>
+                    <h1 className="dashboard-card-title">Gestion des Commandes</h1>
+                    <p className="dashboard-card-subtitle">Gérez vos commandes clients et leur statut</p>
                 </div>
+                <button
+                    className="button primary"
+                    onClick={handleCreateOrder}
+                >
+                    Nouvelle Commande
+                </button>
+            </div>
 
-                <div className="p-6">
-                    {orders.length === 0 ? (
-                        <p className="text-gray-500 text-center py-8">Aucune commande trouvée.</p>
-                    ) : (
-                        <DataTable headers={['Commande', 'Client', 'Produit', 'Montant', 'Date', 'Statut', 'Actions']}>
-                            {orders.map((order) => (
-                                <tr key={order.key} className="hover:bg-gray-50">
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-mono">
-                                        #{order.uid}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm font-medium text-gray-900">{order.cst_name}</div>
-                                        <div className="text-sm text-gray-500">{order.cst_email}</div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        {parseJSON(order.items, [])[0]?.name || 'N/A'}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                        {formatCurrency(order.amount, order.currency)}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {formatDate(order.created_at)}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <StatusBadge status={order.status} />
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <div className="flex space-x-2">
-                                            <button
-                                                onClick={() => handlePreview(order)}
-                                                className="text-blue-600 hover:text-blue-900"
-                                                title="Voir les détails"
-                                            >
-                                                <Eye className="w-4 h-4" />
-                                            </button>
-                                            <button
-                                                onClick={() => handleEdit(order)}
-                                                className="text-green-600 hover:text-green-900"
-                                                title="Modifier"
-                                            >
-                                                <Edit3 className="w-4 h-4" />
-                                            </button>
-                                            <button
-                                                onClick={() => handleInvoice(order)}
-                                                className="text-purple-600 hover:text-purple-900"
-                                                title="Facture"
-                                            >
-                                                <FileText className="w-4 h-4" />
-                                            </button>
-                                            <button
-                                                onClick={() => handleDelete(order)}
-                                                className="text-red-600 hover:text-red-900"
-                                                title="Supprimer"
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </DataTable>
+            {/* Quick Stats */}
+            <OrdersQuickStats orders={orders} />
+
+            <div className="w-full">
+                <div className="p-4 lg:p-6">
+                    {error && (
+                        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md flex items-center justify-between">
+                            <div className="flex items-center space-x-2">
+                                <AlertTriangle className="w-5 h-5 text-red-500" />
+                                <p className="text-sm text-red-600">{error}</p>
+                            </div>
+                            <button
+                                onClick={() => setError(null)}
+                                className="text-red-500 hover:text-red-700"
+                            >
+                                <X className="w-4 h-4" />
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Filter Tabs */}
+                    <OrdersFilterTabs
+                        orders={orders}
+                        activeFilter={activeFilter}
+                        onFilterChange={setActiveFilter}
+                    />
+
+                    {/* Orders Table */}
+                    <OrdersTable
+                        orders={filteredOrders}
+                        loading={loading}
+                        actionLoading={actionLoading}
+                        onPreview={handlePreview}
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
+                        onInvoice={handleInvoice}
+                    />
+
+                    {/* Refresh button if no orders */}
+                    {!loading && orders.length === 0 && (
+                        <div className="text-center mt-4">
+                            <button
+                                onClick={fetchOrders}
+                                className="text-sm text-blue-600 hover:text-blue-800 underline"
+                                disabled={loading}
+                            >
+                                {loading ? 'Chargement...' : 'Actualiser'}
+                            </button>
+                        </div>
                     )}
                 </div>
             </div>
 
+            {/* Create Order Modal */}
+            <Modal
+                isOpen={isCreateOpen}
+                onClose={() => closeModal('create')}
+                title="Créer une nouvelle commande"
+                size="xl"
+            >
+                <CreateOrderForm
+                    form={createForm}
+                    setForm={setCreateForm}
+                    onCreate={createOrder}
+                    onCancel={() => closeModal('create')}
+                    actionLoading={actionLoading}
+                    error={error}
+                />
+            </Modal>
+
             {/* Preview Modal */}
             <Modal
                 isOpen={isPreviewOpen}
-                onClose={() => setIsPreviewOpen(false)}
+                onClose={() => closeModal('preview')}
                 title={`Détails de la commande ${selectedOrder?.uid}`}
                 size="lg"
             >
@@ -491,7 +457,7 @@ const DashboardOrders = () => {
             {/* Edit Modal */}
             <Modal
                 isOpen={isEditOpen}
-                onClose={() => setIsEditOpen(false)}
+                onClose={() => closeModal('edit')}
                 title={`Modifier la commande ${selectedOrder?.uid}`}
             >
                 {selectedOrder && (
@@ -499,6 +465,10 @@ const DashboardOrders = () => {
                         order={selectedOrder}
                         form={editForm}
                         setForm={setEditForm}
+                        onSave={saveEdit}
+                        onCancel={() => closeModal('edit')}
+                        actionLoading={actionLoading}
+                        error={error}
                     />
                 )}
             </Modal>
@@ -506,60 +476,35 @@ const DashboardOrders = () => {
             {/* Delete Confirmation Modal */}
             <Modal
                 isOpen={isDeleteOpen}
-                onClose={() => setIsDeleteOpen(false)}
+                onClose={() => closeModal('delete')}
                 title="Confirmer la suppression"
             >
-                <div className="space-y-4">
-                    <div className="flex items-center space-x-3">
-                        <AlertTriangle className="w-8 h-8 text-red-500" />
-                        <div>
-                            <p className="text-sm text-gray-900">
-                                Vous êtes sur le point de supprimer définitivement la commande{' '}
-                                <span className="font-mono font-medium">{selectedOrder?.uid}</span>.
-                            </p>
-                            <p className="text-sm text-gray-600">Cette action est irréversible.</p>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Tapez <span className="font-mono bg-gray-100 px-1 rounded">delete</span> pour confirmer:
-                        </label>
-                        <input
-                            type="text"
-                            value={deleteConfirmation}
-                            onChange={(e) => setDeleteConfirmation(e.target.value)}
-                            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500"
-                            placeholder="delete"
-                        />
-                    </div>
-
-                    <div className="flex justify-end space-x-3">
-                        <button
-                            onClick={() => setIsDeleteOpen(false)}
-                            className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
-                        >
-                            Annuler
-                        </button>
-                        <button
-                            onClick={confirmDelete}
-                            disabled={deleteConfirmation !== 'delete'}
-                            className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            Supprimer définitivement
-                        </button>
-                    </div>
-                </div>
+                {selectedOrder && (
+                    <DeleteConfirmation
+                        order={selectedOrder}
+                        deleteConfirmation={deleteConfirmation}
+                        setDeleteConfirmation={setDeleteConfirmation}
+                        onConfirm={confirmDelete}
+                        onCancel={() => closeModal('delete')}
+                        actionLoading={actionLoading}
+                        error={error}
+                    />
+                )}
             </Modal>
 
             {/* Invoice Modal */}
             <Modal
                 isOpen={isInvoiceOpen}
-                onClose={() => setIsInvoiceOpen(false)}
+                onClose={() => closeModal('invoice')}
                 title={`Facture ${selectedOrder?.uid}`}
                 size="xl"
             >
-                {selectedOrder && <InvoiceViewer order={selectedOrder} />}
+                {selectedOrder && (
+                    <InvoiceViewer
+                        order={selectedOrder}
+                        onGeneratePDF={generatePDF}
+                    />
+                )}
             </Modal>
         </div>
     );
