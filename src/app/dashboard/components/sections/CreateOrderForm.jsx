@@ -64,7 +64,7 @@ const CreateOrderForm = ({
     };
 
     return (
-        <div className="space-y-6 max-h-[80vh] overflow-y-auto">
+        <div className="space-y-6 max-h-[80vh]">
             {/* Customer Information */}
             <div className="space-y-4">
                 <h4 className="font-semibold  text-gray-300 border-b pb-2">Informations Client</h4>

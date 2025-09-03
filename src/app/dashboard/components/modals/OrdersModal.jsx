@@ -15,8 +15,7 @@ export const Modal = ({ isOpen, onClose, title, children, size = "md" }) => {
 
     return (
         <div className="dashboard-modal-overlay">
-            <div className={`dashboard-modal-content ${sizeClasses[size]}`}>
-                <div className="inline-block w-full p-6">
+            <div className={`dashboard-modal-content ${sizeClasses[size]}`}> 
                     <div className="modal-header">
                         <h3 className="text-lg">{title}</h3>
                         <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
@@ -26,7 +25,6 @@ export const Modal = ({ isOpen, onClose, title, children, size = "md" }) => {
                     <div className="dashboard-modal-body">
                         {children}
                     </div>
-                </div>
             </div>
         </div>
     );

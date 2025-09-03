@@ -8,10 +8,14 @@ import Turnstile from "react-turnstile";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { IoMdEye, IoMdEyeOff } from "react-icons/io";
+import { useAuth } from "@/hooks/useAuth.js";
+import Fingerprint from '@/utils/fingerprint.js';
+import Cookies from 'js-cookie';
 
 const TurnstileKey = process.env.NEXT_PUBLIC_CF_TURNSTILE_API || null;
 
 const RegisterPage = () => {
+    const { login } = useAuth();
     const router = useRouter();
 
     const [name, setName] = useState("");
@@ -24,7 +28,7 @@ const RegisterPage = () => {
     const [isTurnstileVerified, setIsTurnstileVerified] = useState(false);
 
     useEffect(() => {
-        if (isAuthenticated) router.push("/dashboard");
+        if (isAuthenticated) router.push("/");
     }, [isAuthenticated, router]);
 
     const showPassword = () => setShowPwd((prev) => !prev);
@@ -51,6 +55,7 @@ const RegisterPage = () => {
         setLoading(true);
 
         try {
+            const browserUnique = await Fingerprint();
             const passwordHash = btoa(password);
             const response = await fetch('/api/auth/register', {
                 method: 'POST',
@@ -62,6 +67,7 @@ const RegisterPage = () => {
                     name,
                     email,
                     password: passwordHash,
+                    client: browserUnique
                 }),
             });
 
@@ -73,8 +79,17 @@ const RegisterPage = () => {
                 return;
             }
 
+            // Update Redux state with user data
+            login(data.user);
+            Cookies.set("access_data", data.userData, {
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'lax',
+                path: '/',
+                expires: 7 // Days
+            });
+
             toast.success(data.message);
-            router.push("/auth/login");
+            router.push("/");
         } catch (err) {
             toast.error("Registration failed.");
             console.error(err);

@@ -1,5 +1,5 @@
 @import 'tailwindcss';
- 
+
 @layer base {
     html, body {
         background-color: var(--bg-primary);
@@ -172,11 +172,11 @@
 
     /* Header */
     .header {
-        @apply fixed left-0 right-0 top-0 container mx-auto z-50 px-4 md:px-6 lg:px-8;
+        @apply fixed w-full left-0 right-0 top-0 container mx-auto z-50 px-0 md:px-6 lg:px-8;
     }
 
     .header-navbar {
-        @apply relative flex flex-row flex-nowrap items-center justify-between gap-2 sm:gap-4 w-full px-2 sm:px-4 py-3 sm:py-4 rounded-bl-sm rounded-br-sm border-b border-neutral-300/10 backdrop-blur-lg opacity-90 drop-shadow-sm;
+        @apply relative flex flex-row flex-nowrap items-center justify-between gap-2 sm:gap-4 w-full p-4 md:rounded-bl-2xl md:rounded-br-2xl border-b border-neutral-300/10 drop-shadow-sm;
         box-shadow: 0 3px 6px rgba(0,0,0, .1);
         flex-wrap: nowrap;
         background: var(--bg-primary);

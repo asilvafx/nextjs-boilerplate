@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="23e13b79-4cad-474a-ac06-8bf0db48ce45" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/next.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/next.config.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/auth/login/route.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/auth/login/route.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/auth/register/route.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/auth/register/route.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/query/[slug]/route.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/query/[slug]/route.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/auth/login/page.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/auth/login/page.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/auth/register/page.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/auth/register/page.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/components/ProductsSection.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/components/ProductsSection.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/dashboard/access/page.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/dashboard/access/page.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/dashboard/components/common/Common.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/dashboard/components/common/Common.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/dashboard/components/modals/OrdersModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/dashboard/components/modals/OrdersModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/dashboard/components/modals/ProductModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/dashboard/components/modals/ProductModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/dashboard/components/sections/CatalogManagement.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/dashboard/components/sections/CatalogManagement.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/dashboard/components/sections/CategoriesManagement.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/dashboard/components/sections/CategoriesManagement.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/dashboard/components/sections/CollectionsManagement.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/dashboard/components/sections/CollectionsManagement.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/dashboard/components/sections/CreateOrderForm.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/dashboard/components/sections/CreateOrderForm.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/dashboard/components/sections/OrdersQuickStats.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/dashboard/components/sections/OrdersQuickStats.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/dashboard/orders/page.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/dashboard/orders/page.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/styles/Custom.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/styles/Custom.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/styles/Dashboard.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/styles/Dashboard.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/crypto.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/crypto.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/query.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/query.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/store/slices/authSlice.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/store/slices/authSlice.js" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ComposerSettings">
+    <execution />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="PhpWorkspaceProjectConfiguration" interpreter_name="/usr/local/Cellar/php/8.3.11/bin/php" />
+  <component name="ProjectColorInfo"><![CDATA[{
+  "associatedIndex": 4
+}]]></component>
+  <component name="ProjectId" id="31YS32ZoQF8HgZQY3EcRL21iiXN" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="1" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "last_opened_file_path": "/Users/admin/Sites/WEBPACK/nextjs-boilerplate/src/lib",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "prettierjs.PrettierConfiguration.Package": "/Users/admin/Sites/WEBPACK/nextjs-boilerplate/node_modules/prettier",
+    "settings.editor.selected.configurable": "reference.webide.settings.project.settings.php",
+    "ts.external.directory.path": "/Users/admin/Sites/WEBPACK/nextjs-boilerplate/node_modules/typescript/lib"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/lib" />
+      <recent name="$PROJECT_DIR$/src/app/dashboard" />
+      <recent name="$PROJECT_DIR$/src/utils" />
+      <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/src/app" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/app/dashboard/context" />
+      <recent name="$PROJECT_DIR$/src/app/dashboard" />
+      <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/src" />
+      <recent name="$PROJECT_DIR$/src/app/dashboard/components" />
+    </key>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-e768b9ed790e-JavaScript-PS-243.21565.202" />
+        <option value="bundled-php-predefined-a98d8de5180a-5fbe0c30323e-com.jetbrains.php.sharedIndexes-PS-243.21565.202" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="23e13b79-4cad-474a-ac06-8bf0db48ce45" name="Changes" comment="" />
+      <created>1735318663775</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1735318663775</updated>
+      <workItem from="1735318667795" duration="130000" />
+      <workItem from="1755699312880" duration="300508000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/src/data/rest.db.js</url>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/src/scripts/preview-emails.js</url>
+          <line>4</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="4" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/src/app/dashboard/page.jsx</url>
+          <line>3</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="9" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/src/app/dashboard/page.jsx</url>
+          <line>7</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="10" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+</project>

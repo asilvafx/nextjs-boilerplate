@@ -10,6 +10,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { IoMdEye, IoMdEyeOff } from "react-icons/io";
 import { useAuth } from "@/hooks/useAuth.js";
+import Fingerprint from '@/utils/fingerprint.js';
 
 const TurnstileKey = process.env.NEXT_PUBLIC_CF_TURNSTILE_API || null;
 
@@ -26,7 +27,7 @@ const LoginPage = () => {
     const [isTurnstileVerified, setIsTurnstileVerified] = useState(false);
 
     useEffect(() => {
-        if (isAuthenticated) router.push("/dashboard");
+        if (isAuthenticated) router.push("/");
 
         // Check for email in URL params (from reset password redirect)
         const urlParams = new URLSearchParams(window.location.search);
@@ -47,6 +48,7 @@ const LoginPage = () => {
         setLoading(true);
 
         try {
+            const browserUnique = await Fingerprint();
             const passwordHash = btoa(password);
             const response = await fetch('/api/auth/login', {
                 method: 'POST',
@@ -57,7 +59,8 @@ const LoginPage = () => {
                 body: JSON.stringify({
                     email,
                     password: passwordHash,
-                    rememberMe
+                    rememberMe,
+                    client: browserUnique
                 }),
                 credentials: 'include' // Important: Include cookies in the request
             });
@@ -83,7 +86,6 @@ const LoginPage = () => {
             router.push("/");
         } catch (error) {
             toast.error("Login failed.");
-            console.error(error);
             setLoading(false);
         }
     };

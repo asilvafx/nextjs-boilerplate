@@ -1,8 +1,9 @@
 // app/api/auth/login/route.js
 import { NextResponse } from 'next/server';
 import DBService from '@/data/rest.db.js';
-import { encryptHash, decryptHash } from '@/lib/crypto.js';
+import { encryptHash, encryptPassword, validatePassword, generateSalt } from '@/lib/crypto.js';
 import jwt from 'jsonwebtoken';
+import { createWallet, loadConfig } from '@/lib/web3';
 
 export async function POST(request) {
     const authHeader = request.headers.get("x-internal-secret");
@@ -12,9 +13,14 @@ export async function POST(request) {
     }
 
     try {
-        const { email, password, rememberMe } = await request.json();
+        const { email, password, rememberMe, client } = await request.json();
 
         // Validation
+        if(!client) {
+            return NextResponse.json(
+                { error: 'Invalid request: Client mismatch.' }
+            );
+        }
         if (!email || !password) {
             return NextResponse.json(
                 { error: 'Email and Password are required.' }
@@ -31,24 +37,59 @@ export async function POST(request) {
         const inpEmail = email.toLowerCase();
         const user = await DBService.readBy("email", inpEmail, "users");
 
-        if (!user || decryptHash(user.password) !== atob(password)) {
+        const passwordValidated = await validatePassword(atob(password), user.salt, user.password);
+
+        if (!user || !passwordValidated) {
             return NextResponse.json(
                 { error: 'Invalid credentials.' }
             );
         }
 
+        // User validated
+
+        let userLoginData = {
+            ...user,
+            client: client
+        };
+
+        // Load Web3
+        const web3load = await loadConfig.WEB3_ACTIVE;
+        if(web3load){
+            const web3user = user.web3_pk || null;
+            if(!web3user){
+                const salt = generateSalt();
+                const web3create = await createWallet();
+                if(web3create?.web3?.address && web3create?.web3?.privateKey){
+                    const web3data = {
+                        salt: salt,
+                        public_key: web3create.address,
+                        private_key: encryptPassword(web3create.privateKey, salt)
+                    }
+                    userLoginData = {
+                        ...userLoginData,
+                        web3: web3data
+                    };
+                    const userId = await DBService.getItemKey('email', user.email, 'users');
+
+                    await DBService.update(userId, {web3: web3data}, 'users');
+                }
+            }
+        }
+
         // Remove password from response
-        const { password: _, ...userWithoutPassword } = user;
+        const { salt: _salt, password: _password, ...userWithoutPassword } = user;
 
         // Create JWT token
         const token = jwt.sign(
             {
                 email: user.email,
+                client: client,
                 role: user.role || 'user' // Include role if available
             },
             process.env.JWT_SECRET || 'your-secret-key',
             { expiresIn: rememberMe ? '30d' : '7d' } // Token expires in 7 days
         );
+
 
         // Create the response
         const response = NextResponse.json({

@@ -93,28 +93,24 @@ const OrdersQuickStats = ({ orders }) => {
                 title="Total orders"
                 value={stats.currentYearOrders.toLocaleString()}
                 icon={<Package/>}
-                trend={stats.ordersGrowth}
             />
 
             <StatsCard
                 title="Completed"
                 value={stats.completedOrders.toLocaleString()}
                 icon={<CheckCircle />}
-                trend={false}
             />
 
             <StatsCard
                 title="Total returns"
                 value={formatCurrency(stats.currentYearRevenue)}
                 icon={<CreditCard />}
-                trend={stats.revenueGrowth}
             />
 
             <StatsCard
                 title="Year change"
-                value={formatCurrency(stats.lastYearRevenue)}
+                value={formatPercentage(stats.lastYearRevenue)}
                 icon={<Calendar />}
-                trend={false}
             />
         </div>
     );

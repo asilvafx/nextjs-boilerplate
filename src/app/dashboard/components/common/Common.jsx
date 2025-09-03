@@ -1,41 +1,45 @@
 // app/dashboard/components/common/Common.jsx
-"use client"
+"use client";
 
 import React from 'react';
 
+
+
+
+
+// app/dashboard/components/common/Common.jsx
+
+
 export const StatsCard = ({ title, value, icon, trend }) => (
-    <div className="stat-card">
-        <div className="stat-content">
-            <div className="stat-header">
-                <div className="stat-title">{title}</div>
-                <div className="stat-icon">{icon}</div>
+    <div className='stat-card'>
+        <div className='stat-content'>
+            <div className='stat-header'>
+                <div className='stat-title'>{title}</div>
+                <div className='stat-icon'>{icon}</div>
             </div>
-            <div className="stat-value">{value}</div>
-            <div className={`stat-change ${trend.direction}`}>
-                <span>
-                    {trend.direction === 'positive' ? '↗' :
-                        trend.direction === 'negative' ? '↘' : '→'}
-                </span>
-                <span>{trend.value}%</span>
-            </div>
+            <div className='stat-value'>{value}</div>
+            {trend && (
+                <div className={`stat-change ${trend?.direction}`}>
+                    <span>{trend?.direction === 'positive' ? '↗' : trend?.direction === 'negative' ? '↘' : '→'}</span>
+                    <span>{trend?.value}%</span>
+                </div>
+            )}
         </div>
     </div>
 );
 
 // app/dashboard/components/common/DataTable.jsx
-export const DataTable = ({ headers, children, className = "" }) => (
+export const DataTable = ({ headers, children, className = '' }) => (
     <div className={`dashboard-table-container ${className}`}>
-        <table className="dashboard-table">
-            <thead className="table-header">
-            <tr>
-                {headers.map((header, index) => (
-                    <th key={index}>{header}</th>
-                ))}
-            </tr>
+        <table className='dashboard-table'>
+            <thead className='table-header'>
+                <tr>
+                    {headers.map((header, index) => (
+                        <th key={index}>{header}</th>
+                    ))}
+                </tr>
             </thead>
-            <tbody className="table-body">
-            {children}
-            </tbody>
+            <tbody className='table-body'>{children}</tbody>
         </table>
     </div>
 );

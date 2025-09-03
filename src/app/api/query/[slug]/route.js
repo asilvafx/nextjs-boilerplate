@@ -81,7 +81,7 @@ async function handleGet(request, { params }) {
             }
         }
 
-        
+
         const response = result;
 
         // Handle different response formats
@@ -206,7 +206,7 @@ async function handlePost(request, { params }) {
     }
 }
 
-// PUT update item - admin only (or you can change to withAuth for all users)
+// PUT update item
 async function handlePut(request, { params }) {
     try {
         const { slug } = await params;
@@ -324,5 +324,5 @@ async function handleDelete(request, { params }) {
 // Export handlers with appropriate middleware
 export const GET = withAuth(handleGet);
 export const POST = withAuth(handlePost);
-export const PUT = withAdminAuth(handlePut); // Change to withAuth if you want all users to update
+export const PUT = withAuth(handlePut);
 export const DELETE = withAdminAuth(handleDelete);

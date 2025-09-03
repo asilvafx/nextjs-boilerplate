@@ -6,6 +6,7 @@ html, body {
 :root {
 
     /* Dashboard specific colors */
+    --text-primary: #f6e9e9;
     --dashboard-muted: #64748b;
     --dashboard-primary: #2e0bfb;
     --dashboard-secondary: #2200cd;
@@ -45,12 +46,15 @@ table tr {
     background-color: rgba(255, 255, 255, .05);
     border: 1px solid rgba(255, 255, 255, .1);
     padding: .35em;
+    border-radius: 1rem;
 }
 
 table th,
 table td {
     padding: .625em;
     text-align: center;
+    text-wrap: wrap;
+    text-overflow: ellipsis;
 }
 
 table th {
@@ -80,7 +84,6 @@ table th {
     }
 
     table tr {
-        border-radius: 20px;
         border-bottom: 3px solid rgba(255, 255, 255, .1);
         display: block;
         margin-bottom: .625em;
@@ -464,7 +467,10 @@ table th {
     padding: 0.5rem; /* p-2 */
     border-radius: 0.5rem; /* rounded-lg */
     background-color: rgba(255, 255, 255, 0.1);
-    color: var(--dashboard-primary);
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .stat-value {
@@ -495,10 +501,12 @@ table th {
 
 /* Tables */
 .dashboard-table-container {
-    overflow: auto;
+    overflow: hidden;
+    border-radius: 1rem;
 }
 
 .dashboard-table {
+    position: relative;
     width: 100%;
     overflow: auto;
 }
@@ -748,24 +756,24 @@ table th {
     max-width: 42rem; /* max-w-2xl */
     width: 100%;
     max-height: 90vh;
-    overflow: hidden; 
+    overflow: hidden;
 }
 
-.modal-header {
+.dashboard-modal-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 1.5rem; /* p-6 */
+    padding: 1.5rem 1rem; /* p-6 */
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.modal-title {
+.dashboard-modal-title {
     font-size: 1.25rem; /* text-xl */
     font-weight: bold;
     color: white;
 }
 
-.modal-close {
+.dashboard-modal-close {
     padding: 0.5rem; /* p-2 */
     border-radius: 0.5rem; /* rounded-lg */
     transition: background-color 200ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -775,17 +783,19 @@ table th {
     cursor: pointer;
 }
 
-.modal-close:hover {
+.dashboard-modal-close:hover {
     background-color: rgba(255, 255, 255, 0.1);
     color: white;
 }
 
 .dashboard-modal-body {
-    padding: 1.5rem; /* p-6 */
+    margin-bottom: 1.5rem;
+    padding: 1.5rem 1rem; /* p-6 */
     max-height: calc(90vh - 140px);
-}
-
-.modal-footer {
+    overflow-y: auto;
+    position: relative;
+} 
+.dashboard-modal-footer, .modal-footer {
     display: flex;
     align-items: center;
     justify-content: flex-end;

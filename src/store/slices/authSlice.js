@@ -1,21 +1,24 @@
 // src/store/slices/authSlice.js
 import { createSlice } from "@reduxjs/toolkit";
 import Cookies from "js-cookie";
-import { decryptHash } from "@/lib/crypto";
+import { decryptHash } from "@/lib/crypto.js";
+import Fingerprint from "@/utils/fingerprint.js";
 
 let storedUser = null;
 try {
+    const browserUnique = await Fingerprint();
     const encrypted_data = Cookies.get("access_data");
     if (encrypted_data) {
-        storedUser = decryptHash(encrypted_data);
-        if(!storedUser){
+        storedUser = decryptHash(encrypted_data); 
+        if(!storedUser || storedUser.client !== browserUnique){
             storedUser = null;
-            window.location.href('/auth/logout');
+            if (typeof window !== "undefined") {
+                window.location.href = '/auth/logout';
+            }
         }
     }
 } catch (e) {
     storedUser = null;
-    window.location.href('/auth/logout');
 }
 
 const initialState = {

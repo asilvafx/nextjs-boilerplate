@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { getAll, get, update, deleteItem, create } from '@/lib/query.js';
+import { getAll, get, update, remove, create } from '@/lib/query.js';
 import { AlertTriangle, X } from 'lucide-react';
 
 // Import the new components
@@ -19,7 +19,6 @@ import {
 
 // Enhanced PDF Generator
 const generatePDF = (order) => {
-    console.log('Generating PDF for order:', order.uid);
     const mockPDFContent = `Invoice for Order ${order.uid}\nCustomer: ${order.cst_name}\nAmount: €${order.amount}`;
     const blob = new Blob([mockPDFContent], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
@@ -82,7 +81,6 @@ const DashboardOrders = () => {
         setLoading(true);
         try {
             const response = await getAll('orders');
-            console.log('Orders response:', response);
             if (response && response.success) {
                 setOrders(response.data || []);
             } else {
@@ -200,7 +198,7 @@ const DashboardOrders = () => {
 
         try {
             setActionLoading(true);
-            await deleteItem(selectedOrder.id, 'orders');
+            await remove(selectedOrder.id, 'orders');
 
             setOrders(prevOrders =>
                 prevOrders.filter(order => order.id !== selectedOrder.id)
@@ -210,7 +208,6 @@ const DashboardOrders = () => {
             setSelectedOrder(null);
             setDeleteConfirmation('');
 
-            console.log('Order deleted successfully:', selectedOrder.uid);
         } catch (error) {
             console.error('Error deleting order:', error);
             setError(`Failed to delete order: ${error.message}`);
@@ -240,7 +237,6 @@ const DashboardOrders = () => {
             setSelectedOrder(null);
             setEditForm({});
 
-            console.log('Order updated successfully:', selectedOrder.uid);
         } catch (error) {
             console.error('Error updating order:', error);
             setError(`Failed to update order: ${error.message}`);
@@ -303,8 +299,6 @@ const DashboardOrders = () => {
             setOrders(prevOrders => [newOrder, ...prevOrders]);
 
             closeModal('create');
-
-            console.log('Order created successfully:', uid);
         } catch (error) {
             console.error('Error creating order:', error);
             setError(`Failed to create order: ${error.message}`);
@@ -377,8 +371,7 @@ const DashboardOrders = () => {
             {/* Quick Stats */}
             <OrdersQuickStats orders={orders} />
 
-            <div className="w-full">
-                <div className="p-4 lg:p-6">
+            <div className="section">
                     {error && (
                         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md flex items-center justify-between">
                             <div className="flex items-center space-x-2">
@@ -424,7 +417,6 @@ const DashboardOrders = () => {
                             </button>
                         </div>
                     )}
-                </div>
             </div>
 
             {/* Create Order Modal */}

@@ -1,5 +1,4 @@
-// lib/query.js - Minimized Query Helper Library
-
+// lib/query.js 
 import { authenticatedFetch, publicFetch } from '@/hooks/useAuth.js';
 
 class QueryAPI {
@@ -35,7 +34,7 @@ class QueryAPI {
 
     // GET all items from a collection
     async getAll(collection, params={}, isPublic = false) {
-      
+
         const queryString = new URLSearchParams(params).toString();
         const url = `${this.baseURL}/${collection}${queryString ? `?${queryString}` : ''}`;
         return await this.makeRequest(url, { public: isPublic });
@@ -163,7 +162,7 @@ export const get = (id, collection) => queryAPI.get(id, collection);
 export const getAll = (collection, params = {}, isPublic = false) => queryAPI.getAll(collection, params, isPublic);
 export const create = (data, collection) => queryAPI.create(data, collection);
 export const update = (id, data, collection) => queryAPI.update(id, data, collection);
-export const deleteItem = (id, collection) => queryAPI.delete(id, collection);
+export const remove = (id, collection) => queryAPI.delete(id, collection);
 export const upload = (files, path) => queryAPI.upload(files, path);
 
 // Export batch operations

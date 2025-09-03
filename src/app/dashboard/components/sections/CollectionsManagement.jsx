@@ -313,13 +313,16 @@ const CollectionsManagement = () => {
                     </div>
                 </div>
 
-                <div className="dashboard-card">
+                <div className="section">
                     {loading ? (
+                        <div className="dashboard-card">
                         <div className="text-center py-8">
                             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
                             <p className="mt-2">Loading collections...</p>
                         </div>
+                        </div>
                     ) : filteredCollections.length === 0 ? (
+                        <div className="dashboard-card">
                         <EmptyState
                             icon={<Star className="w-16 h-16 text-gray-400" />}
                             title="No Collections Found"
@@ -334,6 +337,7 @@ const CollectionsManagement = () => {
                                 </button>
                             }
                         />
+                        </div>
                     ) : (
                         <>
                             <DataTable headers={['Collection', 'Type', 'Items', 'Status', 'Created', 'Actions']}>

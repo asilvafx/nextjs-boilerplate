@@ -1,6 +1,6 @@
 // app/dashboard/components/sections/CategoriesManagement.jsx
 "use client"
-import { useState, useEffect } from 'react'; 
+import { useState, useEffect } from 'react';
 import { create, getAll } from '@/lib/query.js';
 import { DataTable, StatusBadge, ActionButtons, EmptyState } from '../common/Common';
 import toast, { Toaster } from 'react-hot-toast';
@@ -221,13 +221,18 @@ const CategoriesManagement = () => {
                     </div>
                 </div>
 
-                <div className="dashboard-card">
+                <div className="section">
+
                     {loading ? (
+                        <div className="dashboard-card">
                         <div className="text-center py-8">
                             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
                             <p className="mt-2">Loading categories...</p>
                         </div>
+                        </div>
                     ) : filteredCategories.length === 0 ? (
+
+                        <div className="dashboard-card">
                         <EmptyState
                             icon={<Tags className="w-16 h-16 text-gray-400" />}
                             title="No Categories Found"
@@ -242,6 +247,7 @@ const CategoriesManagement = () => {
                                 </button>
                             }
                         />
+                        </div>
                     ) : (
                         <>
                             <DataTable headers={['Category', 'Description', 'Items', 'Actions']}>

@@ -98,7 +98,7 @@ const DashboardUsers = () => {
             </div>
 
             {/* Users Table */}
-            <div className="p-4 lg:p-6">
+            <div className="section">
                 {error ? (
                     <div className="text-center py-8">
                         <div className="text-red-600 mb-4">

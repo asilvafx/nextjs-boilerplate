@@ -427,10 +427,10 @@ const ProductModal = ({
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-            <div className="p-6 bg-neutral-900/90 m-4 rounded-2xl w-full max-w-4xl max-h-[90vh] lg:max-h-[80vh] overflow-x-hidden">
+        <div className="dashboard-modal-overlay">
+            <div className="dashboard-modal-content">
                 {/* Header */}
-                <div className="border-b border-white/50 px-8 py-6 flex justify-between items-center">
+                <div className="dashboard-modal-header">
                     <div>
                         <h2 className="text-3xl font-bold text-white">
                             {mode === 'create' ? 'Add New Item' : 'Edit Item'}
@@ -441,7 +441,7 @@ const ProductModal = ({
                     </div>
                     <button
                         onClick={onClose}
-                        className="text-white/80 hover:text-white hover:bg-white/10 rounded-full p-2 transition-all duration-200"
+                        className="dashboard-modal-close"
                     >
                         <X size={24} />
                     </button>
@@ -976,7 +976,7 @@ const ProductModal = ({
                         </div>
 
                         {/* Action Buttons */}
-                        <div className="flex gap-4 pt-6 border-t border-gray-700">
+                        <div className="dashboard-modal-footer">
                             <button
                                 type="submit"
                                 className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-semibold text-lg shadow-lg"
